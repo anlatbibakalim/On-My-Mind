@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aklımda - Kişisel Asistan</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 80px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            padding: 24px 20px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card .num {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .event-card.completed {
+            opacity: 0.5;
+        }
+
+        .event-card.completed .event-title {
+            text-decoration: line-through;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .event-type-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-dogum { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .type-yildonumu { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+        .type-odeme { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .type-ozel { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .event-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 15px;
+        }
+
+        .countdown-badge {
+            background: #334155;
+            color: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            align-self: flex-start;
+        }
+
+        .urgent { background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid var(--danger); }
+
+        .event-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+
+        .btn {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-success { background: var(--success); }
+        .btn-gift { background: #8b5cf6; }
+        .btn-delete { background: rgba(239, 68, 68, 0.2); color: #fca5a5; flex: 0; }
+
+        .add-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .gift-box {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px dashed #8b5cf6;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .gift-box h4 {
+            color: #c4b5fd;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .gift-box ul {
+            padding-left: 20px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-brain"></i> Aklımda</h1>
+        <span style="font-size: 0.85rem; opacity: 0.9;">Kişisel Asistan</span>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="num" id="stat-total">0</div>
+                <div class="label">Toplam Kayıt</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-urgent" style="color: var(--danger);">0</div>
+                <div class="label">Yaklaşan (7 Gün)</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-completed" style="color: var(--success);">0</div>
+                <div class="label">Tamamlanan</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterEvents('all', this)">Tümü</button>
+            <button class="filter-btn" onclick="filterEvents('dogum', this)">Doğum Günleri</button>
+            <button class="filter-btn" onclick="filterEvents('yildonumu', this)">Yıldönümleri</button>
+            <button class="filter-btn" onclick="filterEvents('odeme', this)">Ödemeler</button>
+            <button class="filter-btn" onclick="filterEvents('ozel', this)">Özel Günler</button>
+        </div>
+
+        <div class="event-list" id="event-list">
+            <!-- Etkinlikler JavaScript ile eklenecek -->
+        </div>
+    </div>
+
+    <button class="add-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
+
+    <!-- Kayıt Ekleme Modalı -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Kayıt Ekle</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="closeModal()"></i>
+            </div>
+            <form id="eventForm" onsubmit="saveEvent(event)">
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select class="form-control" id="eventType" onchange="toggleGiftFields()">
+                        <option value="dogum">Doğum Günü</option>
+                        <option value="yildonumu">Evlilik / Özel Yıldönümü</option>
+                        <option value="odeme">Ödeme / Fatura</option>
+                        <option value="ozel">Özel Gün / Hatırlatıcı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Başlık / Kişi Adı / Açıklama</label>
+                    <input type="text" class="form-control" id="eventTitle" placeholder="Örn: Eşimin Doğum Günü veya Elektrik Faturası" required>
+                </div>
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input type="date" class="form-control" id="eventDate" required>
+                </div>
+                <div class="form-group" id="amountGroup" style="display: none;">
+                    <label>Tutar (TL)</label>
+                    <input type="number" class="form-control" id="eventAmount" placeholder="Örn: 450">
+                </div>
+
+                <!-- Hediye Bilgileri Alanı -->
+                <div id="giftSection">
+                    <hr style="border-color: var(--border-color); margin: 15px 0;">
+                    <h4 style="font-size: 0.9rem; color: #8b5cf6; margin-bottom: 10px;">🎁 Akıllı Hediye Öneri Detayları (Opsiyonel)</h4>
+                    <div class="form-group">
+                        <label>Yakınlık / İlişki</label>
+                        <input type="text" class="form-control" id="giftRelation" placeholder="Örn: Eşim, Kızım, Arkadaşım">
+                    </div>
+                    <div class="form-group">
+                        <label>İlgi Alanları & Hobiler</label>
+                        <input type="text" class="form-control" id="giftInterests" placeholder="Örn: Kahve, Mühendislik, Borsa, Kitap">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Aklımda Tut & Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hediye Öneri Modalı -->
+    <div class="modal" id="giftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎁 Hediye Önerileri</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="closeGiftModal()"></i>
+            </div>
+            <div id="giftModalContent">
+                <!-- İçerik Dinamik Yüklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let events = JSON.parse(localStorage.getItem('aklimda_events')) || [];
+        let currentFilter = 'all';
+
+        function saveToStorage() {
+            localStorage.setItem('aklimda_events', JSON.stringify(events));
+            renderEvents();
+        }
+
+        function openModal() {
+            document.getElementById('addModal').style.display = 'flex';
+            toggleGiftFields();
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('eventForm').reset();
+        }
+
+        function closeGiftModal() {
+            document.getElementById('giftModal').style.display = 'none';
+        }
+
+        function toggleGiftFields() {
+            const type = document.getElementById('eventType').value;
+            const giftSection = document.getElementById('giftSection');
+            const amountGroup = document.getElementById('amountGroup');
+
+            if (type === 'dogum' || type === 'yildonumu') {
+                giftSection.style.display = 'block';
+                amountGroup.style.display = 'none';
+            } else if (type === 'odeme') {
+                giftSection.style.display = 'none';
+                amountGroup.style.display = 'block';
+            } else {
+                giftSection.style.display = 'none';
+                amountGroup.style.display = 'none';
+            }
+        }
+
+        function saveEvent(e) {
+            e.preventDefault();
+            const newEvent = {
+                id: Date.now(),
+                type: document.getElementById('eventType').value,
+                title: document.getElementById('eventTitle').value,
+                date: document.getElementById('eventDate').value,
+                amount: document.getElementById('eventAmount').value || null,
+                relation: document.getElementById('giftRelation').value || '',
+                interests: document.getElementById('giftInterests').value || '',
+                completed: false
+            };
+
+            events.push(newEvent);
+            saveToStorage();
+            closeModal();
+        }
+
+        function toggleComplete(id) {
+            events = events.map(ev => ev.id === id ? {...ev, completed: !ev.completed} : ev);
+            saveToStorage();
+        }
+
+        function deleteEvent(id) {
+            if(confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
+                events = events.filter(ev => ev.id !== id);
+                saveToStorage();
+            }
+        }
+
+        function getDaysRemaining(targetDateStr) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            let target = new Date(targetDateStr);
+            target.setHours(0,0,0,0);
+
+            // Eğer doğum günü/yıldönümü ise yılı bu yıla getir
+            const currentYearTarget = new Date(today.getFullYear(), target.getMonth(), target.getDate());
+            if (currentYearTarget < today) {
+                currentYearTarget.setFullYear(today.getFullYear() + 1);
+            }
+            
+            const diffTime = currentYearTarget - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function showGifts(id) {
+            const ev = events.find(e => e.id === id);
+            const content = document.getElementById('giftModalContent');
+            
+            let html = `<p style="margin-bottom:12px; color:var(--text-muted);"><b>${ev.title}</b> için akıllı hediye fikirleri:</p>`;
+            
+            html += `<div class="gift-box">
+                <h4>🎯 Kişiselleştirilmiş Fikirler (${ev.relation || 'Özel Kişi'}):</h4>
+                <ul>
+                    <li><b>İlgi Alanlarına Göre:</b> ${ev.interests ? ev.interests + ' temasında özel tasarım hediyeler veya aksesuarlar.' : 'Kişisel hobi ve ilgi alanlarına yönelik hediyeler.'}</li>
+                    <li><b>Deneyim Hediyesi:</b> Birlikte gidebileceğiniz özel bir akşam yemeği, konser veya etkinlik bileti.</li>
+                    <li><b>Klasik & Şık:</b> İsme özel deri cüzdan, kaliteli bir dolma kalem veya kişiselleştirilmiş anı albümü.</li>
+                    <li><b>Teknoloji & Aksesuar:</b> Günlük hayatı kolaylaştıracak akıllı aksesuarlar veya kablosuz kulaklık.</li>
+                </ul>
+            </div>`;
+
+            content.innerHTML = html;
+            document.getElementById('giftModal').style.display = 'flex';
+        }
+
+        function filterEvents(type, btn) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderEvents();
+        }
+
+        function renderEvents() {
+            const list = document.getElementById('event-list');
+            list.innerHTML = '';
+
+            let filtered = events;
+            if (currentFilter !== 'all') {
+                filtered = events.filter(e => e.type === currentFilter);
+            }
+
+            // Yaklaşan güne göre sırala
+            filtered.sort((a,b) => getDaysRemaining(a.date) - getDaysRemaining(b.date));
+
+            let urgentCount = 0;
+            let completedCount = 0;
+
+            filtered.forEach(ev => {
+                const days = getDaysRemaining(ev.date);
+                if (days <= 7 && !ev.completed) urgentCount++;
+                if (ev.completed) completedCount++;
+
+                const card = document.createElement('div');
+                card.className = `event-card ${ev.completed ? 'completed' : ''}`;
+
+                let typeName = 'Özel Gün';
+                if (ev.type === 'dogum') typeName = 'Doğum Günü';
+                if (ev.type === 'yildonumu') typeName = 'Yıldönümü';
+                if (ev.type === 'odeme') typeName = 'Ödeme';
+
+                let urgentClass = days <= 3 && !ev.completed ? 'urgent' : '';
+
+                card.innerHTML = `
+                    <div class="event-header">
+                        <div>
+                            <span class="event-type-badge type-${ev.type}">${typeName}</span>
+                            <div class="event-title">${ev.title}</div>
+                        </div>
+                        <div class="countdown-badge ${urgentClass}">
+                            ${ev.completed ? 'Tamamlandı' : (days === 0 ? 'Bugün!' : days + ' Gün Kaldı')}
+                        </div>
+                    </div>
+                    <div class="event-details">
+                        <span><i class="fa-regular fa-calendar"></i> ${ev.date}</span>
+                        ${ev.amount ? `<span><i class="fa-solid fa-turkish-lira-sign"></i> ${ev.amount} TL</span>` : ''}
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-success" onclick="toggleComplete(${ev.id})">
+                            <i class="fa-solid ${ev.completed ? 'fa-rotate-left' : 'fa-check'}"></i> 
+                            ${ev.completed ? 'Geri Al' : (ev.type === 'odeme' ? 'Ödendi' : 'Kutlandı')}
+                        </button>
+                        ${(ev.type === 'dogum' || ev.type === 'yildonumu') ? `
+                            <button class="btn btn-gift" onclick="showGifts(${ev.id})">
+                                <i class="fa-solid fa-gift"></i> Hediye Fikirleri
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-delete" onclick="deleteEvent(${ev.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            document.getElementById('stat-total').innerText = events.length;
+            document.getElementById('stat-urgent').innerText = urgentCount;
+            document.getElementById('stat-completed').innerText = completedCount;
+        }
+
+        // Başlangıçta çalıştır
+        renderEvents();
+    </script>
+</body>
+</html>
