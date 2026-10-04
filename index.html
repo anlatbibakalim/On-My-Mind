@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Aklımda - Kişisel Asistan</title>
+    <meta name="description" content="Aklımda - Doğum günleri, yıldönümleri ve ödemeler için akıllı kişisel asistanınız. Hatırlatır, geri sayar, hediye önerir.">
+    <meta name="theme-color" content="#0b1120">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Aklımda">
+
+    <!-- Tema flaşını önleyen erken betik -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('aklimda_theme') ||
+                (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.documentElement.dataset.theme = t;
+        })();
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+/* ============================================================
+   AKLIMDA - Kişisel Asistan | Design System v2.0
+   Tema: CSS Custom Properties ile Dark/Light desteği
+   ============================================================ */
+
+/* ---------- Tema Değişkenleri ---------- */
+:root, [data-theme="dark"] {
+    --bg: #0b1120;
+    --bg-soft: #0f172a;
+    --card: #16213a;
+    --card-hover: #1c2a4a;
+    --accent: #6366f1;
+    --accent-2: #06b6d4;
+    --accent-soft: rgba(99, 102, 241, 0.15);
+    --text: #f1f5f9;
+    --muted: #8ea0bc;
+    --border: #243352;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --shadow: 0 12px 32px -8px rgba(2, 6, 23, 0.6);
+    --shadow-accent: 0 10px 25px -5px rgba(99, 102, 241, 0.45);
+    --glass: rgba(15, 23, 42, 0.75);
+    --overlay: rgba(4, 8, 20, 0.7);
+    --input-bg: #0b1428;
+}
+
+[data-theme="light"] {
+    --bg: #eef2f9;
+    --bg-soft: #ffffff;
+    --card: #ffffff;
+    --card-hover: #f4f7fd;
+    --accent: #4f46e5;
+    --accent-2: #0891b2;
+    --accent-soft: rgba(79, 70, 229, 0.1);
+    --text: #0f172a;
+    --muted: #5b6b85;
+    --border: #dbe3f0;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --success: #059669;
+    --shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.18);
+    --shadow-accent: 0 10px 25px -8px rgba(79, 70, 229, 0.35);
+    --glass: rgba(255, 255, 255, 0.8);
+    --overlay: rgba(15, 23, 42, 0.45);
+    --input-bg: #f4f7fd;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:
+        radial-gradient(1000px 500px at 85% -10%, var(--accent-soft), transparent 60%),
+        var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    padding-bottom: 100px;
+    transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* İnce, tematik scrollbar */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+noscript {
+    display: block; text-align: center; padding: 24px; color: var(--danger);
+}
+
+/* ---------- Header (Glassmorphism) ---------- */
+.app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(120deg, rgba(79,70,229,0.92), rgba(6,182,212,0.88));
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    padding: 20px;
+    border-bottom-left-radius: 26px;
+    border-bottom-right-radius: 26px;
+    box-shadow: var(--shadow-accent);
+}
+
+.header-inner {
+    max-width: 680px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand-icon {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; color: #fff;
+}
+
+.brand h1 { font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+
+.brand .tagline {
+    font-size: 0.72rem; color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+}
+
+.header-actions { display: flex; gap: 8px; }
+
+.icon-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #fff; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+.icon-btn:hover { background: rgba(255, 255, 255, 0.28); transform: translateY(-2px); }
+
+/* ---------- Ana Container ---------- */
+.container { max-width: 680px; margin: 0 auto; padding: 20px; }
+
+/* ---------- Toolbar (Arama + Sıralama) ---------- */
+.toolbar { display: flex; gap: 10px; margin-bottom: 18px; }
+
+.search-wrap {
+    flex: 1; position: relative; display: flex; align-items: center;
+}
+
+.search-wrap i {
+    position: absolute; left: 14px; color: var(--muted);
+    pointer-events: none; font-size: 0.9rem;
+}
+
+.search-input {
+    width: 100%; padding: 12px 14px 12px 40px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; color: var(--text); font-size: 0.92rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    outline: none;
+}
+
+.sort-select {
+    padding: 12px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 14px;
+    color: var(--text); font-size: 0.88rem; cursor: pointer;
+}
+
+/* ---------- İstatistik Kartları ---------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 18px;
+}
+
+@media (max-width: 560px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+.stat-card .stat-icon { font-size: 0.85rem; opacity: 0.9; }
+.stat-card .num { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px; }
+.stat-card .label { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+
+.c-accent { color: var(--accent); }
+.c-danger { color: var(--danger); }
+.c-success { color: var(--success); }
+.c-warning { color: var(--warning); }
+
+/* ---------- Grafik Kartı ---------- */
+.chart-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 16px; margin-bottom: 18px;
+}
+
+.chart-card h3 {
+    font-size: 0.85rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+}
+
+.chart { display: flex; align-items: flex-end; gap: 10px; height: 110px; }
+
+.chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+
+.chart-bar {
+    width: 100%; max-width: 42px; border-radius: 8px 8px 4px 4px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    min-height: 4px;
+    transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+}
+.chart-bar.current { box-shadow: 0 0 14px var(--accent-soft), 0 0 0 2px var(--accent); }
+.chart-bar.zero { background: var(--border); }
+
+.chart-count { font-size: 0.72rem; font-weight: 700; color: var(--text); }
+
+.chart-label { font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+
+/* ---------- Filtre Çipleri ---------- */
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+    background: var(--card); color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 22px;
+    font-size: 0.83rem; font-weight: 600; white-space: nowrap;
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--text); }
+
+.filter-btn.active {
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    color: #fff; border-color: transparent;
+    box-shadow: var(--shadow-accent);
+}
+
+.chip-count {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px; padding: 1px 7px; font-size: 0.72rem;
+}
+.filter-btn:not(.active) .chip-count { background: var(--accent-soft); color: var(--accent); }
+
+/* ---------- Etkinlik Listesi ---------- */
+.event-list { display: flex; flex-direction: column; gap: 12px; }
+
+.event-card {
+    --type-color: var(--accent);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--type-color);
+    border-radius: 18px; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    animation: cardIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    transition: transform 0.2s, box-shadow 0.25s, background 0.3s;
+}
+.event-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+.event-card.completed { opacity: 0.55; }
+.event-card.completed .event-title { text-decoration: line-through; }
+
+.event-main { display: flex; gap: 13px; }
+
+.event-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 13px;
+    background: color-mix(in srgb, var(--type-color) 16%, transparent);
+    color: var(--type-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem;
+}
+
+.event-body { flex: 1; min-width: 0; }
+
+.event-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+
+.event-type-badge {
+    font-size: 0.68rem; padding: 3px 9px; border-radius: 8px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    background: color-mix(in srgb, var(--type-color) 18%, transparent);
+    color: var(--type-color);
+}
+
+.event-title { font-size: 1.05rem; font-weight: 700; margin-top: 5px; letter-spacing: -0.2px; }
+
+.event-details {
+    font-size: 0.82rem; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 6px 15px; margin-top: 6px;
+}
+.event-details span { display: inline-flex; align-items: center; gap: 6px; }
+.event-notes { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+.countdown-badge {
+    padding: 6px 12px; border-radius: 12px;
+    font-size: 0.78rem; font-weight: 800; white-space: nowrap;
+    background: var(--accent-soft); color: var(--accent);
+    border: 1px solid transparent;
+}
+.countdown-badge.urgent { background: rgba(239,68,68,0.15); color: var(--danger); border-color: rgba(239,68,68,0.4); animation: pulse 1.8s infinite; }
+.countdown-badge.soon { background: rgba(245,158,11,0.15); color: var(--warning); border-color: rgba(245,158,11,0.35); }
+.countdown-badge.done { background: rgba(16,185,129,0.15); color: var(--success); }
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+    50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+/* ---------- Kart Aksiyonları ---------- */
+.event-actions {
+    display: flex; gap: 8px;
+    border-top: 1px solid var(--border); padding-top: 11px;
+}
+
+.btn {
+    border: none; padding: 9px 12px; border-radius: 11px;
+    font-size: 0.8rem; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--input-bg); color: var(--text);
+    transition: filter 0.2s, transform 0.15s;
+    flex: 1;
+}
+.btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.btn:active { transform: scale(0.97); }
+
+.btn-success { background: var(--success); color: #fff; }
+.btn-gift { background: #8b5cf6; color: #fff; }
+.btn-edit { background: var(--accent); color: #fff; }
+.btn-danger { background: rgba(239, 68, 68, 0.16); color: var(--danger); flex: 0 0 42px; }
+
+/* ---------- Boş Durum ---------- */
+.empty-state {
+    text-align: center; padding: 48px 20px;
+    background: var(--card); border: 1px dashed var(--border);
+    border-radius: 20px; color: var(--muted);
+}
+.empty-state i { font-size: 2.6rem; margin-bottom: 14px; opacity: 0.5; }
+.empty-state h3 { color: var(--text); margin-bottom: 6px; font-size: 1.05rem; }
+.empty-state p { font-size: 0.88rem; max-width: 340px; margin: 0 auto 18px; }
+.empty-state .btn { max-width: 260px; margin: 0 auto; }
+
+/* ---------- FAB ---------- */
+.fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 90;
+    width: 58px; height: 58px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-size: 1.4rem;
+    box-shadow: var(--shadow-accent);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+}
+.fab:hover { transform: scale(1.1) rotate(90deg); }
+
+/* ---------- Modallar ---------- */
+.modal {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: var(--overlay);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 20px;
+}
+.modal.open { display: flex; }
+
+.modal-content {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 26px;
+    width: 100%; max-width: 520px;
+    max-height: 92vh; overflow-y: auto;
+    box-shadow: var(--shadow);
+    animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(26px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+
+body.modal-open { overflow: hidden; }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.3px; }
+
+.modal-close {
+    width: 34px; height: 34px; border-radius: 10px; border: none;
+    background: var(--input-bg); color: var(--muted); font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, background 0.2s;
+}
+.modal-close:hover { color: var(--danger); background: rgba(239,68,68,0.12); }
+
+/* ---------- Form ---------- */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
+
+.form-control {
+    width: 100%; padding: 12px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--border); border-radius: 13px;
+    color: var(--text); font-size: 0.93rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+    border-color: var(--accent); outline: none;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+}
+textarea.form-control { resize: vertical; min-height: 70px; }
+
+select.form-control { cursor: pointer; }
+
+input[type="date"].form-control { color-scheme: dark; }
+[data-theme="light"] input[type="date"].form-control { color-scheme: light; }
+
+.form-hint { font-size: 0.75rem; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+.form-hint i { color: var(--accent-2); }
+
+.form-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 18px 0 14px; color: var(--muted); font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.form-divider::before, .form-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+.submit-btn {
+    width: 100%; padding: 15px; margin-top: 8px;
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    color: #fff; border: none; border-radius: 14px;
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.2px;
+    box-shadow: var(--shadow-accent);
+    transition: transform 0.15s, filter 0.2s;
+}
+.submit-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.submit-btn:active { transform: scale(0.98); }
+
+/* ---------- Hediye Modalı ---------- */
+.gift-intro { font-size: 0.88rem; color: var(--muted); margin-bottom: 16px; }
+.gift-intro b { color: var(--text); }
+
+.gift-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.gift-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 14px; padding: 13px 15px;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.gift-item:hover { border-color: #8b5cf6; transform: translateX(4px); }
+
+.gift-item i { color: #8b5cf6; margin-top: 2px; }
+
+.gift-tag {
+    display: inline-block; font-size: 0.65rem; font-weight: 800;
+    padding: 2px 8px; border-radius: 7px; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    background: rgba(139, 92, 246, 0.16); color: #a78bfa;
+}
+
+.gift-item p { font-size: 0.88rem; }
+
+/* ---------- Onay Modali ---------- */
+.confirm-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: rgba(239, 68, 68, 0.13); color: var(--danger);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin: 0 auto 16px;
+}
+
+.confirm-text { text-align: center; color: var(--muted); font-size: 0.92rem; margin-bottom: 22px; }
+
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions .btn { flex: 1; padding: 13px; font-size: 0.92rem; }
+
+/* ---------- Toast Bildirimleri ---------- */
+.toast-container {
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+    z-index: 2000; display: flex; flex-direction: column; gap: 10px;
+    width: min(92vw, 440px); pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 11px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 15px; padding: 13px 16px;
+    box-shadow: var(--shadow); font-size: 0.88rem;
+    animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.toast.hide { animation: toastOut 0.3s forwards; }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(18px) scale(0.95); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(12px) scale(0.95); } }
+
+.toast i { font-size: 1rem; }
+.toast-success i { color: var(--success); }
+.toast-error i { color: var(--danger); }
+.toast-info i { color: var(--accent-2); }
+
+.toast span { flex: 1; }
+
+.toast-action {
+    background: var(--accent-soft); color: var(--accent);
+    border: none; border-radius: 9px; padding: 6px 13px;
+    font-size: 0.8rem; font-weight: 700;
+}
+
+/* ---------- Footer ---------- */
+.app-footer {
+    text-align: center; color: var(--muted);
+    font-size: 0.74rem; margin-top: 34px; line-height: 1.8;
+}
+.app-footer .version { font-weight: 700; color: var(--accent); }
+
+/* ---------- Erişilebilirlik & Hareket ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media (max-width: 480px) {
+    .event-actions { flex-wrap: wrap; }
+    .btn { flex: 1 1 40%; }
+    .btn-danger { flex: 0 0 42px; }
+}
+
+    </style>
+</head>
+<body>
+
+    <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
+
+    <!-- ================= HEADER ================= -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
+                <div>
+                    <h1>Aklımda</h1>
+                    <span class="tagline">Kişisel Asistan</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="notifBtn" title="Bildirimleri aç" aria-label="Bildirimleri aç">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <button class="icon-btn" id="exportBtn" title="Verileri dışa aktar (JSON)" aria-label="Dışa aktar">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button class="icon-btn" id="importBtn" title="Verileri içe aktar" aria-label="İçe aktar">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+                <input type="file" id="importFile" accept=".json,application/json" hidden>
+                <button class="icon-btn" id="resetBtn" title="Tüm verileri sil" aria-label="Sıfırla">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button class="icon-btn" id="themeToggle" title="Tema değiştir" aria-label="Tema değiştir"></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= ANA İÇERİK ================= -->
+    <main class="container">
+
+        <!-- Arama & Sıralama -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="searchInput" class="search-input" placeholder="Kayıtlarda ara..." aria-label="Kayıtlarda ara">
+            </div>
+            <select id="sortSelect" class="sort-select" aria-label="Sıralama">
+                <option value="urgency">Aciliyete Göre</option>
+                <option value="date">Tarihe Göre</option>
+                <option value="name">İsme Göre</option>
+            </select>
+        </div>
+
+        <!-- İstatistikler -->
+        <section class="stats-grid" aria-label="İstatistikler">
+            <div class="stat-card">
+                <span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span>
+                <span class="num c-accent" id="statTotal">0</span>
+                <span class="label">Toplam Kayıt</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span>
+                <span class="num c-danger" id="statUrgent">0</span>
+                <span class="label">Yaklaşan (7 gün)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span>
+                <span class="num c-success" id="statDone">0</span>
+                <span class="label">Tamamlanan</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span>
+                <span class="num c-warning" id="statPayments">0 ₺</span>
+                <span class="label">30 Gün İçinde Ödeme</span>
+            </div>
+        </section>
+
+        <!-- Aylık Dağılım Grafiği -->
+        <section class="chart-card" aria-label="Aylık dağılım">
+            <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
+            <div class="chart" id="chartBars"></div>
+        </section>
+
+        <!-- Filtreler -->
+        <nav class="filter-bar" id="filterBar" aria-label="Kategori filtreleri">
+            <button class="filter-btn active" data-filter="all">Tümü <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="dogum">Doğum Günleri <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="yildonumu">Yıldönümleri <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="odeme">Ödemeler <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="ozel">Özel Günler <span class="chip-count">0</span></button>
+        </nav>
+
+        <!-- Kayıt Listesi -->
+        <section class="event-list" id="eventList" aria-live="polite"></section>
+
+        <!-- Boş Durum -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            <h3>Henüz kayıt yok</h3>
+            <p id="emptyText">İlk kaydınızı ekleyerek başlayın.</p>
+            <button class="btn btn-edit" id="sampleBtn" style="display:inline-flex;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Örnek Verilerle Başla
+            </button>
+        </div>
+
+        <footer class="app-footer">
+            <span class="version">Aklımda v2.0.0</span> · Tüm verileriniz yalnızca cihazınızda saklanır<br>
+            Çevrimdışı çalışır · Ana ekrana eklenebilir
+        </footer>
+    </main>
+
+    <!-- ================= FAB ================= -->
+    <button class="fab" id="addBtn" aria-label="Yeni kayıt ekle">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- ================= KAYIT MODALI ================= -->
+    <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Yeni Kayıt Ekle</h3>
+                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="eventForm" novalidate>
+                <input type="hidden" id="fieldId">
+
+                <div class="form-group">
+                    <label for="eventType">Kategori</label>
+                    <select class="form-control" id="eventType">
+                        <option value="dogum">🎂 Doğum Günü</option>
+                        <option value="yildonumu">💞 Evlilik / Özel Yıldönümü</option>
+                        <option value="odeme">💳 Ödeme / Fatura</option>
+                        <option value="ozel">⭐ Özel Gün / Hatırlatıcı</option>
+                    </select>
+                    <p class="form-hint"><i class="fa-solid fa-repeat"></i> <span id="recurrenceHint">Her yıl tekrarlar</span></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventTitle">Başlık / Kişi Adı / Açıklama</label>
+                    <input type="text" class="form-control" id="eventTitle"
+                           placeholder="Örn: Eşimin Doğum Günü veya Elektrik Faturası" maxlength="80" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">Tarih</label>
+                    <input type="date" class="form-control" id="eventDate" required>
+                </div>
+
+                <div class="form-group" id="amountGroup" style="display:none;">
+                    <label for="eventAmount">Tutar (TL)</label>
+                    <input type="number" class="form-control" id="eventAmount" placeholder="Örn: 450" min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventNotes">Not (opsiyonel)</label>
+                    <textarea class="form-control" id="eventNotes" placeholder="Eklemek istedikleriniz..." maxlength="300"></textarea>
+                </div>
+
+                <!-- Akıllı Hediye Bölümü -->
+                <div id="giftSection">
+                    <div class="form-divider">🎁 Hediye Öneri Detayları</div>
+                    <div class="form-group">
+                        <label for="giftRelation">Yakınlık / İlişki</label>
+                        <input type="text" class="form-control" id="giftRelation" placeholder="Örn: Eşim, Annem, Arkadaşım" maxlength="40">
+                    </div>
+                    <div class="form-group">
+                        <label for="giftInterests">İlgi Alanları &amp; Hobiler</label>
+                        <input type="text" class="form-control" id="giftInterests" placeholder="Örn: Kahve, kitap, seyahat" maxlength="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="giftBudget">Bütçe Aralığı</label>
+                        <select class="form-control" id="giftBudget">
+                            <option value="ekonomik">Ekonomik (0 - 500 ₺)</option>
+                            <option value="orta" selected>Orta (500 - 2.000 ₺)</option>
+                            <option value="luks">Lüks (2.000 ₺ üzeri)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Aklımda Tut &amp; Kaydet</button>
+                <button type="button" class="btn" id="cancelForm" style="width:100%; margin-top:8px;">Vazgeç</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= HEDİYE MODALI ================= -->
+    <div class="modal" id="giftModal" role="dialog" aria-modal="true" aria-labelledby="giftModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="giftModalTitle">🎁 Hediye Önerileri</h3>
+                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="giftModalContent"></div>
+        </div>
+    </div>
+
+    <!-- ================= ONAY MODALI ================= -->
+    <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 id="confirmTitle" style="text-align:center; margin-bottom:8px;">Emin misiniz?</h3>
+            <p class="confirm-text" id="confirmText"></p>
+            <div class="confirm-actions">
+                <button class="btn" id="confirmNo">Vazgeç</button>
+                <button class="btn btn-success" id="confirmYes" style="background:var(--danger); color:#fff;">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Bildirimleri -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <script>
+/* ============================================================
+   AKLIMDA - Kişisel Asistan | Uygulama Mantığı v2.0
+   Mimari: Modüler Vanilla JS (Storage / State / UI katmanları)
+   ============================================================ */
+'use strict';
+
+/* ==================== 1. SABİTLER ==================== */
+const APP_VERSION = '2.0.0';
+const STORAGE_KEY = 'aklimda_events_v2';
+const LEGACY_KEY = 'aklimda_events';
+const THEME_KEY = 'aklimda_theme';
+const NOTIFY_KEY = 'aklimda_notified';
+const URGENT_DAYS = 7;
+
+const TYPES = {
+    dogum:     { label: 'Doğum Günü', icon: 'fa-cake-candles',         color: '#f59e0b', recurrence: 'yearly'  },
+    yildonumu: { label: 'Yıldönümü',  icon: 'fa-heart',                color: '#ec4899', recurrence: 'yearly'  },
+    odeme:     { label: 'Ödeme',      icon: 'fa-file-invoice-dollar',  color: '#ef4444', recurrence: 'monthly' },
+    ozel:      { label: 'Özel Gün',   icon: 'fa-star',                 color: '#10b981', recurrence: 'none'    }
+};
+
+const RECURRENCE_LABELS = { none: 'Tek seferlik', yearly: 'Her yıl tekrarlar', monthly: 'Her ay tekrarlar' };
+
+/* Hediye motoru: ilgi alanı anahtar kelimeleri */
+const GIFT_KEYWORDS = {
+    'kahve':   ['Özel nitelikli kahve çekirdekleri aboneliği', 'French press veya cezve hediye seti', 'İsme özel seramik kahve kupası'],
+    'kitap':   ['Yılın en çok satan kitap seti', 'Kişiselleştirilmiş deri kitap kılıfı', 'Sahaf buluşu nadir baskı kitap'],
+    'müzik':   ['Kablosuz kulaklık', 'Vinyl plak koleksiyonu', 'Konser / festival bileti'],
+    'spor':    ['Akıllı bileklik veya spor saati', 'Premium spor eşofman seti', 'Spor salonu üyelik paketi'],
+    'tekno':   ['Akıllı ev asistanı cihazı', 'Kablosuz şarj istasyonu', 'Taşınabilir projektör'],
+    'yemek':   ['Gurme restoran tadım menüsü', 'Michelin yıldızlı şef atölyesi deneyimi', 'El yapımı baharat koleksiyonu'],
+    'seyahat': ['Hafta sonu kaçamağı otel kuponu', 'Kişiye özel deri pasaportluk', 'Seyahat boyutlu premium bakım seti'],
+    'borsa':   ['Ekonomi klasikleri kitap seti', 'Premium finans dergisi yıllık aboneliği', 'İsme özel deri portföy çanta'],
+    'mühendis':['3D baskı kalemi', 'Robotik kodlama başlangıç seti', 'Mekanik klavye kiti']
+};
+
+/* Hediye motoru: ilişki bazlı */
+const GIFT_BY_RELATION = {
+    'eş':     ['Birlikte romantik hafta sonu kaçamağı', 'İsme özel yıldız haritası baskısı', 'El yazısı mektuplu anı kutusu'],
+    'es':     ['Birlikte romantik hafta sonu kaçamağı', 'İsme özel yıldız haritası baskısı', 'El yazısı mektuplar albümü'],
+    'sevgili':['Birlikte romantik akşam yemeği deneyimi', 'Çiftlere özel bileklik seti', 'Anı fotoğraflarından karikatür çizimi'],
+    'anne':   ['Spa ve masaj günü deneyimi', 'Kişiye özel çiçek aboneliği', 'El işi takı veya ipek şal'],
+    'baba':   ['Deri cüzdan ve kemer seti', 'Havalık saat veya akıllı bileklik', 'Baba-oğul / baba-kız aktivite günü'],
+    'çocuk':  ['Eğitici robotik oyuncak', 'Bilim deney seti', 'Kişisel hikaye kitabı (ismiyle)'],
+    'kız':    ['Takı tasarım atölyesi bileti', 'Fotoğraf çekim günü deneyimi', 'Kişisel günlük seti'],
+    'oğul':   ['Konsol oyunu veya oyun aksesuarı', 'Kamp / outdoor ekipmanı', 'Drone başlangıç seti'],
+    'arkadaş':['Birlikte escape room veya bowling günü', 'Retro oyun konsolu', 'Kişiye özel karikatür portresi'],
+    'iş':     ['Premium masaüstü ofis seti', 'Kahve aboneliği veya tadım seti', 'Toplantı notluğu ve kaliteli kalem']
+};
+
+/* Hediye motoru: bütçe katmanları */
+const GIFT_BUDGETS = {
+    ekonomik: ['El yapımı mum ve çikolata seti', 'İsme özel kupa ve not kartları', 'Mini bitki bahçesi kiti'],
+    orta:     ['Kablosuz kulaklık', 'Kişiselleştirilmiş anı albümü', 'Gurme kahve veya çay tadım seti'],
+    luks:     ['Akıllı saat', 'Hafta sonu butik otel konaklaması', 'Tasarım marka aksesuar']
+};
+
+const BUDGET_LABELS = { ekonomik: 'Ekonomik (0-500₺)', orta: 'Orta (500-2.000₺)', luks: 'Lüks (2.000₺+)' };
+
+/* ==================== 2. YARDIMCILAR ==================== */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const pad2 = n => String(n).padStart(2, '0');
+const toISOLocal = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const todayISO = () => toISOLocal(new Date());
+const startOfDay = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+
+function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function parseDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+/** Ayın gün sınırını aşmaması için güvenli tarih üretir (31 -> 30 clamp) */
+function safeDate(year, month, day) {
+    const last = new Date(year, month + 1, 0).getDate();
+    return new Date(year, month, Math.min(day, last));
+}
+
+/** Bir kaydın bir sonraki gerçekleşme tarihini hesaplar */
+function nextOccurrence(ev) {
+    const today = startOfDay(new Date());
+    const orig = parseDate(ev.date);
+    const rec = TYPES[ev.type]?.recurrence || 'none';
+
+    if (rec === 'monthly') {
+        let c = safeDate(today.getFullYear(), today.getMonth(), orig.getDate());
+        if (c < today) c = safeDate(today.getFullYear(), today.getMonth() + 1, orig.getDate());
+        return c;
+    }
+    if (rec === 'yearly') {
+        let c = safeDate(today.getFullYear(), orig.getMonth(), orig.getDate());
+        if (c < today) c = safeDate(today.getFullYear() + 1, orig.getMonth(), orig.getDate());
+        return c;
+    }
+    return orig;
+}
+
+/** Gün farkı (bugün = 0) */
+function daysUntil(date) {
+    return Math.round((startOfDay(date) - startOfDay(new Date())) / 86400000);
+}
+
+/** Doğum günü / yıldönümü için hedef yıl katar (32. yaş, 12. yıl) */
+function milestoneText(ev, occ) {
+    const orig = parseDate(ev.date);
+    const n = occ.getFullYear() - orig.getFullYear();
+    if (n < 1) return '';
+    return ev.type === 'dogum' ? `${n}. yaş` : `${n}. yıl`;
+}
+
+function formatDateTR(date, withYear = true) {
+    return date.toLocaleDateString('tr-TR', {
+        day: 'numeric', month: 'long', ...(withYear ? { year: 'numeric' } : {})
+    });
+}
+
+const fmtTL = n => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(n) + ' ₺';
+
+/* ==================== 3. DEPOLAMA KATMANI ==================== */
+const store = {
+    load() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return JSON.parse(raw);
+
+            // v1'den göç
+            const legacy = localStorage.getItem(LEGACY_KEY);
+            if (legacy) {
+                const migrated = JSON.parse(legacy).map(item => ({
+                    id: String(item.id ?? uid()),
+                    type: TYPES[item.type] ? item.type : 'ozel',
+                    title: String(item.title || 'İsimsiz'),
+                    date: /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : todayISO(),
+                    amount: item.amount ? Number(item.amount) : null,
+                    relation: item.relation || '',
+                    interests: item.interests || '',
+                    budget: 'orta',
+                    notes: '',
+                    completed: Boolean(item.completed),
+                    createdAt: Date.now()
+                }));
+                this.save(migrated);
+                localStorage.removeItem(LEGACY_KEY);
+                return migrated;
+            }
+        } catch (e) { console.error('Yükleme hatası:', e); }
+        return [];
+    },
+    save(data) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+        catch (e) { toast('Kayıt yapılamadı: depolama dolu olabilir.', 'error'); }
+    }
+};
+
+/* ==================== 4. DURUM (STATE) ==================== */
+let events = store.load();
+const ui = { filter: 'all', search: '', sort: 'urgency' };
+
+/* ==================== 5. TEMA ==================== */
+function toggleTheme() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem(THEME_KEY, next);
+    $('#themeToggle').innerHTML = `<i class="fa-solid ${next === 'dark' ? 'fa-sun' : 'fa-moon'}"></i>`;
+}
+
+function initTheme() {
+    $('#themeToggle').innerHTML = `<i class="fa-solid ${document.documentElement.dataset.theme === 'dark' ? 'fa-sun' : 'fa-moon'}"></i>`;
+}
+
+/* ==================== 6. TOAST BİLDİRİMLERİ ==================== */
+const TOAST_ICONS = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
+
+function toast(message, type = 'info', action = null) {
+    const container = $('#toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.setAttribute('role', 'status');
+    el.innerHTML = `<i class="fa-solid ${TOAST_ICONS[type]}"></i><span>${escapeHtml(message)}</span>` +
+        (action ? `<button class="toast-action">${escapeHtml(action.label)}</button>` : '');
+    container.appendChild(el);
+
+    let dismissed = false;
+    const dismiss = () => {
+        if (dismissed) return; dismissed = true;
+        el.classList.add('hide');
+        setTimeout(() => el.remove(), 320);
+    };
+
+    if (action) {
+        $('.toast-action', el).addEventListener('click', () => { action.fn(); dismiss(); });
+    }
+    setTimeout(dismiss, action ? 6000 : 3800);
+}
+
+/* ==================== 7. ONAY MODALI ==================== */
+function showConfirm({ title, text, confirmText = 'Evet, Onayla' }) {
+    return new Promise(resolve => {
+        $('#confirmTitle').textContent = title;
+        $('#confirmText').textContent = text;
+        $('#confirmYes').textContent = confirmText;
+        openModalEl('#confirmModal');
+
+        const yes = $('#confirmYes'), no = $('#confirmNo');
+        const cleanup = res => { closeModalEl('#confirmModal'); yes.onclick = no.onclick = null; resolve(res); };
+        yes.onclick = () => cleanup(true);
+        no.onclick = () => cleanup(false);
+    });
+}
+
+/* ==================== 8. MODAL YÖNETİMİ ==================== */
+function openModalEl(sel) { $(sel).classList.add('open'); document.body.classList.add('modal-open'); }
+function closeModalEl(sel) {
+    $(sel).classList.remove('open');
+    if (!$$('.modal.open').length) document.body.classList.remove('modal-open');
+}
+
+function closeAllModals() { $$('.modal.open').forEach(m => m.classList.remove('open')); document.body.classList.remove('modal-open'); }
+
+/* ==================== 9. CRUD İŞLEMLERİ ==================== */
+function persist() { store.save(events); render(); }
+
+function openEventModal(id = null) {
+    const form = $('#eventForm');
+    form.reset();
+    $('#fieldId').value = '';
+    $('#eventDate').value = todayISO();
+
+    if (id) {
+        const ev = events.find(e => e.id === id);
+        if (!ev) return;
+        $('#modalTitle').textContent = 'Kaydı Düzenle';
+        $('#fieldId').value = ev.id;
+        $('#eventType').value = ev.type;
+        $('#eventTitle').value = ev.title;
+        $('#eventDate').value = ev.date;
+        $('#eventAmount').value = ev.amount ?? '';
+        $('#giftRelation').value = ev.relation || '';
+        $('#giftInterests').value = ev.interests || '';
+        $('#giftBudget').value = ev.budget || 'orta';
+        $('#eventNotes').value = ev.notes || '';
+    } else {
+        $('#modalTitle').textContent = 'Yeni Kayıt Ekle';
+    }
+
+    syncFormFields();
+    openModalEl('#eventModal');
+    setTimeout(() => $('#eventTitle').focus(), 60);
+}
+
+function syncFormFields() {
+    const type = $('#eventType').value;
+    $('#amountGroup').style.display = type === 'odeme' ? 'block' : 'none';
+    $('#giftSection').style.display = (type === 'dogum' || type === 'yildonumu') ? 'block' : 'none';
+    $('#recurrenceHint').textContent = RECURRENCE_LABELS[TYPES[type].recurrence];
+}
+
+function saveEvent(e) {
+    e.preventDefault();
+    const id = $('#fieldId').value;
+    const data = {
+        type: $('#eventType').value,
+        title: $('#eventTitle').value.trim(),
+        date: $('#eventDate').value,
+        amount: $('#eventType').value === 'odeme' && $('#eventAmount').value ? Number($('#eventAmount').value) : null,
+        relation: $('#giftRelation').value.trim(),
+        interests: $('#giftInterests').value.trim(),
+        budget: $('#giftBudget').value,
+        notes: $('#eventNotes').value.trim()
+    };
+
+    if (!data.title || !data.date) { toast('Başlık ve tarih zorunludur.', 'error'); return; }
+
+    if (id) {
+        events = events.map(ev => ev.id === id ? { ...ev, ...data } : ev);
+        toast('Kayıt güncellendi.', 'success');
+    } else {
+        events.push({ id: uid(), ...data, completed: false, createdAt: Date.now() });
+        toast('Aklınızda tutuldu! 🎉', 'success');
+    }
+    persist();
+    closeModalEl('#eventModal');
+}
+
+function toggleComplete(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    ev.completed = !ev.completed;
+    persist();
+    toast(ev.completed
+        ? (ev.type === 'odeme' ? 'Ödeme tamamlandı olarak işaretlendi.' : 'Kutlandı olarak işaretlendi. 🎉')
+        : 'İşaret kaldırıldı.', 'info');
+}
+
+async function removeEvent(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    const ok = await showConfirm({
+        title: 'Kayıt Silinsin mi?',
+        text: `"${ev.title}" kalıcı olarak silinecek. Bu işlem geri alınabilir.`,
+        confirmText: 'Evet, Sil'
+    });
+    if (!ok) return;
+
+    const idx = events.findIndex(e => e.id === id);
+    const [removed] = events.splice(idx, 1);
+    persist();
+    toast('Kayıt silindi.', 'info', {
+        label: 'Geri Al',
+        fn: () => { events.splice(Math.min(idx, events.length), 0, removed); persist(); }
+    });
+}
+
+/* ==================== 10. HEDİYE MOTORU ==================== */
+function buildGiftSuggestions(ev) {
+    const ints = (ev.interests || '').toLocaleLowerCase('tr');
+    const rel = (ev.relation || '').toLocaleLowerCase('tr');
+    const out = [];
+    const push = (tag, items) => items.forEach(t => out.push({ tag, text: t }));
+
+    // 1) İlgi alanı eşleşmesi
+    for (const [kw, items] of Object.entries(GIFT_KEYWORDS)) {
+        if (ints.includes(kw)) push('İlgi Alanı', items.slice(0, 2));
+    }
+    // 2) İlişki eşleşmesi
+    for (const [kw, items] of Object.entries(GIFT_BY_RELATION)) {
+        if (rel.includes(kw)) push('İlişkiye Özel', items);
+    }
+    // 3) Bütçe katmanı
+    push(`Bütçe: ${BUDGET_LABELS[ev.budget] || BUDGET_LABELS.orta}`, (GIFT_BUDGETS[ev.budget] || GIFT_BUDGETS.orta).slice(0, 2));
+    // 4) Evrensel
+    push('Klasik', ['Birlikte geçirilen kaliteli zaman: akşam yemeği + etkinlik', 'İsme özel hediye notuyla kaliteli bir deneyim']);
+
+    // Tekilleştir & sınırla
+    const seen = new Set();
+    return out.filter(g => {
+        const k = g.text.toLocaleLowerCase('tr');
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+    }).slice(0, 8);
+}
+
+function openGiftModal(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    const suggestions = buildGiftSuggestions(ev);
+    $('#giftModalTitle').textContent = '🎁 Hediye Önerileri';
+    $('#giftModalContent').innerHTML = `
+        <p class="gift-intro"><b>${escapeHtml(ev.title)}</b> için ${escapeHtml(ev.relation || 'özel kişi')} profiline göre
+        ${suggestions.length} kişiselleştirilmiş öneri hazırlandı.</p>
+        <div class="gift-grid">
+            ${suggestions.map(g => `
+                <div class="gift-item">
+                    <i class="fa-solid fa-gift"></i>
+                    <div><span class="gift-tag">${escapeHtml(g.tag)}</span><p>${escapeHtml(g.text)}</p></div>
+                </div>`).join('')}
+        </div>`;
+    openModalEl('#giftModal');
+}
+
+/* ==================== 11. RENDER: İSTATİSTİK ==================== */
+function renderStats() {
+    const infos = events.map(ev => ({ ev, occ: nextOccurrence(ev), days: daysUntil(nextOccurrence(ev)) }));
+    const total = events.length;
+    const urgent = infos.filter(i => i.days >= 0 && i.days <= URGENT_DAYS && !i.ev.completed).length;
+    const done = events.filter(e => e.completed).length;
+    const payments = infos.filter(i => i.ev.type === 'odeme' && !i.ev.completed && i.days >= 0 && i.days <= 30)
+        .reduce((s, i) => s + (i.ev.amount || 0), 0);
+
+    $('#statTotal').textContent = total;
+    $('#statUrgent').textContent = urgent;
+    $('#statDone').textContent = done;
+    $('#statPayments').textContent = fmtTL(payments);
+}
+
+/* ==================== 12. RENDER: GRAFİK ==================== */
+function renderChart() {
+    const now = new Date();
+    const months = [];
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString('tr-TR', { month: 'short' }), count: 0, current: i === 0 });
+    }
+    events.forEach(ev => {
+        if (ev.completed) return;
+        const occ = nextOccurrence(ev);
+        const key = `${occ.getFullYear()}-${occ.getMonth()}`;
+        const slot = months.find(m => m.key === key);
+        if (slot) slot.count++;
+    });
+
+    const max = Math.max(1, ...months.map(m => m.count));
+    $('#chartBars').innerHTML = months.map(m => `
+        <div class="chart-col" title="${m.count} kayıt">
+            <span class="chart-count">${m.count || ''}</span>
+            <div class="chart-bar ${m.count ? '' : 'zero'} ${m.current ? 'current' : ''}" style="height:${Math.max(4, (m.count / max) * 78)}px"></div>
+            <span class="chart-label">${m.label}</span>
+        </div>`).join('');
+}
+
+/* ==================== 13. RENDER: LİSTE ==================== */
+function getFiltered() {
+    let list = [...events];
+    if (ui.filter !== 'all') list = list.filter(e => e.type === ui.filter);
+    if (ui.search) {
+        const q = ui.search.toLocaleLowerCase('tr');
+        list = list.filter(e =>
+            [e.title, e.relation, e.interests, e.notes].some(f => (f || '').toLocaleLowerCase('tr').includes(q)));
+    }
+    const key = ev => { const o = nextOccurrence(ev); return { ev, occ: o, days: daysUntil(o) }; };
+    const keyed = list.map(key);
+    if (ui.sort === 'urgency') {
+        keyed.sort((a, b) => (a.ev.completed - b.ev.completed) || ((a.days < 0 ? 9999 : a.days) - (b.days < 0 ? 9999 : b.days)));
+    } else if (ui.sort === 'date') {
+        keyed.sort((a, b) => (a.ev.completed - b.ev.completed) || (a.occ - b.occ));
+    } else {
+        keyed.sort((a, b) => a.ev.title.localeCompare(b.ev.title, 'tr'));
+    }
+    return keyed;
+}
+
+function countdownBadge(ev, days) {
+    if (ev.completed) return '<div class="countdown-badge done"><i class="fa-solid fa-check"></i> Tamamlandı</div>';
+    if (days < 0) return '<div class="countdown-badge">Geçti</div>';
+    if (days === 0) return '<div class="countdown-badge urgent"><i class="fa-solid fa-bell"></i> Bugün!</div>';
+    if (days === 1) return '<div class="countdown-badge urgent">Yarın</div>';
+    if (days <= 3) return `<div class="countdown-badge urgent">${days} gün kaldı</div>`;
+    if (days <= URGENT_DAYS) return `<div class="countdown-badge soon">${days} gün kaldı</div>`;
+    return `<div class="countdown-badge">${days} gün kaldı</div>`;
+}
+
+function renderList() {
+    const listEl = $('#eventList');
+    const emptyEl = $('#emptyState');
+    const keyed = getFiltered();
+
+    // Filtre çipi sayaçları (tüm kayıtlar üzerinden)
+    $$('.filter-btn').forEach(btn => {
+        const f = btn.dataset.filter;
+        const n = f === 'all' ? events.length : events.filter(e => e.type === f).length;
+        $('.chip-count', btn).textContent = n;
+    });
+
+    if (!keyed.length) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        $('#emptyText').textContent = events.length
+            ? 'Bu filtreye uygun kayıt bulunamadı. Arama veya filtreleri değiştirmeyi deneyin.'
+            : 'Henüz hiç kayıt yok. İlk doğum gününüzü veya ödemenizi eklemek için başlayın.';
+        $('#sampleBtn').style.display = events.length ? 'none' : 'inline-flex';
+        return;
+    }
+    emptyEl.style.display = 'none';
+
+    listEl.innerHTML = keyed.map(({ ev, occ, days }, i) => {
+        const t = TYPES[ev.type];
+        const milestone = milestoneText(ev, occ);
+        const isGiftable = ev.type === 'dogum' || ev.type === 'yildonumu';
+        return `
+        <article class="event-card ${ev.completed ? 'completed' : ''}" style="--type-color:${t.color}; animation-delay:${Math.min(i * 45, 360)}ms">
+            <div class="event-main">
+                <div class="event-icon"><i class="fa-solid ${t.icon}"></i></div>
+                <div class="event-body">
+                    <div class="event-header">
+                        <div>
+                            <span class="event-type-badge">${t.label}</span>
+                            <h3 class="event-title">${escapeHtml(ev.title)}</h3>
+                        </div>
+                        ${countdownBadge(ev, days)}
+                    </div>
+                    <div class="event-details">
+                        <span><i class="fa-regular fa-calendar"></i> ${formatDateTR(occ)}${milestone ? ` · <b>${milestone}</b>` : ''}</span>
+                        ${ev.amount ? `<span><i class="fa-solid fa-turkish-lira-sign"></i> ${fmtTL(ev.amount)}</span>` : ''}
+                        <span title="${RECURRENCE_LABELS[t.recurrence]}"><i class="fa-solid fa-repeat"></i> ${RECURRENCE_LABELS[t.recurrence]}</span>
+                    </div>
+                    ${ev.notes ? `<p class="event-notes"><i class="fa-regular fa-note-sticky"></i> ${escapeHtml(ev.notes)}</p>` : ''}
+                </div>
+            </div>
+            <div class="event-actions">
+                <button class="btn btn-success" data-action="complete" data-id="${ev.id}" aria-label="Tamamlandı olarak işaretle">
+                    <i class="fa-solid ${ev.completed ? 'fa-rotate-left' : 'fa-check'}"></i>
+                    ${ev.completed ? 'Geri Al' : (ev.type === 'odeme' ? 'Ödendi' : 'Kutlandı')}
+                </button>
+                ${isGiftable ? `<button class="btn btn-gift" data-action="gift" data-id="${ev.id}">
+                    <i class="fa-solid fa-gift"></i> Hediye
+                </button>` : ''}
+                <button class="btn btn-edit" data-action="edit" data-id="${ev.id}">
+                    <i class="fa-solid fa-pen"></i> Düzenle
+                </button>
+                <button class="btn btn-danger" data-action="delete" data-id="${ev.id}" aria-label="Sil">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </article>`;
+    }).join('');
+}
+
+function render() { renderStats(); renderChart(); renderList(); }
+
+/* ==================== 14. YEDEKLEME / İÇE AKTARMA ==================== */
+function exportData() {
+    const blob = new Blob([JSON.stringify({ app: 'aklimda', version: APP_VERSION, exportedAt: new Date().toISOString(), events }, null, 2)],
+        { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `aklimda-yedek-${todayISO()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Yedek dosyası indirildi.', 'success');
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const parsed = JSON.parse(reader.result);
+            const arr = Array.isArray(parsed) ? parsed : parsed.events;
+            if (!Array.isArray(arr)) throw new Error('Geçersiz format');
+            let added = 0;
+            arr.forEach(item => {
+                if (!item || !item.title || !item.date) return;
+                const clean = {
+                    id: String(item.id || uid()),
+                    type: TYPES[item.type] ? item.type : 'ozel',
+                    title: String(item.title),
+                    date: /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : todayISO(),
+                    amount: item.amount ? Number(item.amount) : null,
+                    relation: String(item.relation || ''),
+                    interests: String(item.interests || ''),
+                    budget: GIFT_BUDGETS[item.budget] ? item.budget : 'orta',
+                    notes: String(item.notes || ''),
+                    completed: Boolean(item.completed),
+                    createdAt: Number(item.createdAt) || Date.now()
+                };
+                const idx = events.findIndex(e => e.id === clean.id);
+                if (idx >= 0) events[idx] = clean; else events.push(clean);
+                added++;
+            });
+            persist();
+            toast(`${added} kayıt başarıyla içe aktarıldı.`, 'success');
+        } catch (e) {
+            toast('Dosya okunamadı: geçersiz yedek dosyası.', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+async function resetData() {
+    const ok = await showConfirm({
+        title: 'Tüm Veriler Silinsin mi?',
+        text: 'Tüm kayıtlar kalıcı olarak silinecek. Önce dışa aktarmayı düşünün.',
+        confirmText: 'Evet, Hepsini Sil'
+    });
+    if (!ok) return;
+    events = [];
+    persist();
+    toast('Tüm veriler temizlendi.', 'info');
+}
+
+/* ==================== 15. ÖRNEK VERİ ==================== */
+function addSampleData() {
+    const base = new Date();
+    const add = n => { const d = new Date(base); d.setDate(d.getDate() + n); return toISOLocal(d); };
+    const y = base.getFullYear();
+    const samples = [
+        { type: 'dogum', title: 'Annemin Doğum Günü', date: add(4), relation: 'Anne', interests: 'kitap, yemek', budget: 'orta', notes: 'Kırmızı çiçek seviyor' },
+        { type: 'dogum', title: 'Eşimin Doğum Günü', date: add(12), relation: 'Eş', interests: 'kahve, müzik', budget: 'luks' },
+        { type: 'yildonumu', title: 'Evlilik Yıldönümümüz', date: `${y - 5}-${pad2(base.getMonth() + 1)}-${pad2(Math.min(base.getDate() + 20, 28))}`, relation: 'Eş', interests: 'seyahat', budget: 'luks', notes: 'Her yıl birlikte seyahat ediyoruz' },
+        { type: 'odeme', title: 'Kira Ödemesi', date: add(6), amount: 15000, notes: 'Her ayın 1-5 arası' },
+        { type: 'odeme', title: 'Elektrik Faturası', date: add(9), amount: 850 },
+        { type: 'ozel', title: 'Araç Muayene Tarihi', date: add(25), notes: 'Randevu almayı unutma' }
+    ];
+    samples.forEach(s => events.push({ id: uid(), ...s, completed: false, createdAt: Date.now() }));
+    persist();
+    toast('Örnek kayıtlar eklendi, düzenlemekten çekinmeyin.', 'success');
+}
+
+/* ==================== 16. BİLDİRİM API ==================== */
+async function enableNotifications() {
+    if (!('Notification' in window)) { toast('Tarayıcınız bildirim desteklemiyor.', 'error'); return; }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+        toast('Bildirimler açıldı. Yaklaşan etkinlikler için uyaracaksınız.', 'success');
+        scanUpcoming(true);
+    } else {
+        toast('Bildirim izni verilmedi.', 'error');
+    }
+}
+
+function scanUpcoming(force = false) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    let notified = {};
+    try { notified = JSON.parse(localStorage.getItem(NOTIFY_KEY) || '{}'); } catch (e) {}
+
+    events.forEach(ev => {
+        if (ev.completed) return;
+        const occ = nextOccurrence(ev);
+        const days = daysUntil(occ);
+        if (days >= 0 && days <= 3) {
+            const key = `${ev.id}:${toISOLocal(occ)}`;
+            if (notified[key]) return;
+            notified[key] = true;
+            const t = TYPES[ev.type];
+            new Notification('Aklımda hatırlatıyor 🧠', {
+                body: `${ev.title} — ${days === 0 ? 'bugün!' : days + ' gün sonra'} (${t.label})`,
+                icon: 'icons/icon-192.png',
+                badge: 'icons/icon-192.png'
+            });
+        }
+    });
+    localStorage.setItem(NOTIFY_KEY, JSON.stringify(notified));
+}
+
+/* ==================== 17. OLAY BAĞLAMA (EVENT BINDING) ==================== */
+function bindEvents() {
+    // Header
+    $('#themeToggle').addEventListener('click', toggleTheme);
+    $('#notifBtn').addEventListener('click', enableNotifications);
+    $('#exportBtn').addEventListener('click', exportData);
+    $('#importBtn').addEventListener('click', () => $('#importFile').click());
+    $('#importFile').addEventListener('change', e => {
+        if (e.target.files[0]) importData(e.target.files[0]);
+        e.target.value = '';
+    });
+    $('#resetBtn').addEventListener('click', resetData);
+
+    // Toolbar
+    $('#searchInput').addEventListener('input', e => { ui.search = e.target.value.trim(); renderList(); });
+    $('#sortSelect').addEventListener('change', e => { ui.sort = e.target.value; renderList(); });
+
+    // Filtre çipleri (event delegation)
+    $('#filterBar').addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        ui.filter = btn.dataset.filter;
+        $$('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+        renderList();
+    });
+
+    // Liste aksiyonları (event delegation)
+    $('#eventList').addEventListener('click', e => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const map = { complete: toggleComplete, edit: openEventModal, gift: openGiftModal, delete: removeEvent };
+        map[btn.dataset.action]?.(id);
+    });
+
+    // FAB
+    $('#addBtn').addEventListener('click', () => openEventModal());
+
+    // Form
+    $('#eventType').addEventListener('change', syncFormFields);
+    $('#eventForm').addEventListener('submit', saveEvent);
+    $('#cancelForm').addEventListener('click', () => closeModalEl('#eventModal'));
+
+    // Boş durum
+    $('#sampleBtn').addEventListener('click', addSampleData);
+
+    // Modal kapatma: arka plan tıklaması + Esc
+    $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeAllModals(); }));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+
+    // Modal içi kapatma butonları
+    $$('[data-close]').forEach(btn => btn.addEventListener('click', () => {
+        closeModalEl(btn.closest('.modal'));
+    }));
+}
+
+/* ==================== 18. SERVICE WORKER ==================== */
+function registerSW() {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW kaydı başarısız:', err));
+        });
+    }
+}
+
+/* ==================== 19. BAŞLATMA ==================== */
+function init() {
+    initTheme();
+    bindEvents();
+    render();
+    registerSW();
+    setTimeout(() => scanUpcoming(), 2500);
+    console.log(`%cAklımda v${APP_VERSION} hazır 🧠`, 'color:#6366f1;font-weight:bold;font-size:14px');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
