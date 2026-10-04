@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Aklımda - Kişisel Asistan</title>
+    <meta name="description" content="Aklımda - Doğum günleri, yıldönümleri ve ödemeler için akıllı kişisel asistanınız. Hatırlatır, geri sayar, hediye önerir.">
+    <meta name="theme-color" content="#0b1120">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Aklımda">
+
+    <!-- Tema flaşını önleyen erken betik -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('aklimda_theme') ||
+                (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.documentElement.dataset.theme = t;
+        })();
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
+
+    <!-- ================= HEADER ================= -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
+                <div>
+                    <h1>Aklımda</h1>
+                    <span class="tagline">Kişisel Asistan</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="notifBtn" title="Bildirimleri aç" aria-label="Bildirimleri aç">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <button class="icon-btn" id="exportBtn" title="Verileri dışa aktar (JSON)" aria-label="Dışa aktar">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button class="icon-btn" id="importBtn" title="Verileri içe aktar" aria-label="İçe aktar">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+                <input type="file" id="importFile" accept=".json,application/json" hidden>
+                <button class="icon-btn" id="resetBtn" title="Tüm verileri sil" aria-label="Sıfırla">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button class="icon-btn" id="themeToggle" title="Tema değiştir" aria-label="Tema değiştir"></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= ANA İÇERİK ================= -->
+    <main class="container">
+
+        <!-- Arama & Sıralama -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="searchInput" class="search-input" placeholder="Kayıtlarda ara..." aria-label="Kayıtlarda ara">
+            </div>
+            <select id="sortSelect" class="sort-select" aria-label="Sıralama">
+                <option value="urgency">Aciliyete Göre</option>
+                <option value="date">Tarihe Göre</option>
+                <option value="name">İsme Göre</option>
+            </select>
+        </div>
+
+        <!-- İstatistikler -->
+        <section class="stats-grid" aria-label="İstatistikler">
+            <div class="stat-card">
+                <span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span>
+                <span class="num c-accent" id="statTotal">0</span>
+                <span class="label">Toplam Kayıt</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span>
+                <span class="num c-danger" id="statUrgent">0</span>
+                <span class="label">Yaklaşan (7 gün)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span>
+                <span class="num c-success" id="statDone">0</span>
+                <span class="label">Tamamlanan</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span>
+                <span class="num c-warning" id="statPayments">0 ₺</span>
+                <span class="label">30 Gün İçinde Ödeme</span>
+            </div>
+        </section>
+
+        <!-- Aylık Dağılım Grafiği -->
+        <section class="chart-card" aria-label="Aylık dağılım">
+            <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
+            <div class="chart" id="chartBars"></div>
+        </section>
+
+        <!-- Filtreler -->
+        <nav class="filter-bar" id="filterBar" aria-label="Kategori filtreleri">
+            <button class="filter-btn active" data-filter="all">Tümü <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="dogum">Doğum Günleri <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="yildonumu">Yıldönümleri <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="odeme">Ödemeler <span class="chip-count">0</span></button>
+            <button class="filter-btn" data-filter="ozel">Özel Günler <span class="chip-count">0</span></button>
+        </nav>
+
+        <!-- Kayıt Listesi -->
+        <section class="event-list" id="eventList" aria-live="polite"></section>
+
+        <!-- Boş Durum -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            <h3>Henüz kayıt yok</h3>
+            <p id="emptyText">İlk kaydınızı ekleyerek başlayın.</p>
+            <button class="btn btn-edit" id="sampleBtn" style="display:inline-flex;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Örnek Verilerle Başla
+            </button>
+        </div>
+
+        <footer class="app-footer">
+            <span class="version">Aklımda v2.0.0</span> · Tüm verileriniz yalnızca cihazınızda saklanır<br>
+            Çevrimdışı çalışır · Ana ekrana eklenebilir
+        </footer>
+    </main>
+
+    <!-- ================= FAB ================= -->
+    <button class="fab" id="addBtn" aria-label="Yeni kayıt ekle">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- ================= KAYIT MODALI ================= -->
+    <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Yeni Kayıt Ekle</h3>
+                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="eventForm" novalidate>
+                <input type="hidden" id="fieldId">
+
+                <div class="form-group">
+                    <label for="eventType">Kategori</label>
+                    <select class="form-control" id="eventType">
+                        <option value="dogum">🎂 Doğum Günü</option>
+                        <option value="yildonumu">💞 Evlilik / Özel Yıldönümü</option>
+                        <option value="odeme">💳 Ödeme / Fatura</option>
+                        <option value="ozel">⭐ Özel Gün / Hatırlatıcı</option>
+                    </select>
+                    <p class="form-hint"><i class="fa-solid fa-repeat"></i> <span id="recurrenceHint">Her yıl tekrarlar</span></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventTitle">Başlık / Kişi Adı / Açıklama</label>
+                    <input type="text" class="form-control" id="eventTitle"
+                           placeholder="Örn: Eşimin Doğum Günü veya Elektrik Faturası" maxlength="80" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDate">Tarih</label>
+                    <input type="date" class="form-control" id="eventDate" required>
+                </div>
+
+                <div class="form-group" id="amountGroup" style="display:none;">
+                    <label for="eventAmount">Tutar (TL)</label>
+                    <input type="number" class="form-control" id="eventAmount" placeholder="Örn: 450" min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventNotes">Not (opsiyonel)</label>
+                    <textarea class="form-control" id="eventNotes" placeholder="Eklemek istedikleriniz..." maxlength="300"></textarea>
+                </div>
+
+                <!-- Akıllı Hediye Bölümü -->
+                <div id="giftSection">
+                    <div class="form-divider">🎁 Hediye Öneri Detayları</div>
+                    <div class="form-group">
+                        <label for="giftRelation">Yakınlık / İlişki</label>
+                        <input type="text" class="form-control" id="giftRelation" placeholder="Örn: Eşim, Annem, Arkadaşım" maxlength="40">
+                    </div>
+                    <div class="form-group">
+                        <label for="giftInterests">İlgi Alanları &amp; Hobiler</label>
+                        <input type="text" class="form-control" id="giftInterests" placeholder="Örn: Kahve, kitap, seyahat" maxlength="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="giftBudget">Bütçe Aralığı</label>
+                        <select class="form-control" id="giftBudget">
+                            <option value="ekonomik">Ekonomik (0 - 500 ₺)</option>
+                            <option value="orta" selected>Orta (500 - 2.000 ₺)</option>
+                            <option value="luks">Lüks (2.000 ₺ üzeri)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Aklımda Tut &amp; Kaydet</button>
+                <button type="button" class="btn" id="cancelForm" style="width:100%; margin-top:8px;">Vazgeç</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= HEDİYE MODALI ================= -->
+    <div class="modal" id="giftModal" role="dialog" aria-modal="true" aria-labelledby="giftModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="giftModalTitle">🎁 Hediye Önerileri</h3>
+                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="giftModalContent"></div>
+        </div>
+    </div>
+
+    <!-- ================= ONAY MODALI ================= -->
+    <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 id="confirmTitle" style="text-align:center; margin-bottom:8px;">Emin misiniz?</h3>
+            <p class="confirm-text" id="confirmText"></p>
+            <div class="confirm-actions">
+                <button class="btn" id="confirmNo">Vazgeç</button>
+                <button class="btn btn-success" id="confirmYes" style="background:var(--danger); color:#fff;">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Bildirimleri -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
