@@ -646,9 +646,12 @@ input[type="date"].form-control { color-scheme: dark; }
     bottom: 0; width: min(100%, 680px); height: 85vh;
     background: var(--bg-soft); border: 1px solid var(--border);
     border-bottom: none; border-radius: 24px 24px 0 0;
-    display: flex; flex-direction: column; z-index: 1401;
+    display: none; flex-direction: column; z-index: 1401;
     box-shadow: var(--shadow); overflow: hidden;
     animation: sheetIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+        .chat-overlay.open + .chat-panel {
+    display: flex;
 }
 @media (min-width: 720px) {
     .chat-panel { bottom: 26px; border-radius: 24px; height: 68vh; border-bottom: 1px solid var(--border); }
