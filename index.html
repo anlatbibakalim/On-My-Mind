@@ -552,7 +552,7 @@ input[type="date"].form-control { color-scheme: dark; }
 }
 
 /* ============================================================
-   AKLIMDA v3 - Akıllı Asistan Widget'ları
+   AKLIMDA v3 - Akıllı Asistan Widget'ları & Profesyonel Sağlık / Takvim Modülü
    ============================================================ */
 
 /* ---------- Haber Bandı (Ticker) ---------- */
@@ -606,12 +606,12 @@ input[type="date"].form-control { color-scheme: dark; }
 .wx-setup .btn { flex: 0; padding: 10px 16px; }
 .wx-error { color: var(--danger); font-size: 0.8rem; margin-top: 8px; display: none; }
 
-/* ---------- Adım Sayar Kartı ---------- */
-.steps-card {
+/* ---------- Profesyonel Sağlık & Adım Sayar Kartı ---------- */
+.health-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 20px; padding: 18px; margin-bottom: 16px;
-    display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
 }
+.health-top { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
 .ring-wrap { position: relative; width: 118px; height: 118px; flex-shrink: 0; }
 .ring-wrap svg { transform: rotate(-90deg); }
 .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
@@ -622,21 +622,75 @@ input[type="date"].form-control { color-scheme: dark; }
 .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ring-steps { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; }
 .ring-label { font-size: 0.62rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
-.steps-info { flex: 1; min-width: 200px; }
-.steps-info h3 { font-size: 0.95rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.steps-goal { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
-.steps-goal b { color: var(--accent-2); }
-.steps-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.steps-actions .btn { flex: 0; padding: 9px 15px; font-size: 0.8rem; }
-.steps-edit { display: flex; gap: 8px; align-items: center; }
-.steps-edit input { width: 110px; padding: 8px 12px; font-size: 0.85rem; }
-.steps-week { display: flex; gap: 6px; align-items: flex-end; height: 42px; margin-top: 4px; }
-.steps-week .sw-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
-.sw-bar { width: 100%; border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); min-height: 3px; }
+
+.health-info { flex: 1; min-width: 220px; }
+.health-info h3 { font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.health-params-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+@media(max-width: 520px) { .health-params-grid { grid-template-columns: repeat(2, 1fr); } }
+.hp-group label { display: block; font-size: 0.65rem; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
+.hp-group input, .hp-group select { width: 100%; padding: 6px 8px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); }
+
+.health-metrics-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;
+}
+.hm-box { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 8px; text-align: center; }
+.hm-box span { font-size: 0.68rem; color: var(--muted); display: block; margin-bottom: 2px; }
+.hm-box strong { font-size: 0.9rem; color: var(--text); font-weight: 700; }
+
+.health-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.health-actions .btn { padding: 8px 12px; font-size: 0.78rem; }
+.steps-edit-box { display: flex; gap: 6px; align-items: center; flex: 1; }
+.steps-edit-box input { flex: 1; padding: 7px 10px; font-size: 0.8rem; }
+
+.steps-week { display: flex; gap: 6px; align-items: flex-end; height: 38px; margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 8px; }
+.sw-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+.sw-bar { width: 100%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); min-height: 3px; }
 .sw-bar.today { box-shadow: 0 0 10px var(--accent-soft), 0 0 0 1.5px var(--accent); }
 .sw-lbl { font-size: 0.6rem; color: var(--muted); font-weight: 700; }
-.quote { font-size: 0.78rem; color: var(--muted); font-style: italic; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 4px; width: 100%; }
+.quote { font-size: 0.78rem; color: var(--muted); font-style: italic; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; width: 100%; }
 .quote i { color: var(--warning); margin-right: 6px; }
+
+/* ---------- Kapsamlı Tıklanabilir Takvim (Agenda) ---------- */
+.agenda-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 18px; margin-bottom: 16px;
+}
+.agenda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.agenda-header h3 { font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.agenda-nav-btns { display: flex; gap: 6px; }
+.agenda-nav-btn {
+    background: var(--input-bg); border: 1px solid var(--border);
+    color: var(--text); width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; transition: background 0.2s;
+}
+.agenda-nav-btn:hover { background: var(--accent-soft); color: var(--accent); }
+
+.agenda-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+.agenda-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.agenda-day {
+    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    background: var(--input-bg); border: 1px solid transparent; position: relative; transition: all 0.2s;
+}
+.agenda-day:hover { border-color: var(--accent); background: var(--card-hover); }
+.agenda-day.today { border-color: var(--accent); color: var(--accent); font-weight: 800; }
+.agenda-day.selected { background: var(--accent) !important; color: #fff !important; box-shadow: var(--shadow-accent); }
+.agenda-day.other-month { opacity: 0.35; }
+.agenda-dot { width: 5px; height: 5px; background: var(--accent-2); border-radius: 50%; position: absolute; bottom: 4px; }
+.agenda-day.selected .agenda-dot { background: #fff; }
+
+.agenda-events-panel { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.agenda-events-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.agenda-events-title { font-size: 0.82rem; color: var(--muted); font-weight: 700; }
+.agenda-events-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+.agenda-event-item {
+    background: var(--input-bg); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 9px; padding: 8px 12px; font-size: 0.83rem;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.2s;
+}
+.agenda-event-item:hover { transform: translateX(3px); border-color: var(--accent); }
+.agenda-event-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Asistan (Chat) ---------- */
 .chat-overlay { position: fixed; inset: 0; background: var(--overlay); z-index: 1400; display: none; }
@@ -650,9 +704,7 @@ input[type="date"].form-control { color-scheme: dark; }
     box-shadow: var(--shadow); overflow: hidden;
     animation: sheetIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
-        .chat-overlay.open + .chat-panel {
-    display: flex;
-}
+.chat-overlay.open + .chat-panel { display: flex; }
 @media (min-width: 720px) {
     .chat-panel { bottom: 26px; border-radius: 24px; height: 68vh; border-bottom: 1px solid var(--border); }
 }
@@ -710,9 +762,7 @@ input[type="date"].form-control { color-scheme: dark; }
 }
 .chat-send:active { transform: scale(0.92); }
 
-/* Ayarlar içindeki küçük satırlar */
 .settings-note { font-size: 0.75rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-
     </style>
 </head>
 <body>
@@ -756,33 +806,87 @@ input[type="date"].form-control { color-scheme: dark; }
             <div id="wxBody"><p style="color:var(--muted);font-size:.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Hava durumu yükleniyor...</p></div>
         </section>
 
-        <!-- Adım Sayar -->
-        <section class="steps-card" aria-label="Adım sayar">
+        <!-- Profesyonel Sağlık & Adım Sayar Kartı -->
+        <section class="health-card" aria-label="Sağlık ve Adım Takibi">
             <svg width="0" height="0"><defs>
                 <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/>
                 </linearGradient>
             </defs></svg>
-            <div class="ring-wrap">
-                <svg width="118" height="118" viewBox="0 0 110 110">
-                    <circle class="ring-bg" cx="55" cy="55" r="48"/>
-                    <circle class="ring-fill" id="ringFill" cx="55" cy="55" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-                </svg>
-                <div class="ring-text"><span class="ring-steps" id="ringSteps">0</span><span class="ring-label" id="ringLabel">adım</span></div>
-            </div>
-            <div class="steps-info">
-                <h3><i class="fa-solid fa-person-walking" style="color:var(--accent-2);"></i> Günlük Adım Takibi</h3>
-                <p class="steps-goal" id="stepsGoalText"></p>
-                <div class="steps-actions">
-                    <button class="btn btn-success" id="stepsToggle"><i class="fa-solid fa-play"></i> Sayacı Başlat</button>
+            <div class="health-top">
+                <div class="ring-wrap">
+                    <svg width="118" height="118" viewBox="0 0 110 110">
+                        <circle class="ring-bg" cx="55" cy="55" r="48"/>
+                        <circle class="ring-fill" id="ringFill" cx="55" cy="55" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+                    </svg>
+                    <div class="ring-text"><span class="ring-steps" id="ringSteps">0</span><span class="ring-label" id="ringLabel">adım</span></div>
                 </div>
-                <div class="steps-edit">
-                    <input type="number" class="form-control" id="stepsInput" placeholder="Manuel adım" min="0">
-                    <button class="btn" id="stepsSetBtn"><i class="fa-solid fa-check"></i></button>
+                <div class="health-info">
+                    <h3><i class="fa-solid fa-heart-pulse" style="color:var(--accent);"></i> Profesyonel Sağlık & Kalori Analitiği</h3>
+                    <div class="health-params-grid">
+                        <div class="hp-group">
+                            <label>Cinsiyet</label>
+                            <select id="hpGender">
+                                <option value="male">Erkek</option>
+                                <option value="female">Kadın</option>
+                            </select>
+                        </div>
+                        <div class="hp-group">
+                            <label>Boy (cm)</label>
+                            <input type="number" id="hpHeight" value="179">
+                        </div>
+                        <div class="hp-group">
+                            <label>Kilo (kg)</label>
+                            <input type="number" id="hpWeight" value="74" step="0.1">
+                        </div>
+                        <div class="hp-group">
+                            <label>Yaş</label>
+                            <input type="number" id="hpAge" value="44">
+                        </div>
+                    </div>
                 </div>
-                <div class="steps-week" id="stepsWeek"></div>
             </div>
+
+            <div class="health-metrics-row">
+                <div class="hm-box"><span>Tahmini Mesafe</span><strong id="resDistance">0.00 km</strong></div>
+                <div class="hm-box"><span>Toplam Kalori</span><strong id="resCalories">0 kcal</strong></div>
+                <div class="hm-box"><span>Aktivite Düzeyi</span><strong id="resLevel" style="font-size:0.78rem;">Hesaplanıyor</strong></div>
+            </div>
+
+            <div class="health-actions">
+                <button class="btn btn-success" id="stepsToggle"><i class="fa-solid fa-play"></i> Sayacı Başlat</button>
+                <div class="steps-edit-box">
+                    <input type="number" class="form-control" id="stepsInput" placeholder="Manuel adım gir" min="0">
+                    <button class="btn" id="stepsSetBtn" title="Adımı Güncelle"><i class="fa-solid fa-check"></i></button>
+                </div>
+            </div>
+
+            <div class="steps-week" id="stepsWeek"></div>
             <p class="quote" id="dailyQuote"></p>
+        </section>
+
+        <!-- Kapsamlı Tıklanabilir Etkinlik Takvimi (Agenda) -->
+        <section class="agenda-card" aria-label="Takvim ve Etkinlikler">
+            <div class="agenda-header">
+                <h3 id="agendaMonthYear"><i class="fa-solid fa-calendar-days" style="color:var(--accent);"></i> Ocak 2026</h3>
+                <div class="agenda-nav-btns">
+                    <button class="agenda-nav-btn" id="agendaPrev"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="agenda-nav-btn" id="agendaNext"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="agenda-weekdays">
+                <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+            </div>
+            <div class="agenda-days-grid" id="agendaDaysGrid"></div>
+            <div class="agenda-events-panel">
+                <div class="agenda-events-header">
+                    <span class="agenda-events-title" id="agendaSelectedTitle">Seçilen Gün Etkinlikleri</span>
+                    <button class="btn btn-edit" id="agendaAddBtn" style="padding:4px 10px;font-size:0.75rem;flex:0;"><i class="fa-solid fa-plus"></i> Bu Güne Ekle</button>
+                </div>
+                <div class="agenda-events-list" id="agendaEventsList">
+                    <p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:10px;">Etkinlik detayları için bir güne tıklayın.</p>
+                </div>
+            </div>
         </section>
 
         <!-- Arama & Sıralama -->
@@ -834,7 +938,7 @@ input[type="date"].form-control { color-scheme: dark; }
 
         <footer class="app-footer">
             <span class="version">Aklımda v3.0.0</span> · Verileriniz yalnızca cihazınızda saklanır<br>
-            Çevrimdışı çalışır · Hava durumu, adım sayar, haberler &amp; akıllı asistan
+            Çevrimdışı çalışır · Hava durumu, sağlık asistanı, haberler &amp; akıllı asistan
         </footer>
     </main>
 
@@ -853,7 +957,7 @@ input[type="date"].form-control { color-scheme: dark; }
         <div class="chat-chips">
             <button class="chat-chip" data-q="Hava durumu?">🌤️ Hava durumu?</button>
             <button class="chat-chip" data-q="Yaklaşan etkinlikler neler?">📅 Yaklaşan etkinlikler</button>
-            <button class="chat-chip" data-q="Kaç adım attım?">👟 Adımlarım</button>
+            <button class="chat-chip" data-q="Kaç adım attım?">👟 Adımlarım & Sağlık</button>
             <button class="chat-chip" data-q="Haberlerde neler var?">📰 Haberler</button>
             <button class="chat-chip" data-q="Motivasyon ver">💪 Motivasyon</button>
             <button class="chat-chip" data-q="3 gün sonra toplantı ekle">➕ Etkinlik ekle</button>
@@ -977,12 +1081,10 @@ input[type="date"].form-control { color-scheme: dark; }
 
     <script>
 /* ============================================================
-   AKLIMDA v3 - Akilli Kisisel Asistan
-   Katmanlar: Storage | Events | Weather | Steps | News | AI
+   AKLIMDA v3 - Akilli Kisisel Asistan & Saglik & Takvim
    ============================================================ */
 'use strict';
 
-/* ==================== 1. SABITLER ==================== */
 const APP_VERSION = '3.0.0';
 const K = {
     events: 'aklimda_events_v3',
@@ -990,6 +1092,7 @@ const K = {
     eventsV1: 'aklimda_events',
     settings: 'aklimda_settings_v3',
     steps: 'aklimda_steps_v3',
+    health: 'aklimda_health_v2',
     news: 'aklimda_news_v3',
     wx: 'aklimda_wx_v3',
     theme: 'aklimda_theme',
@@ -1041,7 +1144,6 @@ const GIFT_BUDGETS = {
     orta: ['Kablosuz kulaklik', 'Kisisellestirilmis ani albumu', 'Gurme kahve veya cay tadim seti'],
     luks: ['Akilli saat', 'Hafta sonu butik otel konaklamasi', 'Tasarim marka aksesuar']
 };
-const BUDGET_LABELS = { ekonomik: 'Ekonomik (0-500TL)', orta: 'Orta (500-2000TL)', luks: 'Luks (2000TL+)' };
 
 const QUOTES = [
     'Basari, her gun kucuk adimlarin toplamidir.',
@@ -1061,7 +1163,7 @@ const JOKES = [
     'Adim sayar ne demis? "Bugun de seninleyim, yuru!"'
 ];
 
-/* ==================== 2. YARDIMCILAR ==================== */
+/* ==================== YARDIMCIMCILAR ==================== */
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1102,7 +1204,7 @@ function milestoneText(ev, occ) {
     return ev.type === 'dogum' ? n + '. yas' : n + '. yil';
 }
 
-/* ==================== 3. DEPOLAMA ==================== */
+/* ==================== DEPOLAMA ==================== */
 const db = {
     get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } },
     set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { toast('Depolama dolu olabilir.', 'error'); } },
@@ -1131,11 +1233,12 @@ function loadEvents() {
 
 let events = loadEvents();
 let settings = Object.assign({ city: null, stepGoal: 8000, aiKey: '', aiModel: 'gpt-4o-mini' }, db.get(K.settings, {}));
+let healthData = Object.assign({ gender: 'male', height: 179, weight: 74, age: 44, steps: 0, calories: 0 }, db.get(K.health, {}));
 const ui = { filter: 'all', search: '', sort: 'urgency' };
 
 function persist() { db.set(K.events, events); render(); }
 
-/* ==================== 4. TEMA ==================== */
+/* ==================== TEMA ==================== */
 function initTheme() {
     const t = document.documentElement.dataset.theme;
     $('#themeToggle').innerHTML = '<i class="fa-solid ' + (t === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>';
@@ -1147,7 +1250,7 @@ function toggleTheme() {
     initTheme();
 }
 
-/* ==================== 5. TOAST ==================== */
+/* ==================== TOAST ==================== */
 const TOAST_ICONS = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
 function toast(message, type, action) {
     type = type || 'info';
@@ -1163,7 +1266,7 @@ function toast(message, type, action) {
     setTimeout(dismiss, action ? 6000 : 3800);
 }
 
-/* ==================== 6. MODAL ==================== */
+/* ==================== MODAL ==================== */
 function openModalEl(sel) { $(sel).classList.add('open'); document.body.classList.add('modal-open'); }
 function closeModalEl(sel) {
     $(sel).classList.remove('open');
@@ -1184,7 +1287,214 @@ function showConfirm(opts) {
     });
 }
 
-/* ==================== 7. ETKINLIK CRUD ==================== */
+/* ==================== PROFESYONEL SAĞLIK & ADIM MODÜLÜ ==================== */
+function initHealthModule() {
+    $('#hpGender').value = healthData.gender;
+    $('#hpHeight').value = healthData.height;
+    $('#hpWeight').value = healthData.weight;
+    $('#hpAge').value = healthData.age;
+
+    const calculateHealth = () => {
+        healthData.gender = $('#hpGender').value;
+        healthData.height = parseFloat($('#hpHeight').value) || 179;
+        healthData.weight = parseFloat($('#hpWeight').value) || 74;
+        healthData.age = parseInt($('#hpAge').value) || 44;
+        db.set(K.health, healthData);
+
+        const steps = healthData.steps || 0;
+        const strideFactor = healthData.gender === 'male' ? 0.415 : 0.413;
+        const distanceKm = (steps * (healthData.height * strideFactor)) / 100000;
+
+        // Harris-Benedict BMR + Aktivite Kalori Hesabı
+        let bmr = healthData.gender === 'male' 
+            ? 88.362 + (13.397 * healthData.weight) + (4.799 * healthData.height) - (5.677 * healthData.age)
+            : 447.593 + (9.247 * healthData.weight) + (3.098 * healthData.height) - (4.330 * healthData.age);
+        
+        const activeCalPerStep = healthData.weight * 0.00057; 
+        const totalCalories = Math.round((bmr * 0.25) + (steps * activeCalPerStep));
+        healthData.calories = totalCalories;
+
+        // UI Güncelleme
+        $('#ringSteps').textContent = steps.toLocaleString('tr-TR');
+        $('#resDistance').textContent = distanceKm.toFixed(2) + ' km';
+        $('#resCalories').textContent = totalCalories + ' kcal';
+
+        let levelText = 'Hareketsiz';
+        if (steps > 5000) levelText = 'Orta Aktif';
+        if (steps > 10000) levelText = 'Çok Aktif / Yaşam Biçimi';
+        if (steps > 15000) levelText = 'Yüksek Performans';
+        $('#resLevel').textContent = levelText;
+
+        const goal = settings.stepGoal || 8000;
+        const pct = Math.min(1, steps / goal);
+        const circ = 2 * Math.PI * 48;
+        $('#ringFill').style.strokeDashoffset = circ * (1 - pct);
+        $('#ringLabel').textContent = pct >= 1 ? 'HEDEF!' : 'adım';
+
+        // Haftalık Barlar
+        const days = [];
+        const stepsMap = db.get(K.steps, {});
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const key = toISOLocal(d);
+            days.push({ lbl: d.toLocaleDateString('tr-TR', { weekday: 'narrow' }), n: (i === 0 ? steps : (stepsMap[key] || 0)), today: i === 0 });
+        }
+        const max = Math.max(1, ...days.map(d => d.n));
+        $('#stepsWeek').innerHTML = days.map(d =>
+            '<div class="sw-col"><div class="sw-bar ' + (d.today ? 'today' : '') + '" style="height:' + Math.max(3, (d.n / max) * 100) + '%" title="' + d.n + ' adım"></div>' +
+            '<span class="sw-lbl">' + d.lbl + '</span></div>').join('');
+    };
+
+    $$('#hpGender, #hpHeight, #hpWeight, #hpAge').forEach(el => el.addEventListener('input', calculateHealth));
+    
+    $('#stepsSetBtn').addEventListener('click', () => {
+        const v = parseInt($('#stepsInput').value, 10);
+        if (!isNaN(v) && v >= 0) {
+            healthData.steps = v;
+            const stepsMap = db.get(K.steps, {});
+            stepsMap[todayISO()] = v;
+            db.set(K.steps, stepsMap);
+            db.set(K.health, healthData);
+            calculateHealth();
+            toast('Adım sayısı güncellendi: ' + v.toLocaleString('tr-TR'), 'success');
+        }
+    });
+
+    calculateHealth();
+}
+
+let stepState = { on: false, last: 0, samples: 0, supported: 'DeviceMotionEvent' in window };
+function addStep() {
+    healthData.steps = (healthData.steps || 0) + 1;
+    const stepsMap = db.get(K.steps, {});
+    stepsMap[todayISO()] = healthData.steps;
+    db.set(K.steps, stepsMap);
+    db.set(K.health, healthData);
+    initHealthModule();
+}
+function onMotion(e) {
+    const a = e.accelerationIncludingGravity;
+    if (!a || (a.x == null && a.y == null)) return;
+    stepState.samples++;
+    const m = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
+    const now = Date.now();
+    if (m > 2.1 && now - stepState.last > 290) {
+        stepState.last = now;
+        addStep();
+    }
+}
+function startSteps() {
+    if (!stepState.supported) { toast('Cihazınız hareket sensörü desteklemiyor.', 'error'); return; }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(r => {
+            if (r === 'granted') attachMotion();
+            else toast('Hareket izni verilmedi.', 'error');
+        }).catch(() => toast('Hareket izni alınamadı.', 'error'));
+    } else {
+        attachMotion();
+    }
+}
+function attachMotion() {
+    if (stepState.on) return;
+    stepState.on = true;
+    stepState.samples = 0;
+    window.addEventListener('devicemotion', onMotion);
+    $('#stepsToggle').innerHTML = '<i class="fa-solid fa-pause"></i> Sayacı Durdur';
+    toast('Adım sayacı çalışıyor.', 'success');
+}
+function stopSteps() {
+    stepState.on = false;
+    window.removeEventListener('devicemotion', onMotion);
+    $('#stepsToggle').innerHTML = '<i class="fa-solid fa-play"></i> Sayacı Başlat';
+}
+
+/* ==================== KAPSAMLI ETKİNLİK TAKVİMİ (AGENDA) ==================== */
+let agendaDate = new Date();
+let selectedAgendaDateStr = todayISO();
+
+const monthNamesTR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+function renderAgenda() {
+    const year = agendaDate.getFullYear();
+    const month = agendaDate.getMonth();
+
+    $('#agendaMonthYear').innerHTML = '<i class="fa-solid fa-calendar-days" style="color:var(--accent);"></i> ' + monthNamesTR[month] + ' ' + year;
+    const grid = $('#agendaDaysGrid');
+    grid.innerHTML = '';
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Pazartesi başlangıç
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const prevTotalDays = new Date(year, month, 0).getDate();
+
+    // Önceki aydan kalan günler
+    for (let i = adjustedFirstDay; i > 0; i--) {
+        const cell = document.createElement('div');
+        cell.className = 'agenda-day other-month';
+        cell.textContent = prevTotalDays - i + 1;
+        grid.appendChild(cell);
+    }
+
+    // Bu ayın günleri
+    const todayStr = todayISO();
+    for (let i = 1; i <= totalDays; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'agenda-day';
+        cell.textContent = i;
+        const thisDateStr = `${year}-${pad2(month + 1)}-${pad2(i)}`;
+
+        if (thisDateStr === todayStr) cell.classList.add('today');
+        if (thisDateStr === selectedAgendaDateStr) cell.classList.add('selected');
+
+        // Bu güne denk gelen etkinlik var mı
+        const hasEvent = events.some(ev => nextOccurrence(ev).toISOString().slice(0, 10) === thisDateStr);
+        if (hasEvent) {
+            const dot = document.createElement('div');
+            dot.className = 'agenda-dot';
+            cell.appendChild(dot);
+        }
+
+        cell.addEventListener('click', () => {
+            selectedAgendaDateStr = thisDateStr;
+            renderAgenda();
+        });
+        grid.appendChild(cell);
+    }
+
+    renderAgendaEvents();
+}
+
+function renderAgendaEvents() {
+    $('#agendaSelectedTitle').textContent = 'Seçilen Tarih: ' + selectedAgendaDateStr;
+    const listEl = $('#agendaEventsList');
+    listEl.innerHTML = '';
+
+    const matching = events.filter(ev => nextOccurrence(ev).toISOString().slice(0, 10) === selectedAgendaDateStr);
+    if (!matching.length) {
+        listEl.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:10px;">Bu güne ait etkinlik bulunmuyor.</p>';
+        return;
+    }
+
+    matching.forEach(ev => {
+        const t = TYPES[ev.type];
+        const item = document.createElement('div');
+        item.className = 'agenda-event-item';
+        item.style.borderLeftColor = t.color;
+        item.innerHTML = '<span><b>' + escapeHtml(ev.title) + '</b> (' + t.label + ')</span> <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--muted);"></i>';
+        item.addEventListener('click', () => openEventModal(ev.id));
+        listEl.appendChild(item);
+    });
+}
+
+$('#agendaPrev').addEventListener('click', () => { agendaDate.setMonth(agendaDate.getMonth() - 1); renderAgenda(); });
+$('#agendaNext').addEventListener('click', () => { agendaDate.setMonth(agendaDate.getMonth() + 1); renderAgenda(); });
+$('#agendaAddBtn').addEventListener('click', () => {
+    openEventModal();
+    $('#eventDate').value = selectedAgendaDateStr;
+});
+
+
+/* ==================== ETKİNLİK CRUD ==================== */
 function syncFormFields() {
     const type = $('#eventType').value;
     $('#amountGroup').style.display = type === 'odeme' ? 'block' : 'none';
@@ -1195,7 +1505,7 @@ function openEventModal(id) {
     const form = $('#eventForm');
     form.reset();
     $('#fieldId').value = '';
-    $('#eventDate').value = todayISO();
+    $('#eventDate').value = selectedAgendaDateStr || todayISO();
     if (id) {
         const ev = events.find(e => e.id === id);
         if (!ev) return;
@@ -1258,7 +1568,7 @@ async function removeEvent(id) {
     toast('Kayit silindi.', 'info', { label: 'Geri Al', fn: () => { events.splice(Math.min(idx, events.length), 0, removed); persist(); } });
 }
 
-/* Hediye onerileri */
+/* Hediye önerileri */
 function buildGiftSuggestions(ev) {
     const ints = (ev.interests || '').toLocaleLowerCase('tr');
     const rel = (ev.relation || '').toLocaleLowerCase('tr');
@@ -1282,7 +1592,7 @@ function openGiftModal(id) {
     openModalEl('#giftModal');
 }
 
-/* ==================== 8. RENDER: PANEL ==================== */
+/* ==================== RENDER: PANEL ==================== */
 function renderStats() {
     const infos = events.map(ev => ({ ev: ev, occ: nextOccurrence(ev), days: daysUntil(nextOccurrence(ev)) }));
     const urgent = infos.filter(i => i.days >= 0 && i.days <= URGENT_DAYS && !i.ev.completed).length;
@@ -1378,9 +1688,14 @@ function renderList() {
             '</div></article>';
     }).join('');
 }
-function render() { renderStats(); renderChart(); renderList(); }
+function render() {
+    renderStats();
+    renderChart();
+    renderList();
+    renderAgenda();
+}
 
-/* ==================== 9. HAVA DURUMU ==================== */
+/* ==================== HAVA DURUMU ==================== */
 async function geocodeCity(name) {
     const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(name) + '&count=1&language=tr&format=json');
     const j = await res.json();
@@ -1475,100 +1790,7 @@ function useGeolocation() {
     }, () => toast('Konum izni verilmedi.', 'error'), { timeout: 10000 });
 }
 
-/* ==================== 10. ADIM SAYAR ==================== */
-const stepState = { on: false, last: 0, hist: [], samples: 0, supported: 'DeviceMotionEvent' in window };
-function getStepsData() { return db.get(K.steps, {}); }
-function todaySteps() { const d = getStepsData(); return d[todayISO()] || 0; }
-function addStep() {
-    const d = getStepsData();
-    const t = todayISO();
-    d[t] = (d[t] || 0) + 1;
-    db.set(K.steps, d);
-    renderStepsUI();
-}
-function onMotion(e) {
-    const a = e.accelerationIncludingGravity;
-    if (!a || (a.x == null && a.y == null)) return;
-    stepState.samples++;
-    const m = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
-    const h = stepState.hist;
-    h.push(m);
-    if (h.length > 25) h.shift();
-    if (h.length < 8) return;
-    const base = h.reduce((s, v) => s + v, 0) / h.length;
-    const now = Date.now();
-    if (m > base + 2.1 && now - stepState.last > 290) {
-        stepState.last = now;
-        addStep();
-    }
-}
-function attachMotion() {
-    if (stepState.on) return;
-    stepState.on = true;
-    stepState.samples = 0;
-    window.addEventListener('devicemotion', onMotion);
-    setTimeout(() => {
-        if (stepState.on && stepState.samples === 0) {
-            toast('Ivmeyolcer algilanamadi. Manuel giris kullanabilirsiniz.', 'error');
-            stopSteps();
-        }
-    }, 3500);
-    renderStepsUI();
-    toast('Adim sayacı calisiyor. Telefonu cebinizde/cantada tasimaniz yeterli.', 'success');
-}
-function startSteps() {
-    if (!stepState.supported) { toast('Cihaziniz hareket sensörü desteklemiyor.', 'error'); return; }
-    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(r => {
-            if (r === 'granted') attachMotion();
-            else toast('Hareket izni verilmedi.', 'error');
-        }).catch(() => toast('Hareket izni alinamadi.', 'error'));
-    } else {
-        attachMotion();
-    }
-}
-function stopSteps() {
-    stepState.on = false;
-    window.removeEventListener('devicemotion', onMotion);
-    renderStepsUI();
-}
-function renderStepsUI() {
-    const steps = todaySteps();
-    const goal = settings.stepGoal || 8000;
-    const pct = Math.min(1, steps / goal);
-    const circ = 2 * Math.PI * 48;
-    $('#ringFill').style.strokeDashoffset = circ * (1 - pct);
-    $('#ringSteps').textContent = steps.toLocaleString('tr-TR');
-    $('#ringLabel').textContent = pct >= 1 ? 'HEDEF!' : 'adim';
-    const rem = Math.max(0, goal - steps);
-    $('#stepsGoalText').innerHTML = 'Hedef: <b>' + goal.toLocaleString('tr-TR') + '</b> adim' +
-        (rem > 0 ? ' - Kalan: <b>' + rem.toLocaleString('tr-TR') + '</b>' : ' - Tebrikler! 🎉');
-    $('#stepsToggle').innerHTML = stepState.on
-        ? '<i class="fa-solid fa-pause"></i> Durdur'
-        : '<i class="fa-solid fa-play"></i> Sayaci Baslat';
-    // Haftalik barlar
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const key = toISOLocal(d);
-        days.push({ lbl: d.toLocaleDateString('tr-TR', { weekday: 'narrow' }), n: getStepsData()[key] || 0, today: i === 0 });
-    }
-    const max = Math.max(1, ...days.map(d => d.n));
-    $('#stepsWeek').innerHTML = days.map(d =>
-        '<div class="sw-col"><div class="sw-bar ' + (d.today ? 'today' : '') + '" style="height:' + Math.max(3, (d.n / max) * 100) + '%" title="' + d.n + ' adim"></div>' +
-        '<span class="sw-lbl">' + d.lbl + '</span></div>').join('');
-}
-function setStepsManual() {
-    const v = parseInt($('#stepsInput').value, 10);
-    if (isNaN(v) || v < 0) { toast('Gecerli bir adim sayisi girin.', 'error'); return; }
-    const d = getStepsData();
-    d[todayISO()] = v;
-    db.set(K.steps, d);
-    renderStepsUI();
-    toast('Adim sayisi guncellendi: ' + v.toLocaleString('tr-TR'), 'success');
-}
-
-/* ==================== 11. HABERLER (Ticker) ==================== */
+/* ==================== HABERLER (Ticker) ==================== */
 async function loadNews() {
     const cache = db.get(K.news, null);
     if (cache && cache.t > Date.now() - 15 * 60 * 1000) { renderTicker(cache.items); return; }
@@ -1590,10 +1812,10 @@ function renderTicker(items) {
     if (!items.length) { track.innerHTML = '<span class="ticker-empty">Haber bulunamadi</span>'; return; }
     const html = items.map(it =>
         '<a class="ticker-item" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + escapeHtml(it.title) + '</a>').join('');
-    track.innerHTML = html + html; // kusursuz dongu icin ciftle
+    track.innerHTML = html + html;
 }
 
-/* ==================== 12. ASISTAN (AI) ==================== */
+/* ==================== ASISTAN (AI) ==================== */
 let chatLog = [];
 let chatGreeted = false;
 
@@ -1604,7 +1826,7 @@ function openChat() {
         chatGreeted = true;
         botSay('Merhaba! Ben Aklımda asistanınız 🧠\n' +
             '• Etkinlik ekleyebilirim: "3 gun sonra toplanti ekle"\n' +
-            '• Hava durumu, adimlar, haberler, hediye fikirleri...\n' +
+            '• Hava durumu, adımlar & sağlık, haberler, hediye fikirleri...\n' +
             '• Hesap bile yaparım: "125*4 kaç eder"\n' +
             'Nasıl yardımcı olayım?');
     }
@@ -1660,7 +1882,7 @@ function systemPrompt() {
     }).join('\n') || '- Kayit yok';
     return 'Sen Aklımda uygulamasının Turkce konusan akilli asistanisin. Kisa, sicak ve yardimsever yanitlar ver.\n' +
         'KULLANICI VERILERI (salt okunur):\nAKTIF KAYITLAR:\n' + infos + '\n' +
-        'BUGUNKU ADIM: ' + todaySteps() + '\nHAVA: ' + (settings.city ? settings.city.name : 'sehir ayarlanmadi') + '\n' +
+        'BUGUNKU ADIM: ' + (healthData.steps || 0) + ' (' + (healthData.calories || 0) + ' kcal)\nHAVA: ' + (settings.city ? settings.city.name : 'sehir ayarlanmadi') + '\n' +
         'TARIH: ' + formatDateTR(new Date()) + '\nBugun: ' + todayISO();
 }
 async function tryAI(text) {
@@ -1703,7 +1925,6 @@ function upcomingLines(limit) {
 }
 
 function tryParseAdd(text) {
-    // Ornek: "3 gun sonra toplanti ekle", "15 mayista anne dogum gunu ekle", "yarin kira odemesi ekle"
     const now = new Date();
     let target = null;
     let rest = text;
@@ -1754,129 +1975,84 @@ function tryParseAdd(text) {
 function localBrain(rawInput) {
     const t = norm(rawInput);
 
-    /* --- Hesaplama --- */
     if (/^[0-9+\-*/().\s%]+$/.test(t) && /[0-9]/.test(t) && /[+\-*/]/.test(t)) {
         try {
             const val = Function('"use strict";return (' + t.replace(/%/g, '/100') + ')')();
             if (isFinite(val)) return 'Sonuc: ' + (Math.round(val * 10000) / 10000).toLocaleString('tr-TR');
-        } catch (e) { /* dus */ }
+        } catch (e) { }
     }
 
-    /* --- Selamlasma / sosyal --- */
     if (/^(merhaba|selam|hey|gunaydin|iyi aksamlar|iyi gunler|naber|nasilsin)$/.test(t) || t.startsWith('merhaba') || t.startsWith('selam')) {
-        return 'Merhaba! 👋 Size nasil yardimci olabilirim? Etkinlik ekleyebilir, hava durumu soyleyebilir, adimlarinizi takip edebilirim. "yardim" yazarak tum yeteneklerimi gorebilirsiniz.';
+        return 'Merhaba! 👋 Size nasil yardimci olabilirim? Etkinlik ekleyebilir, hava durumu soyleyebilir, adimlarinizi ve kalorinizi takip edebilirim.';
     }
-    if (/tesekkur|sagol|eyvallah|cok yasa/.test(t)) return 'Rica ederim! Her zaman buradayim. 🧠';
-    if (/kimsin|adin ne|sen neysin/.test(t)) return 'Ben Aklımda asistanıyim - dogum gunleri, odemeler, hava durumu, adim takibi ve daha fazlasini yoneten akilli yardimcınız.';
+    if (/tesekkur|sagol|eyvallah/.test(t)) return 'Rica ederim! Her zaman buradayim. 🧠';
+    if (/kimsin|adin ne/.test(t)) return 'Ben Aklımda asistanıyim - dogum gunleri, odemeler, hava durumu, profesyonel saglik ve adim takibi asistanıyim.';
 
-    /* --- Yardim --- */
-    if (/yardim|ne yapabilirsin|ozellik|komut|yetenek/.test(t)) {
+    if (/yardim|ne yapabilirsin|ozellik|komut/.test(t)) {
         return 'Yapabildiklerim:\n' +
-            '• Etkinlik ekle: "3 gun sonra toplanti ekle", "15 mayista annem dogum gunu ekle"\n' +
-            '• Sorgula: "yaklasan etkinlikler neler?", "kac gun kaldi?"\n' +
-            '• Hava durumu: "hava nasil?", "yarin yagmur var mi"\n' +
-            '• Adimlar: "kac adim attim?", "bugunku hedefim"\n' +
+            '• Etkinlik ekle: "3 gun sonra toplanti ekle"\n' +
+            '• Sağlık & Adım: "kaç adım attım?", "kalori durumu"\n' +
+            '• Hava durumu: "hava nasil?"\n' +
             '• Hediye: "esime ne hediye alayim"\n' +
-            '• Hesaplama: "125 x 4 + 36"\n' +
-            '• Diger: "haberler", "motivasyon", "espri"\n' +
-            'Ayarlar dan OpenAI anahtari eklerseniz gercek yapay zeka ile konusabilirsiniz.';
+            '• Hesaplama: "125 x 4 + 36"';
     }
 
-    /* --- Hava durumu --- */
-    if (/hava|yagmur|kar|sicak|ruzgar|bulut|sis/.test(t)) {
+    if (/hava|yagmur|kar|sicak/.test(t)) {
         const wx = db.get(K.wx, null);
         if (!wx || !wx.data) return 'Henuz hava durumu verisi yok. Ana ekrandaki hava kartindan sehir secmelisiniz.';
         const cur = wx.data.current;
         const info = WMO[cur.weather_code] || ['', ''];
-        const d0 = wx.data.daily;
-        const tomorrow = WMO[d0.weather_code[1]] || ['', ''];
         return 'Simdi ' + settings.city.name + ': ' + Math.round(cur.temperature_2m) + ' derece, ' + info[0].toLocaleLowerCase('tr') +
-            '. Hissedilen ' + Math.round(cur.apparent_temperature) + ', nem %' + cur.relative_humidity_2m +
-            ', ruzgar ' + Math.round(cur.wind_speed_10m) + ' km/sa.\nYarin: ' + Math.round(d0.temperature_2m_min[1]) + '-' + Math.round(d0.temperature_2m_max[1]) + ' derece, ' + tomorrow[0].toLocaleLowerCase('tr') + '.';
+            '. Hissedilen ' + Math.round(cur.apparent_temperature) + ', nem %' + cur.relative_humidity_2m + '.';
     }
 
-    /* --- Adimlar --- */
-    if (/adim|yurudum|fitness|hedef/.test(t)) {
-        const s = todaySteps(), goal = settings.stepGoal || 8000;
-        const week = Object.values(getStepsData()).reduce((a, b) => a + b, 0);
-        return 'Bugun ' + s.toLocaleString('tr-TR') + ' adim attiniz. Hedef ' + goal.toLocaleString('tr-TR') +
-            (s >= goal ? ' - TEBRIKLER, hedef tamamlandi! 🎉' : ' - Kalan ' + (goal - s).toLocaleString('tr-TR') + ' adim. Hadi bir tur daha! 💪') +
-            '\nToplam kayitli adim: ' + week.toLocaleString('tr-TR');
+    if (/adim|yurudum|kalori|saglik|fit/.test(t)) {
+        const s = healthData.steps || 0, c = healthData.calories || 0, goal = settings.stepGoal || 8000;
+        return 'Bugün ' + s.toLocaleString('tr-TR') + ' adım attınız ve yaklaşık ' + c + ' kcal yaktınız. Hedef ' + goal.toLocaleString('tr-TR') + ' adım!';
     }
 
-    /* --- Haberler --- */
-    if (/haber|gundem|son dakika/.test(t)) {
+    if (/haber|gundem/.test(t)) {
         const cache = db.get(K.news, null);
-        if (!cache || !cache.items) return 'Haberler henuz yuklenmedi, birazdan tekrar deneyin.';
+        if (!cache || !cache.items) return 'Haberler henuz yuklenmedi.';
         return 'Guncel basliklar:\n' + cache.items.slice(0, 5).map((x, i) => (i + 1) + '. ' + x.title).join('\n');
     }
 
-    /* --- Etkinlik ekleme --- */
-    if (/\b(ekle|kaydet|hatirlat|not al|planla|olustur)\b/.test(t) && /\d|bugun|yarin|obur|haftaya|pazartesi|sali|carsamba|persembe|cuma|cumartesi|pazar/.test(t)) {
+    if (/\b(ekle|kaydet|hatirlat|not al)\b/.test(t) && /\d|bugun|yarin|haftaya/.test(t)) {
         const parsed = tryParseAdd(t);
         if (parsed) {
             events.push({ id: uid(), title: parsed.title, date: parsed.date, type: parsed.type, amount: null, relation: '', interests: '', budget: 'orta', notes: '', completed: false, createdAt: Date.now() });
             persist();
-            return 'Kaydedildi ✅\n"' + parsed.title + '" - ' + formatDateTR(parseDate(parsed.date)) + ' (' + TYPES[parsed.type].label + ')\nListe guncellendi, geri sayim basladi!';
+            return 'Kaydedildi ✅\n"' + parsed.title + '" - ' + formatDateTR(parseDate(parsed.date)) + ' (' + TYPES[parsed.type].label + ')';
         }
     }
 
-    /* --- Kac gun kaldi (etkinlik adi geciyorsa) --- */
-    const words = t.split(' ').filter(w => w.length > 3);
-    for (const ev of events) {
-        const evWords = norm(ev.title).split(' ');
-        if (words.some(w => evWords.includes(w)) && /kac gun|kaldi|nezaman|ne zaman|geri say/.test(t + ' ' + words.join(' '))) {
-            const d = daysUntil(nextOccurrence(ev));
-            return '"' + ev.title + '" icin ' + (d === 0 ? 'BUGUN zamanı geldi! 🎉' : d + ' gun kaldi.') + ' (' + formatDateTR(nextOccurrence(ev)) + ')';
-        }
-    }
-
-    /* --- Listeleme --- */
-    if (/yaklasan|etkinlik|hatirlat|neler var|listele|dogum gunu var|odeme var/.test(t)) {
+    if (/yaklasan|etkinlik|hatirlat|neler var/.test(t)) {
         return 'Yaklasan kayitlariniz:\n' + upcomingLines(7);
     }
 
-    /* --- Hediye --- */
-    if (/hediye|ne alsam|ne alayim|hediye fikri/.test(t)) {
-        const giftables = events.filter(e => (e.type === 'dogum' || e.type === 'yildonumu') && !e.completed)
-            .sort((a, b) => daysUntil(nextOccurrence(a)) - daysUntil(nextOccurrence(b)));
-        if (!giftables.length) return 'Hediye onerisi icin once bir dogum gunu veya yildonumu ekleyin. Kart uzerindeki "Hediye" butonuna basin.';
+    if (/hediye|ne alsam/.test(t)) {
+        const giftables = events.filter(e => (e.type === 'dogum' || e.type === 'yildonumu') && !e.completed);
+        if (!giftables.length) return 'Hediye onerisi icin once bir dogum gunu veya yildonumu ekleyin.';
         const ev = giftables[0];
         const s = buildGiftSuggestions(ev).slice(0, 4);
-        return 'En yakin: ' + ev.title + ' (' + daysUntil(nextOccurrence(ev)) + ' gun sonra)\nOnerilerim:\n' +
-            s.map((g, i) => (i + 1) + '. ' + g.text + ' [' + g.tag + ']').join('\n');
+        return 'En yakin: ' + ev.title + '\nOnerilerim:\n' + s.map((g, i) => (i + 1) + '. ' + g.text).join('\n');
     }
 
-    /* --- Motivasyon / espri --- */
-    if (/motivasyon|motive|gunun sozu|soz|vazgec/.test(t)) {
-        const q = QUOTES[new Date().getDate() % QUOTES.length];
-        return '💬 ' + q;
+    if (/motivasyon|motive|gunun sozu/.test(t)) {
+        return '💬 ' + QUOTES[new Date().getDate() % QUOTES.length];
     }
-    if (/fikra|espri|guldur|komik/.test(t)) {
+    if (/fikra|espri/.test(t)) {
         return JOKES[Math.floor(Math.random() * JOKES.length)];
     }
 
-    /* --- Tarih / saat --- */
-    if (/saat kac|tarih ne|bugun ne|gunlerden ne/.test(t)) {
-        return 'Bugun ' + formatDateTR(new Date()) + ', saat ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + '.';
-    }
-
-    /* --- Bilinmeyen: akilli geri donus --- */
-    return 'Bunu tam anlayamadim 😅 Deneyebilecekleriniz:\n' +
-        '• "3 gun sonra toplanti ekle"\n' +
-        '• "yaklasan etkinlikler neler?"\n' +
-        '• "hava nasil?" / "kac adim attim?"\n' +
-        '• "yardim" yazarak tum yetenekleri gorun.';
+    return 'Bunu tam anlayamadim 😅 "yardim" yazarak yeteneklerimi gorebilirsiniz.';
 }
 
-/* ==================== 13. AYARLAR ==================== */
+/* ==================== AYARLAR & YEDEK ==================== */
 function openSettings() {
     $('#setGoal').value = settings.stepGoal || 8000;
     $('#setAiKey').value = settings.aiKey || '';
     $('#setAiModel').value = settings.aiModel || 'gpt-4o-mini';
-    const st = $('#chatAiStatus');
-    st.textContent = settings.aiKey ? 'Yapay zeka ACIK (' + settings.aiModel + ')' : 'Yerli motor aktif (API anahtari eklerseniz gercek AI devreye girer)';
-    st.style.color = settings.aiKey ? 'var(--success)' : 'var(--muted)';
     openModalEl('#settingsModal');
 }
 function saveSettings() {
@@ -1885,12 +2061,11 @@ function saveSettings() {
     settings.aiKey = $('#setAiKey').value.trim();
     settings.aiModel = $('#setAiModel').value.trim() || 'gpt-4o-mini';
     db.set(K.settings, settings);
-    renderStepsUI();
+    initHealthModule();
     closeModalEl('#settingsModal');
     toast('Ayarlar kaydedildi.', 'success');
 }
 
-/* ==================== 14. YEDEKLEME ==================== */
 function exportData() {
     const blob = new Blob([JSON.stringify({ app: 'aklimda', version: APP_VERSION, exportedAt: new Date().toISOString(), events: events }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -1907,62 +2082,55 @@ function importData(file) {
             const parsed = JSON.parse(reader.result);
             const arr = Array.isArray(parsed) ? parsed : parsed.events;
             if (!Array.isArray(arr)) throw new Error();
-            let added = 0;
-            arr.forEach(item => {
-                if (!item || !item.title || !item.date) return;
-                const clean = {
-                    id: String(item.id || uid()),
-                    type: TYPES[item.type] ? item.type : 'ozel',
-                    title: String(item.title),
-                    date: /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : todayISO(),
-                    amount: item.amount ? Number(item.amount) : null,
-                    relation: String(item.relation || ''), interests: String(item.interests || ''),
-                    budget: GIFT_BUDGETS[item.budget] ? item.budget : 'orta',
-                    notes: String(item.notes || ''), completed: Boolean(item.completed),
-                    createdAt: Number(item.createdAt) || Date.now()
-                };
-                const idx = events.findIndex(e => e.id === clean.id);
-                if (idx >= 0) events[idx] = clean; else events.push(clean);
-                added++;
-            });
+            events = arr.map(item => ({
+                id: String(item.id || uid()),
+                type: TYPES[item.type] ? item.type : 'ozel',
+                title: String(item.title || 'Isimsiz'),
+                date: /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : todayISO(),
+                amount: item.amount ? Number(item.amount) : null,
+                relation: String(item.relation || ''), interests: String(item.interests || ''),
+                budget: GIFT_BUDGETS[item.budget] ? item.budget : 'orta',
+                notes: String(item.notes || ''), completed: Boolean(item.completed),
+                createdAt: Number(item.createdAt) || Date.now()
+            }));
             persist();
-            toast(added + ' kayit iceri aktarildi.', 'success');
+            toast(events.length + ' kayit iceri aktarildi.', 'success');
         } catch (e) { toast('Gecersiz yedek dosyasi.', 'error'); }
     };
     reader.readAsText(file);
 }
 async function resetData() {
-    const ok = await showConfirm({ title: 'Tum Veriler Silinsin mi?', text: 'Kayitlar, adimlar ve ayarlar silinecek.', confirmText: 'Evet, Hepsini Sil' });
+    const ok = await showConfirm({ title: 'Tum Veriler Silinsin mi?', text: 'Kayitlar ve adimlar silinecek.', confirmText: 'Evet, Sil' });
     if (!ok) return;
     events = [];
     persist();
     toast('Veriler temizlendi.', 'info');
 }
 
-/* ==================== 15. ORNEK VERI ==================== */
 function addSampleData() {
     const base = new Date();
     const add = n => { const d = new Date(base); d.setDate(d.getDate() + n); return toISOLocal(d); };
     const y = base.getFullYear();
     [
-        { type: 'dogum', title: 'Annemin Dogum Gunu', date: add(4), relation: 'Anne', interests: 'kitap, yemek', budget: 'orta', notes: 'Kirmizi cicek seviyor' },
+        { type: 'dogum', title: 'Annemin Dogum Gunu', date: add(4), relation: 'Anne', interests: 'kitap, yemek', budget: 'orta' },
         { type: 'dogum', title: 'Esimin Dogum Gunu', date: add(12), relation: 'Es', interests: 'kahve, muzik', budget: 'luks' },
         { type: 'yildonumu', title: 'Evlilik Yildonumumuz', date: y - 5 + '-' + pad2(base.getMonth() + 1) + '-' + pad2(Math.min(base.getDate() + 20, 28)), relation: 'Es', interests: 'seyahat', budget: 'luks' },
         { type: 'odeme', title: 'Kira Odemesi', date: add(6), amount: 15000 },
         { type: 'odeme', title: 'Elektrik Faturasi', date: add(9), amount: 850 },
-        { type: 'ozel', title: 'Arac Muayene Tarihi', date: add(25), notes: 'Randevu almayi unutma' }
+        { type: 'ozel', title: 'Arac Muayene', date: add(25) }
     ].forEach(s => events.push(Object.assign({ id: uid(), amount: null, relation: '', interests: '', notes: '', completed: false, createdAt: Date.now() }, s)));
     persist();
     toast('Ornek kayitlar eklendi.', 'success');
 }
 
-/* ==================== 16. OLAYLAR ==================== */
+/* ==================== OLAY BINDING ==================== */
 function bindEvents() {
     $('#themeToggle').addEventListener('click', toggleTheme);
     $('#exportBtn').addEventListener('click', exportData);
     $('#importBtn').addEventListener('click', () => $('#importFile').click());
     $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
     $('#resetBtn').addEventListener('click', resetData);
+
     $('#assistantBtn').addEventListener('click', openChat);
     $('#chatClose').addEventListener('click', closeChat);
     $('#chatOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeChat(); });
@@ -1998,10 +2166,7 @@ function bindEvents() {
     $('#sampleBtn').addEventListener('click', addSampleData);
 
     $('#stepsToggle').addEventListener('click', () => { stepState.on ? stopSteps() : startSteps(); });
-    $('#stepsSetBtn').addEventListener('click', setStepsManual);
-    $('#stepsInput').addEventListener('keydown', e => { if (e.key === 'Enter') setStepsManual(); });
 
-    // Modal kapatma: arka plan + Esc + X isaretleri
     $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeAllModals(); }));
     $$('[data-close]').forEach(b => b.addEventListener('click', () => closeModalEl(b.closest('.modal'))));
     document.addEventListener('keydown', e => {
@@ -2012,32 +2177,18 @@ function bindEvents() {
     });
 }
 
-/* ==================== 17. SERVICE WORKER ==================== */
-function registerSW() {
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW hatasi:', err));
-        });
-    }
-}
-
-/* ==================== 18. BASLATMA ==================== */
 function init() {
     initTheme();
     bindEvents();
     render();
-    renderStepsUI();
+    initHealthModule();
     loadWeather();
     loadNews();
     setInterval(loadNews, 20 * 60 * 1000);
-    registerSW();
-    console.log('%cAklımda v' + APP_VERSION + ' hazir', 'color:#6366f1;font-weight:bold;font-size:14px');
 }
 document.addEventListener('DOMContentLoaded', init);
-
     </script>
     <script>
-        // Günün sözü (adım kartı altı)
         (function () {
             var Q = ['Başarı, her gün atılan küçük adımların toplamıdır.', 'En karanlık gece bile sona erer ve güneş doğar. - Victor Hugo', 'Bugün yapabileceğin şeyi yarına bırakma. - Benjamin Franklin', 'Küçük ilerlemeler, büyük dönüşümlerin temelidir.'];
             var d = new Date();
