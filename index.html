@@ -2197,36 +2197,335 @@ document.addEventListener('DOMContentLoaded', init);
             document.getElementById('dailyQuote').innerHTML = '<i class="fa-solid fa-quote-left"></i>' + Q[day % Q.length];
         })();
     </script> 
-    <section class="calculator" aria-label="Hesap Makinesi">
-  <header class="calc-header">
-    <h2>Hesap Makinesi</h2>
-    <span class="calc-badge">Güvenli Mod</span>
-  </header>
-  <output id="calc-display" class="calc-display" aria-live="polite">0</output>
-  <div class="calc-grid">
-    <button class="btn btn-fn" data-action="clear">C</button>
-    <button class="btn btn-fn" data-action="delete">⌫</button>
-    <button class="btn btn-op" data-value="%">%</button>
-    <button class="btn btn-op" data-value="/">÷</button>
-    <button class="btn" data-value="7">7</button>
-    <button class="btn" data-value="8">8</button>
-    <button class="btn" data-value="9">9</button>
-    <button class="btn btn-op" data-value="*">×</button>
-    <button class="btn" data-value="4">4</button>
-    <button class="btn" data-value="5">5</button>
-    <button class="btn" data-value="6">6</button>
-    <button class="btn btn-op" data-value="-">−</button>
-    <button class="btn" data-value="1">1</button>
-    <button class="btn" data-value="2">2</button>
-    <button class="btn" data-value="3">3</button>
-    <button class="btn btn-op" data-value="+">+</button>
-    <button class="btn btn-zero" data-value="0">0</button>
-    <button class="btn" data-value=".">,</button>
-    <button class="btn btn-eq" data-action="equals">=</button>
+    <!-- ========== HESAP MAKİNESİ (BAŞLANGIÇ) ========== -->
+<style>
+  .hesap-makinesi {
+    --hm-bg: #1b1e2b;
+    --hm-surface: #262a3d;
+    --hm-surface-2: #323752;
+    --hm-text: #f4f6fb;
+    --hm-muted: #8b93a7;
+    --hm-accent: #4f8cff;
+    --hm-accent-2: #3a6fd8;
+    --hm-danger: #ff5c5c;
+
+    max-width: 360px;
+    width: calc(100% - 32px);
+    margin: 32px auto;
+    padding: 20px;
+    background: var(--hm-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    color: var(--hm-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  .hesap-makinesi * { box-sizing: border-box; }
+
+  .hm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .hm-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--hm-text);
+  }
+  .hm-badge {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(79,140,255,0.15);
+    color: var(--hm-accent);
+    border: 1px solid rgba(79,140,255,0.35);
+    font-weight: 500;
+  }
+
+  .hm-display {
+    display: block;
+    width: 100%;
+    min-height: 64px;
+    padding: 16px;
+    margin-bottom: 14px;
+    font-size: 28px;
+    font-weight: 500;
+    text-align: right;
+    background: var(--hm-surface);
+    border-radius: 12px;
+    color: var(--hm-text);
+    overflow-x: auto;
+    white-space: nowrap;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+  }
+
+  .hm-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .hm-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 16px 0;
+    font-size: 18px;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    background: var(--hm-surface-2);
+    color: var(--hm-text);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.06s ease;
+    font-family: inherit;
+    line-height: 1;
+    min-height: 52px;
+  }
+  .hm-btn:hover { background: #3d4360; }
+  .hm-btn:active { transform: scale(0.96); }
+  .hm-btn:focus-visible {
+    outline: 2px solid var(--hm-accent);
+    outline-offset: 2px;
+  }
+
+  .hm-op {
+    background: #2a3142;
+    color: var(--hm-accent);
+    font-weight: 600;
+  }
+  .hm-op:hover { background: #343d52; }
+
+  .hm-fn {
+    background: #2a3142;
+    color: var(--hm-danger);
+    font-weight: 600;
+  }
+  .hm-fn:hover { background: #343d52; }
+
+  .hm-eq {
+    background: var(--hm-accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .hm-eq:hover { background: var(--hm-accent-2); }
+
+  .hm-zero { grid-column: span 2; }
+
+  .hm-hint {
+    margin: 14px 0 0;
+    font-size: 11px;
+    text-align: center;
+    color: var(--hm-muted);
+    line-height: 1.5;
+  }
+</style>
+
+<section class="hesap-makinesi" aria-label="Hesap Makinesi">
+  <div class="hm-header">
+    <h3>Hesap Makinesi</h3>
+    <span class="hm-badge">Güvenli Mod</span>
   </div>
-  <p class="calc-hint">Klavye de çalışır: 0-9, + − * / , Enter, Backspace, Esc</p>
+
+  <output id="hm-display" class="hm-display" aria-live="polite" aria-atomic="true">0</output>
+
+  <div class="hm-grid">
+    <button class="hm-btn hm-fn" data-action="clear" aria-label="Temizle">C</button>
+    <button class="hm-btn hm-fn" data-action="delete" aria-label="Sil">⌫</button>
+    <button class="hm-btn hm-op" data-value="%">%</button>
+    <button class="hm-btn hm-op" data-value="/" aria-label="Bölme">÷</button>
+
+    <button class="hm-btn" data-value="7">7</button>
+    <button class="hm-btn" data-value="8">8</button>
+    <button class="hm-btn" data-value="9">9</button>
+    <button class="hm-btn hm-op" data-value="*" aria-label="Çarpma">×</button>
+
+    <button class="hm-btn" data-value="4">4</button>
+    <button class="hm-btn" data-value="5">5</button>
+    <button class="hm-btn" data-value="6">6</button>
+    <button class="hm-btn hm-op" data-value="-" aria-label="Çıkarma">−</button>
+
+    <button class="hm-btn" data-value="1">1</button>
+    <button class="hm-btn" data-value="2">2</button>
+    <button class="hm-btn" data-value="3">3</button>
+    <button class="hm-btn hm-op" data-value="+" aria-label="Toplama">+</button>
+
+    <button class="hm-btn hm-zero" data-value="0">0</button>
+    <button class="hm-btn" data-value=".">,</button>
+    <button class="hm-btn hm-eq" data-action="equals" aria-label="Eşittir">=</button>
+  </div>
+
+  <p class="hm-hint">Klavye: 0-9, + − × ÷ , Enter, Backspace, Esc</p>
 </section>
 
-<script src="calculator.js" defer></script>
+<script>
+(function () {
+  "use strict";
+
+  const displayEl = document.getElementById("hm-display");
+  if (!displayEl) return;
+
+  const MAX_LEN = 40;
+  let expression = "";
+
+  function render(value) {
+    const text = value === "" ? "0" : value;
+    displayEl.textContent = text
+      .replace(/\*/g, "×")
+      .replace(/\//g, "÷")
+      .replace(/-/g, "−");
+  }
+
+  function setExpression(value) {
+    expression = value;
+    render(expression);
+  }
+
+  function append(char) {
+    if (expression.length >= MAX_LEN) return;
+    if (!/^[0-9+\-*/%.()]*$/.test(char)) return;
+
+    const last = expression.slice(-1);
+    const isOp = (c) => "+-*/%".includes(c);
+    if (isOp(char) && isOp(last) && char !== "-") return;
+    if (expression === "" && "*/%".includes(char)) return;
+
+    if (char === ".") {
+      const parts = expression.split(/[+\-*/%()]/);
+      const lastNum = parts[parts.length - 1];
+      if (lastNum.includes(".")) return;
+      if (lastNum === "") char = "0.";
+    }
+    setExpression(expression + char);
+  }
+
+  function clear() { setExpression(""); }
+  function deleteLast() { setExpression(expression.slice(0, -1)); }
+
+  const PREC = { "+": 1, "-": 1, "*": 2, "/": 2, "%": 2 };
+
+  function tokenize(input) {
+    const tokens = [];
+    let i = 0;
+    while (i < input.length) {
+      const ch = input[i];
+      if (/\s/.test(ch)) { i++; continue; }
+
+      if (/[0-9.]/.test(ch)) {
+        let num = "";
+        while (i < input.length && /[0-9.]/.test(input[i])) num += input[i++];
+        if ((num.match(/\./g) || []).length > 1) throw new Error("bad num");
+        tokens.push({ type: "number", value: parseFloat(num) });
+        continue;
+      }
+
+      if ("+-*/%".includes(ch)) {
+        const prev = tokens[tokens.length - 1];
+        const isUnary = ch === "-" && (!prev || prev.type === "operator" || prev.type === "lparen");
+        if (isUnary) tokens.push({ type: "number", value: 0 });
+        tokens.push({ type: "operator", value: ch });
+        i++;
+        continue;
+      }
+
+      if (ch === "(") { tokens.push({ type: "lparen" }); i++; continue; }
+      if (ch === ")") { tokens.push({ type: "rparen" }); i++; continue; }
+      throw new Error("bad char");
+    }
+    return tokens;
+  }
+
+  function toRPN(tokens) {
+    const output = [], stack = [];
+    for (const t of tokens) {
+      if (t.type === "number") output.push(t);
+      else if (t.type === "operator") {
+        while (stack.length && stack[stack.length - 1].type === "operator" &&
+               PREC[stack[stack.length - 1].value] >= PREC[t.value]) {
+          output.push(stack.pop());
+        }
+        stack.push(t);
+      } else if (t.type === "lparen") stack.push(t);
+      else if (t.type === "rparen") {
+        while (stack.length && stack[stack.length - 1].type !== "lparen") output.push(stack.pop());
+        if (!stack.length) throw new Error("paren");
+        stack.pop();
+      }
+    }
+    while (stack.length) {
+      const t = stack.pop();
+      if (t.type === "lparen") throw new Error("paren");
+      output.push(t);
+    }
+    return output;
+  }
+
+  function evalRPN(rpn) {
+    const stack = [];
+    for (const t of rpn) {
+      if (t.type === "number") stack.push(t.value);
+      else {
+        const b = stack.pop(), a = stack.pop();
+        if (a === undefined || b === undefined) throw new Error("incomplete");
+        let r;
+        switch (t.value) {
+          case "+": r = a + b; break;
+          case "-": r = a - b; break;
+          case "*": r = a * b; break;
+          case "/":
+            if (b === 0) throw new Error("div0");
+            r = a / b; break;
+          case "%": r = a % b; break;
+          default: throw new Error("op");
+        }
+        stack.push(r);
+      }
+    }
+    if (stack.length !== 1) throw new Error("expr");
+    return stack[0];
+  }
+
+  function calculate() {
+    if (!expression) return;
+    try {
+      const result = evalRPN(toRPN(tokenize(expression)));
+      if (!isFinite(result)) throw new Error("inf");
+      const rounded = Math.round(result * 1e10) / 1e10;
+      setExpression(String(rounded));
+    } catch (err) {
+      displayEl.textContent = "Hata";
+      expression = "";
+      setTimeout(() => render(""), 900);
+    }
+  }
+
+  document.querySelectorAll(".hesap-makinesi .hm-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const action = btn.dataset.action;
+      const value = btn.dataset.value;
+      if (action === "clear") clear();
+      else if (action === "delete") deleteLast();
+      else if (action === "equals") calculate();
+      else if (value !== undefined) append(value);
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const k = e.key;
+    if (/^[0-9]$/.test(k)) { append(k); e.preventDefault(); }
+    else if (k === "." || k === ",") { append("."); e.preventDefault(); }
+    else if ("+-*/%".includes(k)) { append(k); e.preventDefault(); }
+    else if (k === "Enter" || k === "=") { calculate(); e.preventDefault(); }
+    else if (k === "Backspace") { deleteLast(); e.preventDefault(); }
+    else if (k === "Escape" || k.toLowerCase() === "c") { clear(); e.preventDefault(); }
+  });
+
+  render("");
+})();
+</script>
+<!-- ========== HESAP MAKİNESİ (BİTİŞ) ========== -->
 </body>
 </html>
