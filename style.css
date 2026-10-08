@@ -684,3 +684,108 @@ input[type="date"].form-control { color-scheme: dark; }
 
 /* Ayarlar içindeki küçük satırlar */
 .settings-note { font-size: 0.75rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+121  /* ===== Hesap Makinesi ===== */
+122  .calculator {
+123    --bg: #14161c;
+124    --surface: #1c1f27;
+125    --surface-2: #262a35;
+126    --text: #f4f6fb;
+127    --muted: #8b93a7;
+128    --accent: #4f8cff;
+129    --accent-2: #3a6fd8;
+130    --danger: #ff5c5c;
+131
+132    max-width: 340px;
+133    margin: 32px auto;
+134    padding: 20px;
+135    background: var(--bg);
+136    border-radius: 20px;
+137    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+138    color: var(--text);
+139    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+140    user-select: none;
+141  }
+142
+143  .calc-header {
+144    display: flex;
+145    align-items: center;
+146    justify-content: space-between;
+147    margin-bottom: 14px;
+148  }
+149
+150  .calc-header h2 {
+151    font-size: 16px;
+152    font-weight: 600;
+153    margin: 0;
+154    letter-spacing: 0.3px;
+155  }
+156
+157  .calc-badge {
+158    font-size: 11px;
+159    padding: 3px 8px;
+160    border-radius: 999px;
+161    background: rgba(79, 140, 255, 0.15);
+162    color: var(--accent);
+163    border: 1px solid rgba(79, 140, 255, 0.35);
+164  }
+165
+166  .calc-display {
+167    display: block;
+168    width: 100%;
+169    box-sizing: border-box;
+170    min-height: 64px;
+171    padding: 16px;
+172    margin-bottom: 16px;
+173    font-size: 28px;
+174    font-weight: 500;
+175    text-align: right;
+176    background: var(--surface);
+177    border-radius: 12px;
+178    color: var(--text);
+179    overflow-x: auto;
+180    white-space: nowrap;
+181    line-height: 1.4;
+182  }
+183
+184  .calc-grid {
+185    display: grid;
+186    grid-template-columns: repeat(4, 1fr);
+187    gap: 10px;
+188  }
+189
+190  .btn {
+191    padding: 16px 0;
+192    font-size: 18px;
+193    font-weight: 500;
+194    border: none;
+195    border-radius: 12px;
+196    background: var(--surface-2);
+197    color: var(--text);
+198    cursor: pointer;
+199    transition: background 0.15s ease, transform 0.05s ease;
+200    font-family: inherit;
+201  }
+202
+203  .btn:hover { background: #313746; }
+204  .btn:active { transform: scale(0.97); }
+205  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+206
+207  .btn-op { background: #2a3142; color: var(--accent); }
+208  .btn-op:hover { background: #343d52; }
+209
+210  .btn-fn { background: #2a3142; color: var(--danger); }
+211  .btn-fn:hover { background: #343d52; }
+212
+213  .btn-eq { background: var(--accent); color: #fff; }
+214  .btn-eq:hover { background: var(--accent-2); }
+215
+216  .btn-zero { grid-column: span 2; }
+217
+218  .calc-hint {
+219    margin: 14px 0 0;
+220    font-size: 11px;
+221    text-align: center;
+222    color: var(--muted);
+223    line-height: 1.5;
+224  }
