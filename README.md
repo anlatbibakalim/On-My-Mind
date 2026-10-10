@@ -1,7 +1,12 @@
-# Aklımda v3.2 - Akıllı Kişisel Asistan 🧠
+# Aklımda v3.3 - Akıllı Kişisel Asistan 🧠
 
 Doğum günleri, yıldönümleri, ödemeler ve özel günler için hatırlatıcı; hava durumu, adım sayar,
-hesap makinesi ve **sesli, Türkçe konuşan yapay zekâ asistanı**. Tek sayfalık, kurulum gerektirmeyen bir PWA.
+hesap makinesi ve **sesli, Türkçe konuşan Gemini destekli asistan**. Tek sayfalık, kurulum gerektirmeyen bir PWA.
+
+## v3.3'te yeni
+- **Asistanın beyni Gemini:** Varsayılan sağlayıcı Google Gemini (`gemini-3.8-flash`). Ayarlar > Yapay Zekâ'ya Gemini API anahtarını girmeniz yeterli. Asistan araçlarla kayıt ekler, arar, günceller, tamamlar, siler (silmede onay ister), hava durumuna ve adımlarınıza bakar. OpenAI ve Claude hâlâ seçilebilir.
+- **Gerçekçi insan sesi:** Yanıtlar Gemini'nin ses modeliyle (`gemini-3.8-flash-tts`) seslendirilir. Ayarlardan ses (13 seçenek) ve kalite (en gerçekçi / daha hızlı) seçilir, "Sesi dene" düğmesiyle dinlenir. Aynı Gemini anahtarı hem beyin hem ses için kullanılır. Ses alınamazsa cihaz sesi devreye girer. Konuşurken sohbetteki hoparlör düğmesine basmak konuşmayı durdurur.
+- Gemini 3 işlev çağırma kuralları uygulandı (düşünce imzası aynen geri gönderilir, her çağrıya aynı kimlikle bir yanıt).
 
 ## v3.2'de yeni
 - **"ekle" demeden kayıt:** "11 Ekim Annemin doğum günü" veya "yarın doktor randevusu" yazmanız/söylemeniz yeterli. Yanlış anlaşılırsa "geri al" denir. Tarih eksikse asistan tarihi sorar.
@@ -15,8 +20,8 @@ Adım sayar (masada dururken sayma), takvim gün kayması ve tekrarlayan kayıtl
 hesap makinesi (`2*-3`), çevrimdışı mod (service worker), içe aktarma güvenliği, Türkçe karakterler.
 
 ## Gizlilik
-- Yapay zekâ **Kapalı** iken hiçbir veri dışarı gönderilmez (hava durumu/haber istekleri hariç).
-- Açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir. API anahtarı yalnızca bu tarayıcıda saklanır, yedeğe yazılmaz. Harcama limiti düşük ayrı bir anahtar kullanın.
+- Anahtar girilmediyse ya da yapay zekâ **Kapalı** ise hiçbir veri dışarı gönderilmez (hava durumu/haber istekleri hariç).
+- Açıkken sorularınız, asistanın okuduğu kayıtlar ve seslendirilecek yanıt metinleri seçtiğiniz sağlayıcıya (Gemini için Google) gönderilir. Anahtarlar yalnızca bu tarayıcıda saklanır, yedeğe yazılmaz. Anahtarı yalnızca bu siteden çalışacak şekilde (HTTP yönlendiren kısıtı) sınırlayın; kullanım sağlayıcının kota ve fiyatına tabidir.
 - Sesli konuşma tarayıcının konuşma tanıma servisini kullanır (Chrome'da ses Google'a gönderilir).
 
 ## Dosyalar (hepsi repo köküne)

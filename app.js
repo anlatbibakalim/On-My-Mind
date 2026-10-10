@@ -1,11 +1,11 @@
 /* ============================================================
-   AKLIMDA v3.2 - Akıllı Kişisel Asistan
+   AKLIMDA v3.3 - Akıllı Kişisel Asistan
    Katmanlar: Yardımcılar | Depolama | Tekrar mantığı | Arayüz
               Sağlık | Takvim | Kayıtlar | Hava | Haber | Asistan
    ============================================================ */
 'use strict';
 
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '3.3.0';
 const K = {
     events: 'aklimda_events_v3',
     eventsV2: 'aklimda_events_v2',
@@ -212,17 +212,24 @@ function loadEvents() {
 }
 
 let events = loadEvents();
-let settings = Object.assign({ city: null, stepGoal: 8000, notify: false, aiProvider: 'off', aiKeys: {}, aiModels: {}, voiceReply: true, voiceAlways: false }, db.get(K.settings, {}));
+const savedSettings = db.get(K.settings, {});
+let settings = Object.assign({
+    city: null, stepGoal: 8000, notify: false,
+    aiProvider: 'gemini', aiKeys: {}, aiModels: {},
+    voiceReply: true, voiceAlways: false,
+    voiceEngine: 'gemini', ttsModel: 'gemini-3.8-flash-tts', ttsVoice: 'Sulafat'
+}, savedSettings);
 (function migrateSettings() {
-    settings.aiKeys = Object.assign({ openai: '', anthropic: '' }, settings.aiKeys || {});
+    settings.aiKeys = Object.assign({ gemini: '', openai: '', anthropic: '' }, settings.aiKeys || {});
     settings.aiModels = Object.assign({}, settings.aiModels || {});
     if (settings.aiKey) {                               // v3.1 ve öncesi tek anahtar -> OpenAI
         if (!settings.aiKeys.openai) settings.aiKeys.openai = String(settings.aiKey);
         if (settings.aiModel && !settings.aiModels.openai) settings.aiModels.openai = String(settings.aiModel);
-        if (settings.aiProvider === 'off') settings.aiProvider = 'openai';
+        if (!savedSettings.aiProvider) settings.aiProvider = 'openai';
         delete settings.aiKey; delete settings.aiModel;
     }
-    if (['off', 'openai', 'anthropic'].indexOf(settings.aiProvider) < 0) settings.aiProvider = 'off';
+    if (['off', 'gemini', 'openai', 'anthropic'].indexOf(settings.aiProvider) < 0) settings.aiProvider = 'gemini';
+    if (['gemini', 'device'].indexOf(settings.voiceEngine) < 0) settings.voiceEngine = 'gemini';
 })();
 const profile = (function () {
     const saved = db.get(K.health, {});
@@ -962,12 +969,13 @@ let lastAddedId = null;
 const chatCtx = { pending: null };
 
 const AI_PROVIDERS = {
+    gemini:    { label: 'Gemini', defaultModel: 'gemini-3.8-flash', base: 'https://generativelanguage.googleapis.com/v1beta/models/' },
     openai:    { label: 'OpenAI', defaultModel: 'gpt-4o-mini',      url: 'https://api.openai.com/v1/chat/completions' },
     anthropic: { label: 'Claude', defaultModel: 'claude-haiku-5-5', url: 'https://api.anthropic.com/v1/messages' }
 };
 function getAI() {
     const p = settings.aiProvider;
-    if (p !== 'openai' && p !== 'anthropic') return { active: false };
+    if (!AI_PROVIDERS[p]) return { active: false };
     const key = String((settings.aiKeys && settings.aiKeys[p]) || '').trim();
     if (!key) return { active: false };
     const model = String((settings.aiModels && settings.aiModels[p]) || '').trim() || AI_PROVIDERS[p].defaultModel;
@@ -984,7 +992,9 @@ function updateChatStatus() {
 const voice = {
     recSupported: typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition),
     ttsSupported: typeof window !== 'undefined' && 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance !== 'undefined',
-    rec: null, listening: false, trVoice: null
+    audioSupported: typeof window !== 'undefined' && !!(window.AudioContext || window.webkitAudioContext),
+    rec: null, listening: false, trVoice: null,
+    ctx: null, src: null, token: 0, speaking: false, warned: false
 };
 const REC_ERRORS = {
     'not-allowed': 'Mikrofon izni verilmedi. Tarayıcı ayarlarından izin vermeniz gerekiyor.',
@@ -994,10 +1004,11 @@ const REC_ERRORS = {
     'network': 'Konuşma tanıma için internet bağlantısı gerekir.',
     'language-not-supported': 'Türkçe konuşma tanıma bu cihazda desteklenmiyor.'
 };
+/* Cihazdaki sesler: mümkünse "Google / Natural / Online" gibi daha doğal olanı seç */
 function pickVoice() {
     if (!voice.ttsSupported) return;
-    const list = window.speechSynthesis.getVoices() || [];
-    voice.trVoice = list.find(v => /^tr[-_]TR$/i.test(v.lang)) || list.find(v => /^tr/i.test(v.lang)) || null;
+    const list = (window.speechSynthesis.getVoices() || []).filter(v => /^tr/i.test(v.lang));
+    voice.trVoice = list.find(v => /natural|neural|online|google/i.test(v.name)) || list.find(v => /^tr[-_]TR$/i.test(v.lang)) || list[0] || null;
 }
 function initVoice() {
     if (voice.ttsSupported) {
@@ -1006,17 +1017,22 @@ function initVoice() {
     }
     updateVoiceUI();
 }
+function geminiTtsKey() { return String((settings.aiKeys && settings.aiKeys.gemini) || '').trim(); }
+/* Gemini anahtarı varsa ve tarayıcı ses çalmayı destekliyorsa gerçekçi Gemini sesi, yoksa cihaz sesi */
+function ttsEngine() { return settings.voiceEngine === 'gemini' && geminiTtsKey() && voice.audioSupported ? 'gemini' : 'device'; }
+function canSpeak() { return ttsEngine() === 'gemini' || voice.ttsSupported; }
 function updateVoiceUI() {
     const mic = $('#chatMic'), vol = $('#chatVoice');
     if (mic) mic.style.display = voice.recSupported ? '' : 'none';
     if (vol) {
-        vol.style.display = voice.ttsSupported ? '' : 'none';
-        vol.innerHTML = '<i class="fa-solid ' + (settings.voiceReply ? 'fa-volume-high' : 'fa-volume-xmark') + '"></i>';
-        vol.title = settings.voiceReply ? 'Sesli yanıt açık' : 'Sesli yanıt kapalı';
+        vol.style.display = canSpeak() ? '' : 'none';
+        vol.innerHTML = '<i class="fa-solid ' + (voice.speaking ? 'fa-stop' : (settings.voiceReply ? 'fa-volume-high' : 'fa-volume-xmark')) + '"></i>';
+        vol.classList.toggle('busy', !!voice.speaking);
+        vol.title = voice.speaking ? 'Konuşmayı durdur' : (settings.voiceReply ? 'Sesli yanıt açık' : 'Sesli yanıt kapalı');
         vol.setAttribute('aria-pressed', String(!!settings.voiceReply));
     }
 }
-/* Konuşmaya uygun metin: emoji, bağlantı, madde işaretleri temizlenir; birimler okunur hale getirilir */
+/* Konuşmaya uygun metin: emoji, bağlantı, madde işaretleri temizlenir; birimler okunur hale getirilmesi */
 function speakable(text) {
     return String(text)
         .replace(/https?:\/\/\S+/g, ' bağlantı ')
@@ -1048,7 +1064,17 @@ function splitForSpeech(text, max) {
     if (cur) chunks.push(cur);
     return chunks;
 }
-function speak(text) {
+/* Sesli yanıtın çalınabilmesi için ses bağlamı kullanıcı dokunuşuyla açılmalı (özellikle iPhone) */
+function unlockAudio() {
+    if (!voice.audioSupported) return;
+    try {
+        if (!voice.ctx) voice.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (voice.ctx.state === 'suspended') voice.ctx.resume();
+    } catch (e) { /* yoksay */ }
+}
+function setSpeaking(on) { voice.speaking = on; updateVoiceUI(); }
+
+function speakDevice(text) {
     if (!voice.ttsSupported) return;
     const clean = speakable(text);
     if (!clean) return;
@@ -1063,8 +1089,95 @@ function speak(text) {
         });
     }, 60);
 }
+
+/* ---- Gemini ses üretimi (gerçekçi insan sesi) ---- */
+function b64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+}
+function ttsRequest(text, o) {
+    const model = o.model || 'gemini-3.8-flash-tts';
+    const legacy = /(2\.5|3\.1)/.test(model);                       // eski önizleme modelleri: başka şema, ham PCM
+    const body = legacy
+        ? { contents: [{ parts: [{ text: text }] }],
+            generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: o.voice } } } } }
+        : { contents: [{ role: 'user', parts: [{ text: text, speech_metadata: { style: 'warm, natural, conversational' } }] }],
+            generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { voice: o.voice } } } };
+    return { url: AI_PROVIDERS.gemini.base + encodeURIComponent(model) + ':generateContent', body: body };
+}
+async function fetchTTS(text, o) {
+    const req = ttsRequest(text, o);
+    const j = await aiFetch(req.url, { 'Content-Type': 'application/json', 'x-goog-api-key': o.key }, req.body);
+    const part = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0];
+    const inline = part && (part.inlineData || part.inline_data);
+    if (!inline || !inline.data) throw Object.assign(new Error('empty'), { kind: 'empty' });
+    return { data: inline.data, mime: inline.mimeType || inline.mime_type || '' };
+}
+async function decodeTTS(audio) {
+    const bytes = b64ToBytes(audio.data);
+    const isWav = bytes.length > 44 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46;   // "RIFF"
+    if (isWav) return voice.ctx.decodeAudioData(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    const rate = +((/rate=(\d+)/.exec(audio.mime) || [])[1] || 24000);                    // başlıksız 16 bit PCM, mono
+    const n = bytes.length >> 1;
+    const buf = voice.ctx.createBuffer(1, n, rate);
+    const ch = buf.getChannelData(0);
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    for (let i = 0; i < n; i++) ch[i] = dv.getInt16(i * 2, true) / 32768;
+    return buf;
+}
+function playBuffer(buf) {
+    return new Promise(resolve => {
+        const src = voice.ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(voice.ctx.destination);
+        voice.src = src;
+        src.onended = () => { if (voice.src === src) voice.src = null; resolve(); };
+        src.start();
+    });
+}
+/* Metni cümle gruplarına böler; biri çalarken sıradakini hazırlar (gecikmeyi azaltır) */
+async function speakGemini(text, override) {
+    const o = Object.assign({ key: geminiTtsKey(), model: settings.ttsModel, voice: settings.ttsVoice }, override || {});
+    const clean = speakable(text);
+    if (!clean) return;
+    const chunks = splitForSpeech(clean, 300);
+    const token = ++voice.token;
+    unlockAudio();
+    setSpeaking(true);
+    let spokenAny = false;
+    try {
+        let next = fetchTTS(chunks[0], o);
+        next.catch(() => { /* aşağıda await edilecek */ });
+        for (let i = 0; i < chunks.length; i++) {
+            const audio = await next;
+            if (token !== voice.token) return;
+            if (i + 1 < chunks.length) { next = fetchTTS(chunks[i + 1], o); next.catch(() => { }); }
+            const buf = await decodeTTS(audio);
+            if (token !== voice.token) return;
+            spokenAny = true;
+            await playBuffer(buf);
+            if (token !== voice.token) return;
+        }
+    } catch (e) {
+        if (token !== voice.token) return;
+        // Gemini sesi alınamadıysa cihaz sesiyle devam et ve nedenini bir kez bildir
+        if (!spokenAny) speakDevice(text);
+        if (!voice.warned) { voice.warned = true; toast('Gemini sesi kullanılamadı (' + aiErrorText(e).replace(/\.$/, '') + '); cihaz sesi kullanıldı.', 'info'); }
+    } finally {
+        if (token === voice.token) setSpeaking(false);
+    }
+}
+function speak(text) {
+    if (ttsEngine() === 'gemini') speakGemini(text);
+    else speakDevice(text);
+}
 function stopSpeaking() {
+    voice.token++;
+    if (voice.src) { try { voice.src.stop(); } catch (e) { /* yoksay */ } voice.src = null; }
     if (voice.ttsSupported) { try { window.speechSynthesis.cancel(); } catch (e) { /* yoksay */ } }
+    if (voice.speaking) setSpeaking(false);
 }
 function setMicUI(on) {
     const mic = $('#chatMic');
@@ -1082,6 +1195,7 @@ function stopListening() {
 function startListening() {
     if (!voice.recSupported) { toast('Bu tarayıcı sesli komutu desteklemiyor. Chrome ile deneyin.', 'error'); return; }
     if (chatBusy) return;
+    unlockAudio();
     if (voice.listening && voice.rec) { try { voice.rec.stop(); } catch (e) { /* yoksay */ } return; }
     stopSpeaking();
     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1118,6 +1232,7 @@ function startListening() {
     try { rec.start(); } catch (e) { toast('Mikrofon başlatılamadı.', 'error'); }
 }
 function toggleVoiceReply() {
+    if (voice.speaking) { stopSpeaking(); return; }
     settings.voiceReply = !settings.voiceReply;
     db.set(K.settings, settings);
     if (!settings.voiceReply) stopSpeaking();
@@ -1173,6 +1288,7 @@ async function sendUserMessage(raw, opts) {
     const text = (raw || $('#chatInput').value).trim();
     if (!text || chatBusy) return;
     chatBusy = true;
+    unlockAudio();
     stopSpeaking();
     $('#chatInput').value = '';
     addMsg(text, 'user');
@@ -1198,7 +1314,7 @@ async function sendUserMessage(raw, opts) {
     typing.remove();
     botSay(reply);
     chatBusy = false;
-    if (settings.voiceReply && voice.ttsSupported && (opts.voice || settings.voiceAlways)) speak(reply);
+    if (settings.voiceReply && canSpeak() && (opts.voice || settings.voiceAlways)) speak(reply);
 }
 
 /* ==================== ASİSTAN EYLEM KATMANI ==================== */
@@ -1462,10 +1578,14 @@ async function aiFetch(url, headers, body) {
 }
 function aiErrorText(e) {
     if (e && e.name === 'AbortError') return 'Zaman aşımı.';
-    if (e && (e.status === 401 || e.status === 403)) return 'API anahtarı geçersiz ya da yetkisiz.';
+    if (e && e.kind === 'blocked') return 'Yanıt güvenlik filtresine takıldı.';
+    if (e && e.kind === 'empty') return 'Servis boş yanıt döndürdü.';
+    const msg = e && e.message ? String(e.message) : '';
+    if (e && (e.status === 401 || e.status === 403 || (e.status === 400 && /api key|api_key/i.test(msg)))) return 'API anahtarı geçersiz ya da yetkisiz.';
     if (e && e.status === 404) return 'Model bulunamadı; Ayarlar\'dan model adını kontrol edin.';
-    if (e && e.status === 429) return 'Kullanım sınırı ya da bakiye sorunu (429).';
-    if (e && e.status) return 'Sağlayıcı hatası (' + e.status + '): ' + String(e.message).slice(0, 100) + '.';
+    if (e && e.status === 429) return 'Kullanım sınırı ya da kota aşıldı (429).';
+    if (e && (e.status === 503 || e.status === 500)) return 'Servis şu an yoğun, biraz sonra tekrar deneyin.';
+    if (e && e.status) return 'Sağlayıcı hatası (' + e.status + '): ' + msg.slice(0, 100) + '.';
     return 'Bağlantı kurulamadı.';
 }
 function cleanAI(text) {
@@ -1498,9 +1618,59 @@ async function claudeTurn(ai, system, wire) {
     const calls = blocks.filter(b => b.type === 'tool_use').map(b => ({ id: b.id, name: b.name, args: b.input || {} }));
     return { text: text, calls: calls, raw: blocks };
 }
+function geminiDeclarations() {
+    return AI_TOOLS.map(t => {
+        const d = { name: t.name, description: t.description };
+        // Parametresiz araçlarda "parameters" alanı hiç gönderilmez
+        if (t.parameters && t.parameters.properties && Object.keys(t.parameters.properties).length) d.parameters = t.parameters;
+        return d;
+    });
+}
+async function geminiTurn(ai, system, contents) {
+    const body = {
+        systemInstruction: { parts: [{ text: system }] },
+        contents: contents,
+        tools: [{ functionDeclarations: geminiDeclarations() }],
+        generationConfig: { maxOutputTokens: 2048 }
+    };
+    // Gemini 3.x: sıcaklık vb. gönderilmez; düşünme düzeyi sohbet için "low"
+    if (/^gemini-3/.test(ai.model)) body.generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+    const url = AI_PROVIDERS.gemini.base + encodeURIComponent(ai.model) + ':generateContent';
+    const j = await aiFetch(url, { 'Content-Type': 'application/json', 'x-goog-api-key': ai.key }, body);
+    const cand = j.candidates && j.candidates[0];
+    if (!cand || !cand.content || !Array.isArray(cand.content.parts) || !cand.content.parts.length) {
+        const blocked = (j.promptFeedback && j.promptFeedback.blockReason) || (cand && /SAFETY|BLOCK|PROHIBITED|RECITATION/.test(cand.finishReason || ''));
+        throw Object.assign(new Error(blocked ? 'blocked' : 'empty'), { kind: blocked ? 'blocked' : 'empty' });
+    }
+    const parts = cand.content.parts;
+    const text = parts.filter(p => typeof p.text === 'string' && !p.thought).map(p => p.text).join('');
+    const calls = parts.filter(p => p.functionCall).map((p, i) => ({
+        id: p.functionCall.id, name: p.functionCall.name, args: p.functionCall.args || {}
+    }));
+    return { text: text, calls: calls, raw: cand.content };      // raw: düşünce imzalarıyla birlikte olduğu gibi geri gönderilir
+}
 async function runAgent(ai) {
     const system = aiSystemPrompt();
     const history = aiHistory();
+
+    if (ai.provider === 'gemini') {
+        const contents = history.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+        for (let step = 0; step < 6; step++) {
+            const turn = await geminiTurn(ai, system, contents);
+            if (!turn.calls.length) return turn.text;
+            const results = [];
+            for (const c of turn.calls) results.push({ call: c, out: await execTool(c.name, c.args) });
+            contents.push(Object.assign({ role: 'model' }, turn.raw));
+            // Her işlev çağrısına, aynı id ve adla tam olarak bir yanıt (Gemini 3 kuralı)
+            contents.push({ role: 'user', parts: results.map(r => {
+                const fr = { name: r.call.name, response: { result: r.out } };
+                if (r.call.id) fr.id = r.call.id;
+                return { functionResponse: fr };
+            }) });
+        }
+        return 'İşlem biraz uzadı. İsteğinizi daha basit söyler misiniz?';
+    }
+
     const wire = ai.provider === 'openai' ? [{ role: 'system', content: system }].concat(history) : history.slice();
     for (let step = 0; step < 6; step++) {
         const turn = ai.provider === 'openai' ? await openaiTurn(ai, wire) : await claudeTurn(ai, system, wire);
@@ -1927,9 +2097,10 @@ function tryCalc(raw) {
 const aiDraft = { openai: { key: '', model: '' }, anthropic: { key: '', model: '' } };
 let aiDraftProvider = 'off';
 function showAiFields(provider) {
-    const on = provider === 'openai' || provider === 'anthropic';
-    $('#aiFields').style.display = on ? 'block' : 'none';
-    if (!on) return;
+    const other = provider === 'openai' || provider === 'anthropic';
+    $('#geminiFields').style.display = provider === 'gemini' ? 'block' : 'none';
+    $('#aiFields').style.display = other ? 'block' : 'none';
+    if (!other) return;
     $('#setAiKey').value = aiDraft[provider].key;
     $('#setAiModel').value = aiDraft[provider].model;
     $('#setAiModel').placeholder = AI_PROVIDERS[provider].defaultModel;
@@ -1949,13 +2120,35 @@ function onProviderChange() {
 function openSettings() {
     $('#setGoal').value = settings.stepGoal || 8000;
     ['openai', 'anthropic'].forEach(p => { aiDraft[p].key = settings.aiKeys[p] || ''; aiDraft[p].model = settings.aiModels[p] || ''; });
+    $('#setGeminiKey').value = settings.aiKeys.gemini || '';
+    $('#setGeminiModel').value = settings.aiModels.gemini || '';
+    $('#setGeminiModel').placeholder = AI_PROVIDERS.gemini.defaultModel;
     aiDraftProvider = settings.aiProvider;
     $('#setAiProvider').value = aiDraftProvider;
     showAiFields(aiDraftProvider);
     $('#setNotify').checked = !!settings.notify;
     $('#setVoiceReply').checked = !!settings.voiceReply;
     $('#setVoiceAlways').checked = !!settings.voiceAlways;
+    $('#setVoiceEngine').value = settings.voiceEngine;
+    $('#setTtsVoice').value = settings.ttsVoice;
+    $('#setTtsModel').value = settings.ttsModel;
     openModalEl('#settingsModal');
+}
+async function testVoice() {
+    unlockAudio();
+    stopSpeaking();
+    const sample = 'Merhaba, ben Aklımda asistanınız. Yarın annenizin doğum günü, hediyenizi aldınız mı?';
+    const engine = $('#setVoiceEngine').value;
+    const key = $('#setGeminiKey').value.trim();
+    if (engine === 'gemini') {
+        if (!key) { toast('Gemini sesi için önce Gemini API anahtarını girin.', 'error'); return; }
+        if (!voice.audioSupported) { toast('Bu tarayıcı ses çalmayı desteklemiyor.', 'error'); return; }
+        voice.warned = false;
+        await speakGemini(sample, { key: key, model: $('#setTtsModel').value, voice: $('#setTtsVoice').value });
+    } else {
+        if (!voice.ttsSupported) { toast('Bu cihazda sesli okuma desteklenmiyor.', 'error'); return; }
+        speakDevice(sample);
+    }
 }
 async function saveSettings() {
     const goal = parseInt($('#setGoal').value, 10);
@@ -1963,15 +2156,24 @@ async function saveSettings() {
     else { toast('Adım hedefi 1.000 ile 100.000 arasında olmalıdır.', 'error'); return; }
     flushAiDraft();
     const provider = $('#setAiProvider').value;
+    const geminiKey = $('#setGeminiKey').value.trim();
+    if (provider === 'gemini' && !geminiKey) {
+        toast('Gemini için API anahtarını girin ya da yapay zekâyı "Kapalı" yapın.', 'error');
+        return;
+    }
     if ((provider === 'openai' || provider === 'anthropic') && !aiDraft[provider].key) {
         toast('Yapay zekâ için API anahtarını girin ya da "Kapalı" seçin.', 'error');
         return;
     }
     settings.aiProvider = provider;
-    settings.aiKeys = { openai: aiDraft.openai.key, anthropic: aiDraft.anthropic.key };
-    settings.aiModels = { openai: aiDraft.openai.model, anthropic: aiDraft.anthropic.model };
+    settings.aiKeys = { gemini: geminiKey, openai: aiDraft.openai.key, anthropic: aiDraft.anthropic.key };
+    settings.aiModels = { gemini: $('#setGeminiModel').value.trim(), openai: aiDraft.openai.model, anthropic: aiDraft.anthropic.model };
     settings.voiceReply = $('#setVoiceReply').checked;
     settings.voiceAlways = $('#setVoiceAlways').checked;
+    settings.voiceEngine = $('#setVoiceEngine').value === 'device' ? 'device' : 'gemini';
+    settings.ttsVoice = $('#setTtsVoice').value || 'Sulafat';
+    settings.ttsModel = $('#setTtsModel').value || 'gemini-3.8-flash-tts';
+    voice.warned = false;
     if (!settings.voiceReply) stopSpeaking();
     let wantNotify = $('#setNotify').checked;
     if (wantNotify) {
@@ -2080,6 +2282,7 @@ function bindEvents() {
     $('#chatMic').addEventListener('click', startListening);
     $('#chatVoice').addEventListener('click', toggleVoiceReply);
     $('#setAiProvider').addEventListener('change', onProviderChange);
+    $('#ttsTest').addEventListener('click', testVoice);
     $$('.chat-chip').forEach(c => c.addEventListener('click', () => sendUserMessage(c.dataset.q)));
     $('#saveSettings').addEventListener('click', saveSettings);
 

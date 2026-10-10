@@ -199,7 +199,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.2.0</span> · Kayıtlarınız cihazınızda saklanır<br>
+            <span class="version">Aklımda v3.3.0</span> · Kayıtlarınız cihazınızda saklanır<br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -335,12 +335,24 @@
 
             <div class="form-divider">🤖 Yapay Zekâ</div>
             <div class="form-group">
+                <label for="setGeminiKey">Gemini API anahtarı</label>
+                <input type="password" class="form-control" id="setGeminiKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
+                <p class="settings-note">Asistanın beyni ve gerçekçi insan sesi için. Anahtarı Google AI Studio'dan (aistudio.google.com/apikey) alabilirsiniz. Anahtarı yalnızca bu siteden çalışacak şekilde (HTTP yönlendiren kısıtı) sınırlamanız önerilir.</p>
+            </div>
+            <div class="form-group">
                 <label for="setAiProvider">Asistanın beyni</label>
                 <select class="form-control" id="setAiProvider">
-                    <option value="off">Kapalı (yalnızca cihazdaki yerel mod)</option>
+                    <option value="gemini">Gemini (Google)</option>
                     <option value="openai">OpenAI (GPT)</option>
                     <option value="anthropic">Claude (Anthropic)</option>
+                    <option value="off">Kapalı (yalnızca cihazdaki yerel mod)</option>
                 </select>
+            </div>
+            <div id="geminiFields">
+                <div class="form-group">
+                    <label for="setGeminiModel">Gemini modeli</label>
+                    <input type="text" class="form-control" id="setGeminiModel" autocomplete="off" spellcheck="false">
+                </div>
             </div>
             <div id="aiFields" style="display:none;">
                 <div class="form-group">
@@ -352,7 +364,7 @@
                     <input type="text" class="form-control" id="setAiModel" autocomplete="off" spellcheck="false">
                 </div>
             </div>
-            <p class="settings-note">Yapay zekâ açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir; asistan kayıt ekleyip düzenleyebilir (silme için her zaman onayınız istenir). Anahtar yalnızca bu tarayıcıda saklanır ve yedeğe yazılmaz; harcama limiti düşük, ayrı bir anahtar kullanmanız önerilir. "Kapalı" iken hiçbir veri dışarı gönderilmez.</p>
+            <p class="settings-note">Yapay zekâ açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir; asistan kayıt ekleyip düzenleyebilir (silme için her zaman onayınız istenir). Anahtarlar yalnızca bu tarayıcıda saklanır ve yedeğe yazılmaz. Kullanım, sağlayıcının kota ve fiyatlandırmasına tabidir. "Kapalı" iken ya da anahtar girilmediyse hiçbir veri gönderilmez.</p>
 
             <div class="form-divider">🎙️ Sesli Asistan</div>
             <label class="switch-row" for="setVoiceReply">
@@ -363,7 +375,41 @@
                 <span>Yazarak sorsam da sesli oku<small>Her yanıt seslendirilir.</small></span>
                 <input type="checkbox" id="setVoiceAlways">
             </label>
-            <p class="settings-note">Sesli konuşma tarayıcınızın konuşma tanıma servisini kullanır (Chrome'da ses, tanıma için Google sunucularına gönderilir). Mikrofon izni ve internet gerekir.</p>
+            <div class="form-group">
+                <label for="setVoiceEngine">Ses motoru</label>
+                <select class="form-control" id="setVoiceEngine">
+                    <option value="gemini">Gemini · gerçekçi insan sesi (Gemini anahtarı gerekir)</option>
+                    <option value="device">Cihaz sesi (anahtarsız, daha robotik)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="setTtsVoice">Ses</label>
+                <select class="form-control" id="setTtsVoice">
+                    <option value="Sulafat">Sulafat · sıcak</option>
+                    <option value="Kore">Kore · kararlı</option>
+                    <option value="Aoede">Aoede · rahat</option>
+                    <option value="Achird">Achird · arkadaşça</option>
+                    <option value="Vindemiatrix">Vindemiatrix · nazik</option>
+                    <option value="Callirrhoe">Callirrhoe · sakin</option>
+                    <option value="Zephyr">Zephyr · parlak</option>
+                    <option value="Leda">Leda · genç</option>
+                    <option value="Puck">Puck · neşeli</option>
+                    <option value="Charon">Charon · bilgilendirici</option>
+                    <option value="Orus">Orus · kararlı</option>
+                    <option value="Algieba">Algieba · pürüzsüz</option>
+                    <option value="Fenrir">Fenrir · heyecanlı</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="setTtsModel">Ses kalitesi</label>
+                <select class="form-control" id="setTtsModel">
+                    <option value="gemini-3.8-flash-tts">En gerçekçi (Flash)</option>
+                    <option value="gemini-3.8-flash-lite-tts">Daha hızlı (Flash-Lite)</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-block" id="ttsTest"><i class="fa-solid fa-volume-high"></i> Sesi dene</button>
+            <p class="settings-note">Gemini sesi seçiliyken seslendirilecek yanıt metinleri Google'a gönderilir. Mikrofonla konuşmanın tanınması ise tarayıcınızın kendi servisiyle yapılır (Chrome'da ses Google'a gönderilir). Gemini sesi alınamazsa cihaz sesi devreye girer.</p>
+
             <button class="submit-btn" id="saveSettings">Kaydet</button>
 
             <div class="form-divider">💾 Yedek &amp; Veri</div>
