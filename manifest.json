@@ -1,36 +1,20 @@
 {
+  "id": "./",
   "name": "Aklımda - Akıllı Kişisel Asistan",
   "short_name": "Aklımda",
   "description": "Doğum günleri, ödemeler, hava durumu, adım sayar ve akıllı asistan. Hepsi tek uygulamada.",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b1120",
   "theme_color": "#0b1120",
   "orientation": "portrait-primary",
   "lang": "tr",
-  "categories": [
-    "productivity",
-    "lifestyle"
-  ],
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
