@@ -199,7 +199,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.1.0</span> · Kayıtlarınız cihazınızda saklanır<br>
+            <span class="version">Aklımda v3.2.0</span> · Kayıtlarınız cihazınızda saklanır<br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -212,6 +212,7 @@
         <div class="chat-header">
             <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
             <div class="chat-title"><b>Aklımda Asistan</b><small id="chatAiStatus">çevrimiçi · yerel mod</small></div>
+            <button class="modal-close" id="chatVoice" title="Sesli yanıt" aria-label="Sesli yanıt" aria-pressed="true"><i class="fa-solid fa-volume-high"></i></button>
             <button class="modal-close" id="chatSettings" title="Ayarlar" aria-label="Ayarlar"><i class="fa-solid fa-gear"></i></button>
             <button class="modal-close" id="chatClose" title="Kapat" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
         </div>
@@ -222,10 +223,12 @@
             <button class="chat-chip" data-q="Kaç adım attım?">👟 Adımlarım &amp; Sağlık</button>
             <button class="chat-chip" data-q="Haberlerde neler var?">📰 Haberler</button>
             <button class="chat-chip" data-q="Motivasyon ver">💪 Motivasyon</button>
-            <button class="chat-chip" data-q="3 gün sonra toplantı ekle">➕ Etkinlik ekle</button>
+            <button class="chat-chip" data-q="Bu hafta neler var?">📆 Bu hafta neler var?</button>
+            <button class="chat-chip" data-q="Bu ay ne kadar ödemem var?">💳 Bu ayki ödemeler</button>
         </div>
         <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Asistana yazın... (örn: yarın doktor randevusu ekle)" autocomplete="off" aria-label="Mesajınız">
+            <input type="text" id="chatInput" placeholder="Asistana yazın ya da mikrofona basıp konuşun" autocomplete="off" aria-label="Mesajınız">
+            <button class="chat-mic" id="chatMic" aria-label="Sesle konuş" aria-pressed="false" title="Sesle konuş"><i class="fa-solid fa-microphone"></i></button>
             <button class="chat-send" id="chatSend" aria-label="Gönder"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
@@ -330,16 +333,37 @@
                 <input type="checkbox" id="setNotify">
             </label>
 
-            <div class="form-divider">🤖 Yapay Zekâ (opsiyonel)</div>
+            <div class="form-divider">🤖 Yapay Zekâ</div>
             <div class="form-group">
-                <label for="setAiKey">OpenAI API Anahtarı</label>
-                <input type="password" class="form-control" id="setAiKey" placeholder="sk-..." autocomplete="off" spellcheck="false">
-                <p class="settings-note">Anahtar yalnızca bu cihazın tarayıcısında saklanır; yedek dosyasına yazılmaz. Yapay zekâ açıkken sorularınız, yaklaşan kayıt başlıkları ve adım sayınız OpenAI'ye gönderilir. Boş bırakırsanız yalnızca cihazdaki yerel motor çalışır ve hiçbir veri dışarı gönderilmez.</p>
+                <label for="setAiProvider">Asistanın beyni</label>
+                <select class="form-control" id="setAiProvider">
+                    <option value="off">Kapalı (yalnızca cihazdaki yerel mod)</option>
+                    <option value="openai">OpenAI (GPT)</option>
+                    <option value="anthropic">Claude (Anthropic)</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label for="setAiModel">Model</label>
-                <input type="text" class="form-control" id="setAiModel" placeholder="gpt-4o-mini" autocomplete="off">
+            <div id="aiFields" style="display:none;">
+                <div class="form-group">
+                    <label for="setAiKey">API Anahtarı</label>
+                    <input type="password" class="form-control" id="setAiKey" placeholder="sk-..." autocomplete="off" spellcheck="false">
+                </div>
+                <div class="form-group">
+                    <label for="setAiModel">Model</label>
+                    <input type="text" class="form-control" id="setAiModel" autocomplete="off" spellcheck="false">
+                </div>
             </div>
+            <p class="settings-note">Yapay zekâ açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir; asistan kayıt ekleyip düzenleyebilir (silme için her zaman onayınız istenir). Anahtar yalnızca bu tarayıcıda saklanır ve yedeğe yazılmaz; harcama limiti düşük, ayrı bir anahtar kullanmanız önerilir. "Kapalı" iken hiçbir veri dışarı gönderilmez.</p>
+
+            <div class="form-divider">🎙️ Sesli Asistan</div>
+            <label class="switch-row" for="setVoiceReply">
+                <span>Sesli yanıt<small>Mikrofonla sorduğunuzda asistan yanıtı yüksek sesle okur.</small></span>
+                <input type="checkbox" id="setVoiceReply">
+            </label>
+            <label class="switch-row" for="setVoiceAlways">
+                <span>Yazarak sorsam da sesli oku<small>Her yanıt seslendirilir.</small></span>
+                <input type="checkbox" id="setVoiceAlways">
+            </label>
+            <p class="settings-note">Sesli konuşma tarayıcınızın konuşma tanıma servisini kullanır (Chrome'da ses, tanıma için Google sunucularına gönderilir). Mikrofon izni ve internet gerekir.</p>
             <button class="submit-btn" id="saveSettings">Kaydet</button>
 
             <div class="form-divider">💾 Yedek &amp; Veri</div>

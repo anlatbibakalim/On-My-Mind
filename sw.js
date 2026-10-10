@@ -4,7 +4,7 @@
    - Yerel dosyalar: önbellekten sun, arka planda güncelle
    - Font Awesome (cdnjs): önbellek öncelikli
    - Hava/haber/AI istekleri hiç yakalanmaz (her zaman ağ) */
-const VERSION = 'v3.1.0';
+const VERSION = 'v3.2.0';
 const CACHE = 'aklimda-' + VERSION;
 const SHELL = [
     './',

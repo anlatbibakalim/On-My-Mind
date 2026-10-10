@@ -1,32 +1,31 @@
-# Aklımda v3.1 - Akıllı Kişisel Asistan 🧠
+# Aklımda v3.2 - Akıllı Kişisel Asistan 🧠
 
 Doğum günleri, yıldönümleri, ödemeler ve özel günler için hatırlatıcı; hava durumu, adım sayar,
-hesap makinesi ve Türkçe sohbet asistanı. Tek sayfalık, kurulum gerektirmeyen bir PWA.
+hesap makinesi ve **sesli, Türkçe konuşan yapay zekâ asistanı**. Tek sayfalık, kurulum gerektirmeyen bir PWA.
+
+## v3.2'de yeni
+- **"ekle" demeden kayıt:** "11 Ekim Annemin doğum günü" veya "yarın doktor randevusu" yazmanız/söylemeniz yeterli. Yanlış anlaşılırsa "geri al" denir. Tarih eksikse asistan tarihi sorar.
+- **Sesle konuşma ve sesli yanıt:** Sohbetteki mikrofon düğmesine basıp konuşun; asistan yanıtı yüksek sesle okur. "on bir ekim" gibi söylenen sayılar anlaşılır. (Chrome ve internet gerekir; ayarlardan kapatılabilir.)
+- **Yapay zekâ ajanı (isteğe bağlı):** Ayarlar > Yapay Zekâ bölümünden OpenAI veya Claude anahtarı girilirse asistan gerçek bir dil modeli olur ve araçlarla kayıt ekler, arar, günceller, tamamlar, siler (silmede onay ister), hava durumuna ve adımlarınıza bakar.
+- **Daha akıllı yerel mod (anahtarsız, çevrimdışı):** "annemin doğum günü ne zaman?", "bu hafta neler var?", "bu ay ne kadar ödemem var?", "kira ödendi", "elektrik faturasını sil", "İzmir'de hava nasıl?", belirsiz durumda "hangisi?" sorusu ve bağlam hatırlama.
+- **Hata düzeltmesi:** Sohbetteki ⚙ düğmesiyle açılan Ayarlar penceresi sohbetin altında kalıyordu; düzeltildi.
 
 ## v3.1'de düzeltilenler
-- **Adım sayar:** Telefon masada dururken bile saniyede ~3 adım sayıyordu. Yerçekimi filtrelenip gerçek adım tepe noktaları sayılıyor; günlük sıfırlama eklendi; her adımda dinleyici çoğalması giderildi.
-- **Takvim:** Noktalar ve seçili gün UTC kaymasıyla bir gün önceyi gösteriyordu; tekrarlayan kayıtlar yalnızca bir sonraki tarihte görünüyordu; ay geçişi 31. günde ay atlıyordu. Hepsi düzeltildi.
-- **Tekrarlayan ödemeler:** Bir kez "Ödendi" denince sonsuza kadar tamamlanmış kalıyordu. Artık tamamlanma o ayın/yılın oluşu için geçerli; sonraki dönemde kayıt yeniden aktif olur.
-- **Asistan:** "125*4 kaç eder" hesaplaması çalışmıyordu; "15 mayısta", "15.05 toplantı", "cumaya", "iki hafta sonra", "kira 15.000 TL" gibi komutlar anlaşılmıyordu; Türkçe karakterler başlıktan siliniyordu. Ayrıştırıcı baştan yazıldı. `Function()` kullanımı kaldırıldı.
-- **Hesap makinesi:** `2*-3` yanlış sonuç veriyordu (−3). Özyinelemeli ayrıştırıcıyla yeniden yazıldı (`eval` yok, `^` sağdan birleşimli, örtük çarpma).
-- **Çevrimdışı mod:** Service worker hiç kaydedilmiyordu ve var olmayan `icons/` klasörünü önbelleğe almaya çalıştığı için kurulamazdı. Düzeltildi; Font Awesome da önbelleğe alınır.
-- **Güvenlik:** İçe aktarılan JSON'daki `id` alanı HTML'e olduğu gibi yazılıyordu; artık temizleniyor. API anahtarı yedek dosyasına yazılmaz.
-- **Metinler:** Tüm arayüz metinleri doğru Türkçe karakterlerle (Doğum Günü, Ödeme, Rüzgâr...).
-- Kişisel varsayılanlar (boy/kilo/yaş) nötr değerlerle değiştirildi.
-- Kullanılmayan eski dosyalar (`app.js`, `style.css`, `Calculator.js` eski sürümleri) temizlendi; kod artık gerçekten ayrı dosyalarda.
+Adım sayar (masada dururken sayma), takvim gün kayması ve tekrarlayan kayıtlar, tekrarlayan ödemelerin sonsuza dek "ödendi" kalması,
+hesap makinesi (`2*-3`), çevrimdışı mod (service worker), içe aktarma güvenliği, Türkçe karakterler.
 
-## Yeni özellikler
-Ayarlar penceresi (yedek, içe/dışa aktarma, sıfırlama burada), açılışta "bugün/yarın" hatırlatması,
-yeni sürüm bildirimi, çevrimdışı göstergesi, takvimde "Bugün" düğmesi, klavye/ekran okuyucu erişilebilirliği,
-yedek dosyasına adım geçmişi, doğru maskable ve Apple simgeleri.
+## Gizlilik
+- Yapay zekâ **Kapalı** iken hiçbir veri dışarı gönderilmez (hava durumu/haber istekleri hariç).
+- Açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir. API anahtarı yalnızca bu tarayıcıda saklanır, yedeğe yazılmaz. Harcama limiti düşük ayrı bir anahtar kullanın.
+- Sesli konuşma tarayıcının konuşma tanıma servisini kullanır (Chrome'da ses Google'a gönderilir).
 
 ## Dosyalar (hepsi repo köküne)
 `index.html`, `style.css`, `app.js`, `calculator.js`, `sw.js`, `manifest.json`,
 `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon.svg`, `favicon-32.png`
 
 ## Güncelleme (GitHub Pages)
-1. Yukarıdaki dosyaların hepsini repoya yükleyin (aynı adlıların üzerine yazın).
-2. Eski `Calculator.js` (büyük C) ve `icon.svg` dosyalarını silin; artık kullanılmıyorlar.
-3. Sayfayı bir kez yenileyin. Eski önbellek varsa uygulama "Yeni sürüm hazır" bildirimi gösterir.
+1. Dosyaların hepsini repoya yükleyin (aynı adlıların üzerine yazın).
+2. Eski `Calculator.js` (büyük C) ve `icon.svg` dosyalarını silin.
+3. Sayfayı yenileyin; eski sürüm açıksa "Yeni sürüm hazır" bildirimi çıkar.
 
-Veriler tarayıcının localStorage alanında tutulur. Depolama anahtarları değişmediği için mevcut kayıtlarınız korunur.
+Veriler tarayıcının localStorage alanında tutulur; depolama anahtarları değişmediği için kayıtlarınız ve eski ayarlarınız korunur.

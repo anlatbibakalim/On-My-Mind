@@ -359,7 +359,7 @@ noscript {
 
 /* ---------- Modallar ---------- */
 .modal {
-    display: none; position: fixed; inset: 0; z-index: 1000;
+    display: none; position: fixed; inset: 0; z-index: 1500;
     background: var(--overlay);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
@@ -893,3 +893,23 @@ button.agenda-day.today { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
     .wx-refresh.spinning i { animation: none; }
 }
+
+
+/* ---------- Sesli asistan ---------- */
+.chat-mic {
+    width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    font-size: 1rem; transition: transform 0.15s, background 0.2s, border-color 0.2s;
+}
+.chat-mic:hover { border-color: var(--accent); }
+.chat-mic:active { transform: scale(0.92); }
+.chat-mic.listening {
+    background: var(--danger); border-color: var(--danger); color: #fff;
+    animation: micPulse 1.3s infinite;
+}
+@keyframes micPulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+    70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .chat-mic.listening { animation: none; } }
