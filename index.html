@@ -28,46 +28,78 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3.5.0">
 </head>
-<body>
+<body data-version="3.5.0">
 
     <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
 
     <!-- ================= BAŞLIK ================= -->
-    <header class="app-header">
+    <header class="app-header" id="appHeader">
         <div class="header-inner">
             <div class="brand">
                 <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
-                <div>
+                <div class="brand-text">
                     <h1>Aklımda</h1>
                     <span class="tagline">Akıllı Kişisel Asistan</span>
                 </div>
             </div>
             <div class="header-actions">
                 <button class="icon-btn icon-btn-primary" id="assistantBtn" title="Asistanı aç" aria-label="Asistanı aç"><i class="fa-solid fa-robot"></i></button>
-                <button class="icon-btn" id="calcBtn" title="Hesap makinesi" aria-label="Hesap makinesi"><i class="fa-solid fa-calculator"></i></button>
-                <button class="icon-btn" id="settingsBtn" title="Ayarlar ve yedek" aria-label="Ayarlar ve yedek"><i class="fa-solid fa-sliders"></i></button>
-                <button class="icon-btn" id="themeToggle" title="Tema değiştir" aria-label="Tema değiştir"></button>
+                <button class="icon-btn" id="councilBtn" title="Karar Odası" aria-label="Karar Odası"><i class="fa-solid fa-people-group"></i></button>
+                <button class="icon-btn" id="menuBtn" title="Menü" aria-label="Menü" aria-haspopup="menu" aria-expanded="false" aria-controls="headerMenu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </div>
+        </div>
+        <div class="header-menu" id="headerMenu" role="menu" hidden>
+            <button class="menu-item" id="calcBtn" role="menuitem"><i class="fa-solid fa-calculator"></i> Hesap makinesi</button>
+            <button class="menu-item" id="settingsBtn" role="menuitem"><i class="fa-solid fa-sliders"></i> Ayarlar ve yedek</button>
+            <button class="menu-item" id="themeToggle" role="menuitem"></button>
         </div>
     </header>
 
     <!-- ================= ANA İÇERİK ================= -->
     <main class="container">
 
-        <!-- Haber Bandı -->
-        <div class="ticker" role="region" aria-label="Güncel haberler">
-            <span class="ticker-label"><i class="fa-solid fa-radio"></i> GÜNDEM</span>
-            <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack"></div></div>
+        <!-- Paneller: isteyince açılır -->
+        <nav class="panel-bar" id="panelBar" aria-label="Paneller">
+            <button class="panel-chip" data-panel="agenda" aria-pressed="false"><i class="fa-solid fa-calendar-days"></i> Takvim</button>
+            <button class="panel-chip" data-panel="wx" aria-pressed="false"><i class="fa-solid fa-cloud-sun"></i> Hava</button>
+            <button class="panel-chip" data-panel="health" aria-pressed="false"><i class="fa-solid fa-heart-pulse"></i> Sağlık</button>
+            <button class="panel-chip" data-panel="summary" aria-pressed="false"><i class="fa-solid fa-chart-column"></i> Özet</button>
+            <button class="panel-chip" data-panel="news" aria-pressed="false"><i class="fa-solid fa-radio"></i> Haberler</button>
+        </nav>
+
+        <div class="panel" id="panel-agenda" hidden>
+        <section class="agenda-card" aria-label="Takvim ve etkinlikler">
+            <div class="agenda-header">
+                <h3 id="agendaMonthYear"></h3>
+                <div class="agenda-nav-btns">
+                    <button class="agenda-nav-btn" id="agendaPrev" aria-label="Önceki ay"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="agenda-nav-btn agenda-today-btn" id="agendaToday" aria-label="Bugüne git">Bugün</button>
+                    <button class="agenda-nav-btn" id="agendaNext" aria-label="Sonraki ay"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="agenda-weekdays" aria-hidden="true">
+                <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+            </div>
+            <div class="agenda-days-grid" id="agendaDaysGrid"></div>
+            <div class="agenda-events-panel">
+                <div class="agenda-events-header">
+                    <span class="agenda-events-title" id="agendaSelectedTitle"></span>
+                    <button class="btn btn-edit btn-compact" id="agendaAddBtn"><i class="fa-solid fa-plus"></i> Bu Güne Ekle</button>
+                </div>
+                <div class="agenda-events-list" id="agendaEventsList"></div>
+            </div>
+        </section>
         </div>
 
-        <!-- Hava Durumu -->
+        <div class="panel" id="panel-wx" hidden>
         <section class="wx-card" aria-label="Hava durumu">
             <div id="wxBody"><p class="loading-line"><i class="fa-solid fa-spinner fa-spin"></i> Hava durumu yükleniyor...</p></div>
         </section>
+        </div>
 
-        <!-- Sağlık & Adım Kartı -->
+        <div class="panel" id="panel-health" hidden>
         <section class="health-card" aria-label="Sağlık ve adım takibi">
             <svg width="0" height="0" aria-hidden="true" focusable="false"><defs>
                 <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
@@ -127,29 +159,30 @@
             <p class="quote" id="dailyQuote"></p>
             <p class="health-disclaimer">Mesafe ve kalori değerleri tahminidir; tıbbi tavsiye yerine geçmez.</p>
         </section>
+        </div>
 
-        <!-- Takvim -->
-        <section class="agenda-card" aria-label="Takvim ve etkinlikler">
-            <div class="agenda-header">
-                <h3 id="agendaMonthYear"></h3>
-                <div class="agenda-nav-btns">
-                    <button class="agenda-nav-btn" id="agendaPrev" aria-label="Önceki ay"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="agenda-nav-btn agenda-today-btn" id="agendaToday" aria-label="Bugüne git">Bugün</button>
-                    <button class="agenda-nav-btn" id="agendaNext" aria-label="Sonraki ay"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <div class="agenda-weekdays" aria-hidden="true">
-                <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
-            </div>
-            <div class="agenda-days-grid" id="agendaDaysGrid"></div>
-            <div class="agenda-events-panel">
-                <div class="agenda-events-header">
-                    <span class="agenda-events-title" id="agendaSelectedTitle"></span>
-                    <button class="btn btn-edit btn-compact" id="agendaAddBtn"><i class="fa-solid fa-plus"></i> Bu Güne Ekle</button>
-                </div>
-                <div class="agenda-events-list" id="agendaEventsList"></div>
-            </div>
+        <div class="panel" id="panel-summary" hidden>
+        <section class="stats-grid" aria-label="İstatistikler">
+            <div class="stat-card"><span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span><span class="num c-accent" id="statTotal">0</span><span class="label">Toplam Kayıt</span></div>
+            <div class="stat-card"><span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span><span class="num c-danger" id="statUrgent">0</span><span class="label">Yaklaşan (7 gün)</span></div>
+            <div class="stat-card"><span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span><span class="num c-success" id="statDone">0</span><span class="label">Tamamlanan</span></div>
+            <div class="stat-card"><span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span><span class="num c-warning" id="statPayments">₺0</span><span class="label">30 Gün İçinde Ödeme</span></div>
         </section>
+
+        
+
+        <section class="chart-card" aria-label="Aylık dağılım">
+            <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
+            <div class="chart" id="chartBars"></div>
+        </section>
+        </div>
+
+        <div class="panel" id="panel-news" hidden>
+        <div class="ticker" role="region" aria-label="Güncel haberler">
+            <span class="ticker-label"><i class="fa-solid fa-radio"></i> GÜNDEM</span>
+            <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack"></div></div>
+        </div>
+        </div>
 
         <!-- Arama & Sıralama -->
         <div class="toolbar">
@@ -164,21 +197,7 @@
             </select>
         </div>
 
-        <!-- İstatistikler -->
-        <section class="stats-grid" aria-label="İstatistikler">
-            <div class="stat-card"><span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span><span class="num c-accent" id="statTotal">0</span><span class="label">Toplam Kayıt</span></div>
-            <div class="stat-card"><span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span><span class="num c-danger" id="statUrgent">0</span><span class="label">Yaklaşan (7 gün)</span></div>
-            <div class="stat-card"><span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span><span class="num c-success" id="statDone">0</span><span class="label">Tamamlanan</span></div>
-            <div class="stat-card"><span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span><span class="num c-warning" id="statPayments">₺0</span><span class="label">30 Gün İçinde Ödeme</span></div>
-        </section>
-
-        <!-- Grafik -->
-        <section class="chart-card" aria-label="Aylık dağılım">
-            <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
-            <div class="chart" id="chartBars"></div>
-        </section>
-
-        <!-- Filtreler -->
+                <!-- Filtreler -->
         <nav class="filter-bar" id="filterBar" aria-label="Kategori filtreleri">
             <button class="filter-btn active" data-filter="all" aria-pressed="true">Tümü <span class="chip-count">0</span></button>
             <button class="filter-btn" data-filter="dogum" aria-pressed="false">Doğum Günleri <span class="chip-count">0</span></button>
@@ -199,7 +218,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.3.0</span> · Kayıtlarınız cihazınızda saklanır<br>
+            <span class="version">Aklımda v3.5.0</span> · Kayıtlarınız cihazınızda saklanır<br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -228,8 +247,68 @@
         </div>
         <div class="chat-input">
             <input type="text" id="chatInput" placeholder="Asistana yazın ya da mikrofona basıp konuşun" autocomplete="off" aria-label="Mesajınız">
+            <button class="chat-attach" id="chatAttach" aria-label="Dosya ekle" title="Dosya ekle (CSV, TXT, MD, JSON)"><i class="fa-solid fa-paperclip"></i></button>
+            <input type="file" id="chatFile" hidden accept=".csv,.tsv,.txt,.md,.json,text/plain,text/csv,application/json">
             <button class="chat-mic" id="chatMic" aria-label="Sesle konuş" aria-pressed="false" title="Sesle konuş"><i class="fa-solid fa-microphone"></i></button>
             <button class="chat-send" id="chatSend" aria-label="Gönder"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- ================= KARAR ODASI ================= -->
+    <div class="council-overlay" id="councilOverlay"></div>
+    <div class="council-panel" id="councilPanel" role="dialog" aria-modal="true" aria-label="Karar Odası">
+        <div class="chat-header">
+            <div class="chat-avatar"><i class="fa-solid fa-people-group"></i></div>
+            <div class="chat-title"><b>Karar Odası</b><small id="councilStatus">ajanlar hazır</small></div>
+            <button class="modal-close" id="councilVoice" title="Sesli tartışma" aria-label="Sesli tartışma" aria-pressed="false"><i class="fa-solid fa-volume-xmark"></i></button>
+            <button class="modal-close" id="councilClose" title="Kapat" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="council-body" id="councilBody">
+            <section id="councilSetup">
+                <p class="council-hint">Önemli bir kararı farklı bakış açılarına sahip ajanlarla tartışın. Tartışma bitince Hakem net bir karar verir.</p>
+                <div class="form-group">
+                    <label for="councilTopic">Konu / karar</label>
+                    <textarea class="form-control" id="councilTopic" maxlength="400" placeholder="Örn: Kira artışına itiraz etmeli miyim?"></textarea>
+                </div>
+                <div class="council-examples" id="councilExamples"></div>
+                <div class="council-label">Kurul üyeleri (2 - 5 kişi)</div>
+                <div class="agent-grid" id="agentGrid"></div>
+                <div class="form-group council-rounds">
+                    <label for="councilRounds">Tur sayısı</label>
+                    <select class="form-control" id="councilRounds">
+                        <option value="1">1 tur (hızlı)</option>
+                        <option value="2" selected>2 tur</option>
+                        <option value="3">3 tur (ayrıntılı)</option>
+                    </select>
+                </div>
+                <label class="switch-row" for="councilCtx">
+                    <span>Takvimimi ve ödemelerimi bilsinler<small>Yaklaşan kayıtlarınızın başlıkları, tarihleri ve tutarları ajanlara gönderilir.</small></span>
+                    <input type="checkbox" id="councilCtx">
+                </label>
+                <p class="council-note" id="councilNote"></p>
+                <button class="submit-btn" id="councilStart">Tartışmayı başlat</button>
+                <div id="councilHistory"></div>
+            </section>
+
+            <section id="councilRoom" hidden>
+                <div class="council-topic-bar" id="councilTopicBar"></div>
+                <div class="council-feed" id="councilFeed" aria-live="polite"></div>
+            </section>
+        </div>
+
+        <div class="council-footer" id="councilFooter" hidden>
+            <div class="council-input-row">
+                <input type="text" id="councilInput" placeholder="Söz alın: fikir ya da yeni bilgi ekleyin" autocomplete="off" aria-label="Kurula mesajınız">
+                <button class="chat-mic" id="councilMic" aria-label="Sesle söz al" aria-pressed="false" title="Sesle söz al"><i class="fa-solid fa-microphone"></i></button>
+                <button class="chat-send" id="councilSend" aria-label="Yeni tur başlat" title="Yeni tur"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+            <div class="council-actions">
+                <button class="btn btn-confirm-yes" id="councilStop" hidden><i class="fa-solid fa-stop"></i> Durdur</button>
+                <button class="btn btn-edit" id="councilRetry" hidden><i class="fa-solid fa-rotate"></i> Yeniden dene</button>
+                <button class="btn btn-success" id="councilJudge" hidden><i class="fa-solid fa-scale-balanced"></i> Karar ver</button>
+                <button class="btn" id="councilNew"><i class="fa-solid fa-plus"></i> Yeni konu</button>
+            </div>
         </div>
     </div>
 
@@ -364,6 +443,8 @@
                     <input type="text" class="form-control" id="setAiModel" autocomplete="off" spellcheck="false">
                 </div>
             </div>
+            <button type="button" class="btn btn-block" id="aiTest"><i class="fa-solid fa-plug"></i> Bağlantıyı test et</button>
+            <p class="diag" id="aiTestResult" role="status"></p>
             <p class="settings-note">Yapay zekâ açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir; asistan kayıt ekleyip düzenleyebilir (silme için her zaman onayınız istenir). Anahtarlar yalnızca bu tarayıcıda saklanır ve yedeğe yazılmaz. Kullanım, sağlayıcının kota ve fiyatlandırmasına tabidir. "Kapalı" iken ya da anahtar girilmediyse hiçbir veri gönderilmez.</p>
 
             <div class="form-divider">🎙️ Sesli Asistan</div>
@@ -408,9 +489,22 @@
                 </select>
             </div>
             <button type="button" class="btn btn-block" id="ttsTest"><i class="fa-solid fa-volume-high"></i> Sesi dene</button>
+            <p class="diag" id="ttsStatus" role="status"></p>
             <p class="settings-note">Gemini sesi seçiliyken seslendirilecek yanıt metinleri Google'a gönderilir. Mikrofonla konuşmanın tanınması ise tarayıcınızın kendi servisiyle yapılır (Chrome'da ses Google'a gönderilir). Gemini sesi alınamazsa cihaz sesi devreye girer.</p>
 
             <button class="submit-btn" id="saveSettings">Kaydet</button>
+
+            <div class="form-divider">🧠 Kişisel bellek</div>
+            <label class="switch-row" for="memToggle">
+                <span>Belleği kullan<small>Asistan kaydettiğiniz tercihleri ve devam eden işleri bilir. Cihazda saklanır; sağlık, din, siyaset, kimlik, kart ve parola gibi hassas bilgiler alınmaz.</small></span>
+                <input type="checkbox" id="memToggle">
+            </label>
+            <div class="mem-list" id="memList"></div>
+            <div class="mem-add">
+                <input type="text" class="form-control" id="memInput" placeholder="Örn: Kahveyi sade içerim" maxlength="200" autocomplete="off">
+                <button type="button" class="btn" id="memAdd" aria-label="Belleğe ekle"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <p class="diag" id="memStatus" role="status"></p>
 
             <div class="form-divider">💾 Yedek &amp; Veri</div>
             <div class="settings-actions">
@@ -419,6 +513,8 @@
             </div>
             <input type="file" id="importFile" accept=".json,application/json" hidden>
             <button class="btn btn-ghost-danger btn-block" id="resetBtn"><i class="fa-solid fa-trash-can"></i> Tüm Verileri Sıfırla</button>
+            <p class="settings-note" id="kbInfo"></p>
+            <p class="settings-note" id="versionInfo"></p>
         </div>
     </div>
 
@@ -499,7 +595,8 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-    <script src="calculator.js"></script>
-    <script src="app.js"></script>
+    <script src="calculator.js?v=3.5.0"></script>
+    <script src="kb.js?v=3.5.0"></script>
+    <script src="app.js?v=3.5.0"></script>
 </body>
 </html>

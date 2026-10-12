@@ -1,32 +1,22 @@
-/* Aklımda - Service Worker
-   - Uygulama kabuğu önceden önbelleğe alınır (çevrimdışı açılış)
-   - Sayfa: önce ağ, olmazsa önbellek
-   - Yerel dosyalar: önbellekten sun, arka planda güncelle
+/* Aklımda - Service Worker (v3.5.0)
+   - Yerel dosyalar: ÖNCE AĞ (her zaman en yeni sürüm), internet yoksa önbellek
+   - Yeni sürüm hemen devreye girer (skipWaiting + clients.claim), eski önbellekler silinir
    - Font Awesome (cdnjs): önbellek öncelikli
-   - Hava/haber/AI istekleri hiç yakalanmaz (her zaman ağ) */
-const VERSION = 'v3.3.0';
+   - Hava/haber/yapay zekâ gibi dış istekler hiç yakalanmaz */
+const VERSION = 'v3.5.0';
 const CACHE = 'aklimda-' + VERSION;
 const SHELL = [
-    './',
-    './index.html',
-    './style.css',
-    './app.js',
-    './calculator.js',
-    './manifest.json',
-    './icon-192.png',
-    './icon-512.png',
-    './icon-maskable-512.png',
-    './apple-touch-icon.png',
-    './favicon.svg',
-    './favicon-32.png'
+    './', './index.html', './style.css', './app.js', './calculator.js', './kb.js', './kb.json', './manifest.json',
+    './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon.svg', './favicon-32.png'
 ];
 const CDN = 'https://cdnjs.cloudflare.com';
 
 self.addEventListener('install', event => {
+    self.skipWaiting();
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE);
-        // Tek bir dosya eksik olsa bile kurulum başarısız olmasın
-        await Promise.all(SHELL.map(url => cache.add(url).catch(() => null)));
+        // Tek bir dosya eksik olsa bile kurulum başarısız olmasın; HTTP önbelleğini atla
+        await Promise.all(SHELL.map(url => cache.add(new Request(url, { cache: 'reload' })).catch(() => null)));
     })());
 });
 
@@ -60,7 +50,7 @@ self.addEventListener('fetch', event => {
                 }
                 return res;
             } catch (e) {
-                return cached || Response.error();
+                return Response.error();
             }
         })());
         return;
@@ -69,31 +59,25 @@ self.addEventListener('fetch', event => {
     // Başka kaynaklar (API'ler): dokunma
     if (url.origin !== self.location.origin) return;
 
-    // Sayfa gezintisi: önce ağ, sonra önbellek
-    if (req.mode === 'navigate') {
-        event.respondWith((async () => {
-            try {
-                const res = await fetch(req);
-                const copy = res.clone();
-                caches.open(CACHE).then(c => c.put('./index.html', copy));
-                return res;
-            } catch (e) {
-                return (await caches.match('./index.html')) || (await caches.match('./')) || Response.error();
-            }
-        })());
-        return;
-    }
-
-    // Yerel dosyalar: önbellekten sun, arkadan yenile
+    // Yerel dosyalar: önce ağ (sürüm uyuşmazlığı olmaz), olmazsa önbellek
     event.respondWith((async () => {
-        const cached = await caches.match(req);
-        const network = fetch(req).then(res => {
+        try {
+            const res = await fetch(new Request(req.url, { cache: 'no-cache' }));
             if (res && res.ok) {
-                const copy = res.clone();
-                caches.open(CACHE).then(c => c.put(req, copy));
+                // Hem sürüm parametreli (?v=...) hem de yalın adresle sakla; çevrimdışıyken ikisi de en yenisi olur
+                const plain = req.url.split('?')[0];
+                const a = res.clone(), b = res.clone();
+                caches.open(CACHE).then(c => { c.put(req, a); if (plain !== req.url) c.put(plain, b); });
             }
             return res;
-        }).catch(() => null);
-        return cached || (await network) || Response.error();
+        } catch (e) {
+            const cached = await caches.match(req, { ignoreSearch: true });
+            if (cached) return cached;
+            if (req.mode === 'navigate') {
+                const page = (await caches.match('./index.html')) || (await caches.match('./'));
+                if (page) return page;
+            }
+            return Response.error();
+        }
     })());
 });
