@@ -1,9 +1,9 @@
-/* Aklımda - Service Worker (v3.5.0)
+/* Aklımda - Service Worker (v3.5.1)
    - Yerel dosyalar: ÖNCE AĞ (her zaman en yeni sürüm), internet yoksa önbellek
    - Yeni sürüm hemen devreye girer (skipWaiting + clients.claim), eski önbellekler silinir
    - Font Awesome (cdnjs): önbellek öncelikli
    - Hava/haber/yapay zekâ gibi dış istekler hiç yakalanmaz */
-const VERSION = 'v3.5.0';
+const VERSION = 'v3.5.1';
 const CACHE = 'aklimda-' + VERSION;
 const SHELL = [
     './', './index.html', './style.css', './app.js', './calculator.js', './kb.js', './kb.json', './manifest.json',

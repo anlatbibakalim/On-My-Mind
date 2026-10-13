@@ -973,7 +973,7 @@ button.agenda-day.today { color: var(--accent); }
 .event-card.open .more-btn { background: var(--accent-soft); color: var(--text); border-color: var(--accent); }
 
 /* ---------- Teşhis satırları ---------- */
-.diag { font-size: 0.78rem; line-height: 1.5; margin-top: 8px; color: var(--muted); word-break: break-word; }
+.diag { font-size: 0.78rem; line-height: 1.5; margin-top: 8px; color: var(--muted); word-break: break-word; white-space: pre-line; }
 .diag:empty { display: none; }
 .diag.ok { color: var(--success); }
 .diag.err { color: var(--danger); }
