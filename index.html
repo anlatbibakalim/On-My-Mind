@@ -3,26 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Aklımda - Akıllı Kişisel Asistan</title>
-    <meta name="description" content="Aklımda - Doğum günleri, ödemeler, hava durumu, adım sayar ve akıllı asistan. Hepsi tek uygulamada.">
-    <meta name="theme-color" content="#0b1120">
-    <meta name="color-scheme" content="dark light">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Aklımda">
-    <script>
-        /* Tema titremesini önlemek için sayfa çizilmeden önce uygula */
-        (function () {
-            var t = 'dark';
-            try {
-                var saved = localStorage.getItem('aklimda_theme');
-                t = saved ? JSON.parse(saved) : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-            } catch (e) { /* varsayılan koyu */ }
-            if (t !== 'light' && t !== 'dark') t = 'dark';
-            document.documentElement.dataset.theme = t;
-        })();
-    </script>
+    <title>Aklımda - Akıllı Kişisel Asistan (Sci-Fi Edition)</title>
+    <meta name="description" content="Aklımda - Doğum günleri, ödemeler, hava durumu, adım sayar ve akıllı asistan.">
+    <meta name="theme-color" content="#030712">
+    <meta name="color-scheme" content="dark">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -34,290 +18,287 @@
 
     <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
 
-    <!-- ================= BAŞLIK ================= -->
-    <header class="app-header" id="appHeader">
-        <div class="header-inner">
+    <div class="dashboard-container">
+        <!-- ÜST HEADER / BRAND BAR -->
+        <header class="top-bar" id="appHeader">
             <div class="brand">
-                <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
+                <i class="fa-solid fa-brain glow-icon"></i>
                 <div class="brand-text">
-                    <h1>Aklımda</h1>
-                    <span class="tagline">Akıllı Kişisel Asistan</span>
+                    <h2>Apex Assistant</h2>
+                    <span class="tagline">Aklımda v3.5.1 AI Core</span>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="icon-btn icon-btn-primary" id="assistantBtn" title="Asistanı aç" aria-label="Asistanı aç"><i class="fa-solid fa-robot"></i></button>
-                <button class="icon-btn" id="councilBtn" title="Karar Odası" aria-label="Karar Odası"><i class="fa-solid fa-people-group"></i></button>
-                <button class="icon-btn" id="menuBtn" title="Menü" aria-label="Menü" aria-haspopup="menu" aria-expanded="false" aria-controls="headerMenu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <div class="top-actions">
+                <button class="icon-btn icon-btn-primary" id="assistantBtn" title="Asistanı Aç"><i class="fa-solid fa-robot"></i></button>
+                <button class="icon-btn" id="councilBtn" title="Karar Odası"><i class="fa-solid fa-people-group"></i></button>
+                <button class="icon-btn" id="calcBtn" title="Hesap Makinesi"><i class="fa-solid fa-calculator"></i></button>
+                <button class="icon-btn" id="settingsBtn" title="Ayarlar"><i class="fa-solid fa-sliders"></i></button>
+                <button class="icon-btn" id="themeToggle" title="Tema Değiştir" style="display:none;"></button>
             </div>
-        </div>
-        <div class="header-menu" id="headerMenu" role="menu" hidden>
-            <button class="menu-item" id="calcBtn" role="menuitem"><i class="fa-solid fa-calculator"></i> Hesap makinesi</button>
-            <button class="menu-item" id="settingsBtn" role="menuitem"><i class="fa-solid fa-sliders"></i> Ayarlar ve yedek</button>
-            <button class="menu-item" id="themeToggle" role="menuitem"></button>
-        </div>
-    </header>
+        </header>
 
-    <!-- ================= ANA İÇERİK ================= -->
-    <main class="container">
-
-        <!-- Paneller: isteyince açılır -->
+        <!-- PANELLER & SEÇENEKLER (PANELLERİ AÇIP KAPATAN BAR) -->
         <nav class="panel-bar" id="panelBar" aria-label="Paneller">
-            <button class="panel-chip" data-panel="agenda" aria-pressed="false"><i class="fa-solid fa-calendar-days"></i> Takvim</button>
+            <button class="panel-chip active" data-panel="agenda" aria-pressed="true"><i class="fa-solid fa-calendar-days"></i> Takvim</button>
             <button class="panel-chip" data-panel="wx" aria-pressed="false"><i class="fa-solid fa-cloud-sun"></i> Hava</button>
             <button class="panel-chip" data-panel="health" aria-pressed="false"><i class="fa-solid fa-heart-pulse"></i> Sağlık</button>
             <button class="panel-chip" data-panel="summary" aria-pressed="false"><i class="fa-solid fa-chart-column"></i> Özet</button>
             <button class="panel-chip" data-panel="news" aria-pressed="false"><i class="fa-solid fa-radio"></i> Haberler</button>
         </nav>
 
-        <div class="panel" id="panel-agenda" hidden>
-        <section class="agenda-card" aria-label="Takvim ve etkinlikler">
-            <div class="agenda-header">
-                <h3 id="agendaMonthYear"></h3>
-                <div class="agenda-nav-btns">
-                    <button class="agenda-nav-btn" id="agendaPrev" aria-label="Önceki ay"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="agenda-nav-btn agenda-today-btn" id="agendaToday" aria-label="Bugüne git">Bugün</button>
-                    <button class="agenda-nav-btn" id="agendaNext" aria-label="Sonraki ay"><i class="fa-solid fa-chevron-right"></i></button>
+        <!-- DİNAMİK AÇILAN PANELLER -->
+        <div class="panel" id="panel-agenda">
+            <section class="glass-widget agenda-card">
+                <div class="agenda-header">
+                    <h3 id="agendaMonthYear"><i class="fa-solid fa-calendar-days"></i> Takvim</h3>
+                    <div class="agenda-nav-btns">
+                        <button class="agenda-nav-btn" id="agendaPrev"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="agenda-nav-btn agenda-today-btn" id="agendaToday">Bugün</button>
+                        <button class="agenda-nav-btn" id="agendaNext"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
                 </div>
-            </div>
-            <div class="agenda-weekdays" aria-hidden="true">
-                <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
-            </div>
-            <div class="agenda-days-grid" id="agendaDaysGrid"></div>
-            <div class="agenda-events-panel">
-                <div class="agenda-events-header">
-                    <span class="agenda-events-title" id="agendaSelectedTitle"></span>
-                    <button class="btn btn-edit btn-compact" id="agendaAddBtn"><i class="fa-solid fa-plus"></i> Bu Güne Ekle</button>
+                <div class="agenda-weekdays">
+                    <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
                 </div>
-                <div class="agenda-events-list" id="agendaEventsList"></div>
-            </div>
-        </section>
+                <div class="agenda-days-grid" id="agendaDaysGrid"></div>
+                <div class="agenda-events-panel">
+                    <div class="agenda-events-header">
+                        <span class="agenda-events-title" id="agendaSelectedTitle"></span>
+                        <button class="btn btn-edit btn-compact" id="agendaAddBtn"><i class="fa-solid fa-plus"></i> Bu Güne Ekle</button>
+                    </div>
+                    <div class="agenda-events-list" id="agendaEventsList"></div>
+                </div>
+            </section>
         </div>
 
         <div class="panel" id="panel-wx" hidden>
-        <section class="wx-card" aria-label="Hava durumu">
-            <div id="wxBody"><p class="loading-line"><i class="fa-solid fa-spinner fa-spin"></i> Hava durumu yükleniyor...</p></div>
-        </section>
+            <section class="glass-widget wx-card">
+                <div id="wxBody"><p class="loading-line"><i class="fa-solid fa-spinner fa-spin"></i> Hava durumu yükleniyor...</p></div>
+            </section>
         </div>
 
         <div class="panel" id="panel-health" hidden>
-        <section class="health-card" aria-label="Sağlık ve adım takibi">
-            <svg width="0" height="0" aria-hidden="true" focusable="false"><defs>
-                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/>
-                </linearGradient>
-            </defs></svg>
-            <div class="health-top">
-                <div class="ring-wrap">
-                    <svg width="118" height="118" viewBox="0 0 110 110" aria-hidden="true">
-                        <circle class="ring-bg" cx="55" cy="55" r="48"/>
-                        <circle class="ring-fill" id="ringFill" cx="55" cy="55" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-                    </svg>
-                    <div class="ring-text"><span class="ring-steps" id="ringSteps">0</span><span class="ring-label" id="ringLabel">adım</span></div>
-                </div>
-                <div class="health-info">
-                    <h3><i class="fa-solid fa-heart-pulse" style="color:var(--accent);"></i> Sağlık &amp; Adım Takibi</h3>
-                    <div class="health-params-grid">
-                        <div class="hp-group">
-                            <label for="hpGender">Cinsiyet</label>
-                            <select id="hpGender">
-                                <option value="male">Erkek</option>
-                                <option value="female">Kadın</option>
-                            </select>
-                        </div>
-                        <div class="hp-group">
-                            <label for="hpHeight">Boy (cm)</label>
-                            <input type="number" id="hpHeight" min="100" max="250" inputmode="numeric">
-                        </div>
-                        <div class="hp-group">
-                            <label for="hpWeight">Kilo (kg)</label>
-                            <input type="number" id="hpWeight" min="30" max="300" step="0.1" inputmode="decimal">
-                        </div>
-                        <div class="hp-group">
-                            <label for="hpAge">Yaş</label>
-                            <input type="number" id="hpAge" min="5" max="120" inputmode="numeric">
+            <section class="glass-widget health-card">
+                <svg width="0" height="0" aria-hidden="true"><defs>
+                    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#00f3ff"/><stop offset="1" stop-color="#0088ff"/>
+                    </linearGradient>
+                </defs></svg>
+                <div class="health-top">
+                    <div class="ring-wrap">
+                        <svg width="118" height="118" viewBox="0 0 110 110">
+                            <circle class="ring-bg" cx="55" cy="55" r="48"/>
+                            <circle class="ring-fill" id="ringFill" cx="55" cy="55" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+                        </svg>
+                        <div class="ring-text"><span class="ring-steps" id="ringSteps">0</span><span class="ring-label" id="ringLabel">adım</span></div>
+                    </div>
+                    <div class="health-info">
+                        <h3><i class="fa-solid fa-heart-pulse"></i> Sağlık &amp; Adım Takibi</h3>
+                        <div class="health-params-grid">
+                            <div class="hp-group"><label for="hpGender">Cinsiyet</label><select id="hpGender"><option value="male">Erkek</option><option value="female">Kadın</option></select></div>
+                            <div class="hp-group"><label for="hpHeight">Boy (cm)</label><input type="number" id="hpHeight" min="100" max="250"></div>
+                            <div class="hp-group"><label for="hpWeight">Kilo (kg)</label><input type="number" id="hpWeight" min="30" max="300" step="0.1"></div>
+                            <div class="hp-group"><label for="hpAge">Yaş</label><input type="number" id="hpAge" min="5" max="120"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="health-metrics-row">
-                <div class="hm-box"><span>Tahmini Mesafe</span><strong id="resDistance">0,00 km</strong></div>
-                <div class="hm-box"><span>Yakılan Kalori</span><strong id="resCalories">0 kcal</strong></div>
-                <div class="hm-box"><span>Aktivite Düzeyi</span><strong id="resLevel" class="level-text">Hareketsiz</strong></div>
-            </div>
-
-            <div class="health-actions">
-                <button class="btn btn-success" id="stepsToggle" aria-pressed="false"><i class="fa-solid fa-play"></i> Sayacı Başlat</button>
-                <div class="steps-edit-box">
-                    <input type="number" class="form-control" id="stepsInput" placeholder="Manuel adım gir" min="0" max="200000" inputmode="numeric" aria-label="Manuel adım sayısı">
-                    <button class="btn" id="stepsSetBtn" title="Adımı güncelle" aria-label="Adımı güncelle"><i class="fa-solid fa-check"></i></button>
+                <div class="health-metrics-row">
+                    <div class="hm-box"><span>Mesafe</span><strong id="resDistance">0,00 km</strong></div>
+                    <div class="hm-box"><span>Kalori</span><strong id="resCalories">0 kcal</strong></div>
+                    <div class="hm-box"><span>Aktivite</span><strong id="resLevel">Hareketsiz</strong></div>
                 </div>
-            </div>
-            <p class="steps-note">Sayaç yalnızca uygulama açık ve ekran uyanıkken sayar. Arka planda sayım yapılamaz; gerekirse adımı elle girebilirsiniz.</p>
-
-            <div class="steps-week" id="stepsWeek" aria-label="Son 7 günün adımları"></div>
-            <p class="quote" id="dailyQuote"></p>
-            <p class="health-disclaimer">Mesafe ve kalori değerleri tahminidir; tıbbi tavsiye yerine geçmez.</p>
-        </section>
+                <div class="health-actions">
+                    <button class="btn btn-success" id="stepsToggle"><i class="fa-solid fa-play"></i> Sayacı Başlat</button>
+                    <div class="steps-edit-box">
+                        <input type="number" class="form-control" id="stepsInput" placeholder="Manuel adım">
+                        <button class="btn" id="stepsSetBtn"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                </div>
+                <div class="steps-week" id="stepsWeek"></div>
+                <p class="quote" id="dailyQuote"></p>
+            </section>
         </div>
 
         <div class="panel" id="panel-summary" hidden>
-        <section class="stats-grid" aria-label="İstatistikler">
-            <div class="stat-card"><span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span><span class="num c-accent" id="statTotal">0</span><span class="label">Toplam Kayıt</span></div>
-            <div class="stat-card"><span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span><span class="num c-danger" id="statUrgent">0</span><span class="label">Yaklaşan (7 gün)</span></div>
-            <div class="stat-card"><span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span><span class="num c-success" id="statDone">0</span><span class="label">Tamamlanan</span></div>
-            <div class="stat-card"><span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span><span class="num c-warning" id="statPayments">₺0</span><span class="label">30 Gün İçinde Ödeme</span></div>
-        </section>
-
-        
-
-        <section class="chart-card" aria-label="Aylık dağılım">
-            <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
-            <div class="chart" id="chartBars"></div>
-        </section>
+            <section class="stats-grid">
+                <div class="stat-card glass-widget"><span class="stat-icon c-accent"><i class="fa-solid fa-layer-group"></i></span><span class="num c-accent" id="statTotal">0</span><span class="label">Toplam Kayıt</span></div>
+                <div class="stat-card glass-widget"><span class="stat-icon c-danger"><i class="fa-solid fa-fire"></i></span><span class="num c-danger" id="statUrgent">0</span><span class="label">Yaklaşan (7 gün)</span></div>
+                <div class="stat-card glass-widget"><span class="stat-icon c-success"><i class="fa-solid fa-circle-check"></i></span><span class="num c-success" id="statDone">0</span><span class="label">Tamamlanan</span></div>
+                <div class="stat-card glass-widget"><span class="stat-icon c-warning"><i class="fa-solid fa-wallet"></i></span><span class="num c-warning" id="statPayments">₺0</span><span class="label">Ödemeler</span></div>
+            </section>
+            <section class="chart-card glass-widget">
+                <h3><i class="fa-solid fa-chart-column"></i> Önümüzdeki 6 Ay</h3>
+                <div class="chart" id="chartBars"></div>
+            </section>
         </div>
 
         <div class="panel" id="panel-news" hidden>
-        <div class="ticker" role="region" aria-label="Güncel haberler">
-            <span class="ticker-label"><i class="fa-solid fa-radio"></i> GÜNDEM</span>
-            <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack"></div></div>
-        </div>
-        </div>
-
-        <!-- Arama & Sıralama -->
-        <div class="toolbar">
-            <div class="search-wrap">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="search" id="searchInput" class="search-input" placeholder="Kayıtlarda ara..." aria-label="Kayıtlarda ara">
+            <div class="ticker glass-widget">
+                <span class="ticker-label"><i class="fa-solid fa-radio"></i> GÜNDEM</span>
+                <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack"></div></div>
             </div>
-            <select id="sortSelect" class="sort-select" aria-label="Sıralama">
-                <option value="urgency">Aciliyete Göre</option>
-                <option value="date">Tarihe Göre</option>
-                <option value="name">İsme Göre</option>
-            </select>
         </div>
 
-                <!-- Filtreler -->
-        <nav class="filter-bar" id="filterBar" aria-label="Kategori filtreleri">
-            <button class="filter-btn active" data-filter="all" aria-pressed="true">Tümü <span class="chip-count">0</span></button>
-            <button class="filter-btn" data-filter="dogum" aria-pressed="false">Doğum Günleri <span class="chip-count">0</span></button>
-            <button class="filter-btn" data-filter="yildonumu" aria-pressed="false">Yıldönümleri <span class="chip-count">0</span></button>
-            <button class="filter-btn" data-filter="odeme" aria-pressed="false">Ödemeler <span class="chip-count">0</span></button>
-            <button class="filter-btn" data-filter="ozel" aria-pressed="false">Özel Günler <span class="chip-count">0</span></button>
-        </nav>
+        <!-- ANA MATRİS DÜZENİ (SCI-FI DASHBOARD GRID) -->
+        <main class="dashboard-grid">
 
-        <!-- Liste -->
-        <section class="event-list" id="eventList" aria-live="polite"></section>
+            <!-- SOL SÜTUN: SERVİSLER & FİLTRELER -->
+            <aside class="left-column">
+                <div class="glass-widget">
+                    <h3><i class="fa-solid fa-cubes"></i> KATEGORİLER</h3>
+                    <nav class="filter-bar vertical-filter" id="filterBar">
+                        <button class="filter-btn active" data-filter="all">Tümü <span class="chip-count">0</span></button>
+                        <button class="filter-btn" data-filter="dogum">Doğum Günleri <span class="chip-count">0</span></button>
+                        <button class="filter-btn" data-filter="yildonumu">Yıldönümleri <span class="chip-count">0</span></button>
+                        <button class="filter-btn" data-filter="odeme">Ödemeler <span class="chip-count">0</span></button>
+                        <button class="filter-btn" data-filter="ozel">Özel Günler <span class="chip-count">0</span></button>
+                    </nav>
+                </div>
+            </aside>
 
-        <!-- Boş Durum -->
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <i class="fa-regular fa-calendar-xmark"></i>
-            <h3>Henüz kayıt yok</h3>
-            <p id="emptyText">İlk kaydınızı ekleyerek başlayın.</p>
-            <button class="btn btn-edit" id="sampleBtn" style="display:inline-flex;"><i class="fa-solid fa-wand-magic-sparkles"></i> Örnek Verilerle Başla</button>
-        </div>
+            <!-- ORTA SÜTUN: AI CORE (YAPAY ZEKA ÇEKİRDEĞİ VİZÜALİZASYONU) -->
+            <section class="center-column">
+                <div class="ai-core-container">
+                    <div class="orb-ring"></div>
+                    <div class="ai-orb" id="centerOrb">
+                        <span>AI CORE</span>
+                    </div>
+                </div>
+                <div class="status-box">
+                    <p class="status-text">Apex is Listening...</p>
+                    <div class="voice-wave">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <p class="command-hint">"Hey Apex, bana bugünkü görevlerimi söyle."</p>
+                </div>
+            </section>
 
+            <!-- SAĞ SÜTUN: ARAMA & LİSTELEME -->
+            <aside class="right-column">
+                <div class="glass-widget toolbar-widget">
+                    <h3><i class="fa-solid fa-magnifying-glass"></i> HIZLI ARAMA</h3>
+                    <div class="search-wrap">
+                        <input type="search" id="searchInput" class="search-input" placeholder="Kayıtlarda ara...">
+                    </div>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="urgency">Aciliyete Göre</option>
+                        <option value="date">Tarihe Göre</option>
+                        <option value="name">İsme Göre</option>
+                    </select>
+                </div>
+            </aside>
+
+        </main>
+
+        <!-- LİSTE / ETKİNLİKLER BÖLÜMÜ -->
+        <section class="glass-widget main-events-section">
+            <h3><i class="fa-solid fa-list-check"></i> AKTİF KAYITLAR</h3>
+            <div class="event-list" id="eventList"></div>
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <i class="fa-regular fa-calendar-xmark"></i>
+                <h3>Henüz kayıt yok</h3>
+                <p id="emptyText">İlk kaydınızı ekleyerek başlayın.</p>
+                <button class="btn btn-edit" id="sampleBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> Örnek Verilerle Başla</button>
+            </div>
+        </section>
+
+        <!-- ALT BİLGİ -->
         <footer class="app-footer">
-            <span class="version">Aklımda v3.5.1</span> · Kayıtlarınız cihazınızda saklanır<br>
-            Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
+            <span class="version">Apex Assistant / Aklımda v3.5.1</span> · Sci-Fi Neon Dashboard Active
         </footer>
-    </main>
 
-    <button class="fab" id="addBtn" aria-label="Yeni kayıt ekle"><i class="fa-solid fa-plus"></i></button>
+    </div>
 
-    <!-- ================= ASİSTAN PANELİ ================= -->
+    <!-- YENİ KAYIT FAB BUTTON -->
+    <button class="fab" id="addBtn" title="Yeni Kayıt Ekle"><i class="fa-solid fa-plus"></i></button>
+
+    <!-- ASİSTAN MODALI / OVERLAY -->
     <div class="chat-overlay" id="chatOverlay"></div>
-    <div class="chat-panel" role="dialog" aria-modal="true" aria-label="Aklımda Asistan">
+    <div class="chat-panel" role="dialog" aria-modal="true">
         <div class="chat-header">
             <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
-            <div class="chat-title"><b>Aklımda Asistan</b><small id="chatAiStatus">çevrimiçi · yerel mod</small></div>
-            <button class="modal-close" id="chatVoice" title="Sesli yanıt" aria-label="Sesli yanıt" aria-pressed="true"><i class="fa-solid fa-volume-high"></i></button>
-            <button class="modal-close" id="chatSettings" title="Ayarlar" aria-label="Ayarlar"><i class="fa-solid fa-gear"></i></button>
-            <button class="modal-close" id="chatClose" title="Kapat" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            <div class="chat-title"><b>Apex AI Asistan</b><small id="chatAiStatus">çevrimiçi</small></div>
+            <button class="modal-close" id="chatVoice"><i class="fa-solid fa-volume-high"></i></button>
+            <button class="modal-close" id="chatSettings"><i class="fa-solid fa-gear"></i></button>
+            <button class="modal-close" id="chatClose"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="chat-body" id="chatBody" aria-live="polite"></div>
+        <div class="chat-body" id="chatBody"></div>
         <div class="chat-chips">
-            <button class="chat-chip" data-q="Hava durumu?">🌤️ Hava durumu?</button>
-            <button class="chat-chip" data-q="Yaklaşan etkinlikler neler?">📅 Yaklaşan etkinlikler</button>
-            <button class="chat-chip" data-q="Kaç adım attım?">👟 Adımlarım &amp; Sağlık</button>
-            <button class="chat-chip" data-q="Haberlerde neler var?">📰 Haberler</button>
-            <button class="chat-chip" data-q="Motivasyon ver">💪 Motivasyon</button>
-            <button class="chat-chip" data-q="Bu hafta neler var?">📆 Bu hafta neler var?</button>
-            <button class="chat-chip" data-q="Bu ay ne kadar ödemem var?">💳 Bu ayki ödemeler</button>
+            <button class="chat-chip" data-q="Hava durumu?">🌤️ Hava durumu</button>
+            <button class="chat-chip" data-q="Yaklaşan etkinlikler neler?">📅 Etkinlikler</button>
+            <button class="chat-chip" data-q="Kaç adım attım?">👟 Adım Sayısı</button>
         </div>
         <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Asistana yazın ya da mikrofona basıp konuşun" autocomplete="off" aria-label="Mesajınız">
-            <button class="chat-attach" id="chatAttach" aria-label="Dosya ekle" title="Dosya ekle (CSV, TXT, MD, JSON)"><i class="fa-solid fa-paperclip"></i></button>
-            <input type="file" id="chatFile" hidden accept=".csv,.tsv,.txt,.md,.json,text/plain,text/csv,application/json">
-            <button class="chat-mic" id="chatMic" aria-label="Sesle konuş" aria-pressed="false" title="Sesle konuş"><i class="fa-solid fa-microphone"></i></button>
-            <button class="chat-send" id="chatSend" aria-label="Gönder"><i class="fa-solid fa-paper-plane"></i></button>
+            <input type="text" id="chatInput" placeholder="Mesajınızı yazın..." autocomplete="off">
+            <button class="chat-attach" id="chatAttach"><i class="fa-solid fa-paperclip"></i></button>
+            <input type="file" id="chatFile" hidden accept=".csv,.tsv,.txt,.md,.json">
+            <button class="chat-mic" id="chatMic"><i class="fa-solid fa-microphone"></i></button>
+            <button class="chat-send" id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- ================= KARAR ODASI ================= -->
+    <!-- KARAR ODASI MODALI -->
     <div class="council-overlay" id="councilOverlay"></div>
-    <div class="council-panel" id="councilPanel" role="dialog" aria-modal="true" aria-label="Karar Odası">
+    <div class="council-panel" id="councilPanel" role="dialog" aria-modal="true">
         <div class="chat-header">
             <div class="chat-avatar"><i class="fa-solid fa-people-group"></i></div>
-            <div class="chat-title"><b>Karar Odası</b><small id="councilStatus">ajanlar hazır</small></div>
-            <button class="modal-close" id="councilVoice" title="Sesli tartışma" aria-label="Sesli tartışma" aria-pressed="false"><i class="fa-solid fa-volume-xmark"></i></button>
-            <button class="modal-close" id="councilClose" title="Kapat" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+            <div class="chat-title"><b>Karar Odası</b><small id="councilStatus">hazır</small></div>
+            <button class="modal-close" id="councilVoice"><i class="fa-solid fa-volume-xmark"></i></button>
+            <button class="modal-close" id="councilClose"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
         <div class="council-body" id="councilBody">
             <section id="councilSetup">
-                <p class="council-hint">Önemli bir kararı farklı bakış açılarına sahip ajanlarla tartışın. Tartışma bitince Hakem net bir karar verir.</p>
+                <p class="council-hint">Önemli kararlarınızı farklı bakış açılarına sahip yapay zeka ajanları ile tartışın.</p>
                 <div class="form-group">
-                    <label for="councilTopic">Konu / karar</label>
-                    <textarea class="form-control" id="councilTopic" maxlength="400" placeholder="Örn: Kira artışına itiraz etmeli miyim?"></textarea>
+                    <label for="councilTopic">Konu / Karar</label>
+                    <textarea class="form-control" id="councilTopic" maxlength="400" placeholder="Kira artışına itiraz etmeli miyim?"></textarea>
                 </div>
                 <div class="council-examples" id="councilExamples"></div>
-                <div class="council-label">Kurul üyeleri (2 - 5 kişi)</div>
+                <div class="council-label">Kurul Üyeleri</div>
                 <div class="agent-grid" id="agentGrid"></div>
                 <div class="form-group council-rounds">
-                    <label for="councilRounds">Tur sayısı</label>
+                    <label for="councilRounds">Tur Sayısı</label>
                     <select class="form-control" id="councilRounds">
-                        <option value="1">1 tur (hızlı)</option>
-                        <option value="2" selected>2 tur</option>
-                        <option value="3">3 tur (ayrıntılı)</option>
+                        <option value="1">1 Tur</option>
+                        <option value="2" selected>2 Tur</option>
+                        <option value="3">3 Tur</option>
                     </select>
                 </div>
                 <label class="switch-row" for="councilCtx">
-                    <span>Takvimimi ve ödemelerimi bilsinler<small>Yaklaşan kayıtlarınızın başlıkları, tarihleri ve tutarları ajanlara gönderilir.</small></span>
+                    <span>Takvimi ve ödemeleri dahil et</span>
                     <input type="checkbox" id="councilCtx">
                 </label>
                 <p class="council-note" id="councilNote"></p>
-                <button class="submit-btn" id="councilStart">Tartışmayı başlat</button>
+                <button class="submit-btn" id="councilStart">Tartışmayı Başlat</button>
                 <div id="councilHistory"></div>
             </section>
 
             <section id="councilRoom" hidden>
                 <div class="council-topic-bar" id="councilTopicBar"></div>
-                <div class="council-feed" id="councilFeed" aria-live="polite"></div>
+                <div class="council-feed" id="councilFeed"></div>
             </section>
         </div>
-
         <div class="council-footer" id="councilFooter" hidden>
             <div class="council-input-row">
-                <input type="text" id="councilInput" placeholder="Söz alın: fikir ya da yeni bilgi ekleyin" autocomplete="off" aria-label="Kurula mesajınız">
-                <button class="chat-mic" id="councilMic" aria-label="Sesle söz al" aria-pressed="false" title="Sesle söz al"><i class="fa-solid fa-microphone"></i></button>
-                <button class="chat-send" id="councilSend" aria-label="Yeni tur başlat" title="Yeni tur"><i class="fa-solid fa-paper-plane"></i></button>
+                <input type="text" id="councilInput" placeholder="Fikir veya bilgi ekleyin...">
+                <button class="chat-mic" id="councilMic"><i class="fa-solid fa-microphone"></i></button>
+                <button class="chat-send" id="councilSend"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
             <div class="council-actions">
                 <button class="btn btn-confirm-yes" id="councilStop" hidden><i class="fa-solid fa-stop"></i> Durdur</button>
-                <button class="btn btn-edit" id="councilRetry" hidden><i class="fa-solid fa-rotate"></i> Yeniden dene</button>
-                <button class="btn btn-success" id="councilJudge" hidden><i class="fa-solid fa-scale-balanced"></i> Karar ver</button>
-                <button class="btn" id="councilNew"><i class="fa-solid fa-plus"></i> Yeni konu</button>
+                <button class="btn btn-edit" id="councilRetry" hidden><i class="fa-solid fa-rotate"></i> Yeniden Dene</button>
+                <button class="btn btn-success" id="councilJudge" hidden><i class="fa-solid fa-scale-balanced"></i> Karar Ver</button>
+                <button class="btn" id="councilNew"><i class="fa-solid fa-plus"></i> Yeni Konu</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= KAYIT MODALI ================= -->
-    <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-content">
+    <!-- DİĞER MODALLAR (KAYIT, HEDİYE, ONAY, AYARLAR, HESAP MAKİNESİ) -->
+    <div class="modal" id="eventModal" role="dialog" aria-modal="true">
+        <div class="modal-content glass-widget">
             <div class="modal-header">
                 <h3 id="modalTitle">Yeni Kayıt Ekle</h3>
-                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+                <button class="modal-close" data-close><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="eventForm" novalidate>
                 <input type="hidden" id="fieldId">
@@ -325,15 +306,15 @@
                     <label for="eventType">Kategori</label>
                     <select class="form-control" id="eventType">
                         <option value="dogum">🎂 Doğum Günü</option>
-                        <option value="yildonumu">💞 Evlilik / Özel Yıldönümü</option>
+                        <option value="yildonumu">💞 Evlilik / Yıldönümü</option>
                         <option value="odeme">💳 Ödeme / Fatura</option>
-                        <option value="ozel">⭐ Özel Gün / Hatırlatıcı</option>
+                        <option value="ozel">⭐ Özel Gün</option>
                     </select>
-                    <p class="form-hint"><i class="fa-solid fa-repeat"></i> <span id="recurrenceHint">Her yıl tekrarlar</span></p>
+                    <p class="form-hint"><span id="recurrenceHint">Her yıl tekrarlar</span></p>
                 </div>
                 <div class="form-group">
-                    <label for="eventTitle">Başlık / Kişi Adı / Açıklama</label>
-                    <input type="text" class="form-control" id="eventTitle" placeholder="Örn: Eşimin Doğum Günü veya Elektrik Faturası" maxlength="80" required>
+                    <label for="eventTitle">Başlık</label>
+                    <input type="text" class="form-control" id="eventTitle" placeholder="Örn: Elektrik Faturası" maxlength="80" required>
                 </div>
                 <div class="form-group">
                     <label for="eventDate">Tarih</label>
@@ -341,28 +322,22 @@
                 </div>
                 <div class="form-group" id="amountGroup" style="display:none;">
                     <label for="eventAmount">Tutar (₺)</label>
-                    <input type="number" class="form-control" id="eventAmount" placeholder="Örn: 450" min="0" step="0.01" inputmode="decimal">
+                    <input type="number" class="form-control" id="eventAmount" placeholder="450" min="0" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label for="eventNotes">Not (opsiyonel)</label>
-                    <textarea class="form-control" id="eventNotes" placeholder="Eklemek istedikleriniz..." maxlength="300"></textarea>
+                    <label for="eventNotes">Not</label>
+                    <textarea class="form-control" id="eventNotes" maxlength="300"></textarea>
                 </div>
                 <div id="giftSection">
-                    <div class="form-divider">🎁 Hediye Öneri Detayları</div>
+                    <div class="form-divider">🎁 Hediye Detayları</div>
+                    <div class="form-group"><label for="giftRelation">Yakınlık</label><input type="text" class="form-control" id="giftRelation" placeholder="Eşim, Annem"></div>
+                    <div class="form-group"><label for="giftInterests">İlgi Alanları</label><input type="text" class="form-control" id="giftInterests" placeholder="Kahve, Kitap"></div>
                     <div class="form-group">
-                        <label for="giftRelation">Yakınlık / İlişki</label>
-                        <input type="text" class="form-control" id="giftRelation" placeholder="Örn: Eşim, Annem" maxlength="40">
-                    </div>
-                    <div class="form-group">
-                        <label for="giftInterests">İlgi Alanları &amp; Hobiler</label>
-                        <input type="text" class="form-control" id="giftInterests" placeholder="Örn: Kahve, kitap, seyahat" maxlength="120">
-                    </div>
-                    <div class="form-group">
-                        <label for="giftBudget">Bütçe Aralığı</label>
+                        <label for="giftBudget">Bütçe</label>
                         <select class="form-control" id="giftBudget">
-                            <option value="ekonomik">Ekonomik (0 - 500 ₺)</option>
-                            <option value="orta" selected>Orta (500 - 2.000 ₺)</option>
-                            <option value="luks">Lüks (2.000 ₺ üzeri)</option>
+                            <option value="ekonomik">Ekonomik (0-500 TL)</option>
+                            <option value="orta" selected>Orta (500-2000 TL)</option>
+                            <option value="luks">Lüks (2000+ TL)</option>
                         </select>
                     </div>
                 </div>
@@ -372,20 +347,18 @@
         </div>
     </div>
 
-    <!-- ================= HEDİYE MODALI ================= -->
-    <div class="modal" id="giftModal" role="dialog" aria-modal="true" aria-label="Hediye önerileri">
-        <div class="modal-content">
+    <div class="modal" id="giftModal" role="dialog" aria-modal="true">
+        <div class="modal-content glass-widget">
             <div class="modal-header">
                 <h3>🎁 Hediye Önerileri</h3>
-                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+                <button class="modal-close" data-close><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="giftModalContent"></div>
         </div>
     </div>
 
-    <!-- ================= ONAY MODALI ================= -->
-    <div class="modal" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
-        <div class="modal-content modal-narrow">
+    <div class="modal" id="confirmModal" role="alertdialog">
+        <div class="modal-content modal-narrow glass-widget">
             <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h3 id="confirmTitle" class="confirm-title">Emin misiniz?</h3>
             <p class="confirm-text" id="confirmText"></p>
@@ -396,206 +369,160 @@
         </div>
     </div>
 
-    <!-- ================= AYARLAR MODALI ================= -->
-    <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-        <div class="modal-content modal-medium">
+    <div class="modal" id="settingsModal" role="dialog">
+        <div class="modal-content modal-medium glass-widget">
             <div class="modal-header">
-                <h3 id="settingsTitle">Ayarlar</h3>
-                <button class="modal-close" data-close aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+                <h3>Ayarlar</h3>
+                <button class="modal-close" data-close><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="form-group">
                 <label for="setGoal">Günlük Adım Hedefi</label>
-                <input type="number" class="form-control" id="setGoal" min="1000" max="100000" step="500" inputmode="numeric">
+                <input type="number" class="form-control" id="setGoal" min="1000" max="100000" step="500">
             </div>
             <label class="switch-row" for="setNotify">
-                <span>Açılışta hatırlat<small>Bugün ve yarın için kaydınız varsa bildirim gösterir (uygulama açıldığında).</small></span>
+                <span>Hatırlatmaları aç</span>
                 <input type="checkbox" id="setNotify">
             </label>
-
-            <div class="form-divider">🤖 Yapay Zekâ</div>
+            <div class="form-divider">🤖 Yapay Zeka Ayarları</div>
             <div class="form-group">
-                <label for="setGeminiKey">Gemini API anahtarı</label>
-                <input type="password" class="form-control" id="setGeminiKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
-                <p class="settings-note">Asistanın beyni ve gerçekçi insan sesi için. Anahtarı Google AI Studio'dan (aistudio.google.com/apikey) alabilirsiniz. Anahtarı yalnızca bu siteden çalışacak şekilde (HTTP yönlendiren kısıtı) sınırlamanız önerilir.</p>
+                <label for="setGeminiKey">Gemini API Anahtarı</label>
+                <input type="password" class="form-control" id="setGeminiKey" placeholder="AIza...">
             </div>
             <div class="form-group">
-                <label for="setAiProvider">Asistanın beyni</label>
+                <label for="setAiProvider">Sağlayıcı</label>
                 <select class="form-control" id="setAiProvider">
                     <option value="gemini">Gemini (Google)</option>
                     <option value="openai">OpenAI (GPT)</option>
-                    <option value="anthropic">Claude (Anthropic)</option>
-                    <option value="off">Kapalı (yalnızca cihazdaki yerel mod)</option>
+                    <option value="anthropic">Claude</option>
+                    <option value="off">Kapalı</option>
                 </select>
             </div>
             <div id="geminiFields">
                 <div class="form-group">
-                    <label for="setGeminiModel">Gemini modeli</label>
-                    <input type="text" class="form-control" id="setGeminiModel" list="geminiModels" autocomplete="off" spellcheck="false">
-                    <datalist id="geminiModels"><option value="gemini-3.8-flash"><option value="gemini-3.8-flash-lite"><option value="gemini-3.7-flash"><option value="gemini-3.6-flash"><option value="gemini-flash-latest"><option value="gemini-flash-lite-latest"></datalist>
-                    <p class="settings-note">Google bir model için "yoğun" derse uygulama önce yeniden dener, sonra anahtarınıza açık başka bir modele kendiliğinden geçer. Kalıcı olarak başka model istersen buraya yaz.</p>
+                    <label for="setGeminiModel">Gemini Modeli</label>
+                    <input type="text" class="form-control" id="setGeminiModel">
                 </div>
             </div>
             <div id="aiFields" style="display:none;">
-                <div class="form-group">
-                    <label for="setAiKey">API Anahtarı</label>
-                    <input type="password" class="form-control" id="setAiKey" placeholder="sk-..." autocomplete="off" spellcheck="false">
-                </div>
-                <div class="form-group">
-                    <label for="setAiModel">Model</label>
-                    <input type="text" class="form-control" id="setAiModel" autocomplete="off" spellcheck="false">
-                </div>
+                <div class="form-group"><label for="setAiKey">API Key</label><input type="password" class="form-control" id="setAiKey"></div>
+                <div class="form-group"><label for="setAiModel">Model</label><input type="text" class="form-control" id="setAiModel"></div>
             </div>
-            <button type="button" class="btn btn-block" id="aiTest"><i class="fa-solid fa-plug"></i> Bağlantıyı test et</button>
-            <p class="diag" id="aiTestResult" role="status"></p>
-            <p class="settings-note">Yapay zekâ açıkken sorularınız ve asistanın okuduğu kayıtlar seçtiğiniz sağlayıcıya gönderilir; asistan kayıt ekleyip düzenleyebilir (silme için her zaman onayınız istenir). Anahtarlar yalnızca bu tarayıcıda saklanır ve yedeğe yazılmaz. Kullanım, sağlayıcının kota ve fiyatlandırmasına tabidir. "Kapalı" iken ya da anahtar girilmediyse hiçbir veri gönderilmez.</p>
-
-            <div class="form-divider">🎙️ Sesli Asistan</div>
-            <label class="switch-row" for="setVoiceReply">
-                <span>Sesli yanıt<small>Mikrofonla sorduğunuzda asistan yanıtı yüksek sesle okur.</small></span>
-                <input type="checkbox" id="setVoiceReply">
-            </label>
-            <label class="switch-row" for="setVoiceAlways">
-                <span>Yazarak sorsam da sesli oku<small>Her yanıt seslendirilir.</small></span>
-                <input type="checkbox" id="setVoiceAlways">
-            </label>
+            <button type="button" class="btn btn-block" id="aiTest">Bağlantıyı Test Et</button>
+            <p class="diag" id="aiTestResult"></p>
+            <div class="form-divider">🎙️ Ses Motoru</div>
+            <label class="switch-row" for="setVoiceReply"><span>Sesli Yanıt</span><input type="checkbox" id="setVoiceReply"></label>
+            <label class="switch-row" for="setVoiceAlways"><span>Her Zaman Sesli Oku</span><input type="checkbox" id="setVoiceAlways"></label>
             <div class="form-group">
-                <label for="setVoiceEngine">Ses motoru</label>
+                <label for="setVoiceEngine">Motor</label>
                 <select class="form-control" id="setVoiceEngine">
-                    <option value="gemini">Gemini · gerçekçi insan sesi (Gemini anahtarı gerekir)</option>
-                    <option value="device">Cihaz sesi (anahtarsız, daha robotik)</option>
+                    <option value="gemini">Gemini Neural Voice</option>
+                    <option value="device">Cihaz Sesi</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="setTtsVoice">Ses</label>
+                <label for="setTtsVoice">Ses Tipi</label>
                 <select class="form-control" id="setTtsVoice">
-                    <option value="Sulafat">Sulafat · sıcak</option>
-                    <option value="Kore">Kore · kararlı</option>
-                    <option value="Aoede">Aoede · rahat</option>
-                    <option value="Achird">Achird · arkadaşça</option>
-                    <option value="Vindemiatrix">Vindemiatrix · nazik</option>
-                    <option value="Callirrhoe">Callirrhoe · sakin</option>
-                    <option value="Zephyr">Zephyr · parlak</option>
-                    <option value="Leda">Leda · genç</option>
-                    <option value="Puck">Puck · neşeli</option>
-                    <option value="Charon">Charon · bilgilendirici</option>
-                    <option value="Orus">Orus · kararlı</option>
-                    <option value="Algieba">Algieba · pürüzsüz</option>
-                    <option value="Fenrir">Fenrir · heyecanlı</option>
+                    <option value="Sulafat">Sulafat (Sıcak)</option>
+                    <option value="Kore">Kore (Net)</option>
+                    <option value="Puck">Puck (Neşeli)</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="setTtsModel">Ses kalitesi</label>
-                <select class="form-control" id="setTtsModel">
-                    <option value="gemini-3.8-flash-tts">En gerçekçi (Flash)</option>
-                    <option value="gemini-3.8-flash-lite-tts">Daha hızlı (Flash-Lite)</option>
-                </select>
-            </div>
-            <button type="button" class="btn btn-block" id="ttsTest"><i class="fa-solid fa-volume-high"></i> Sesi dene</button>
-            <p class="diag" id="ttsStatus" role="status"></p>
-            <p class="settings-note">Gemini sesi seçiliyken seslendirilecek yanıt metinleri Google'a gönderilir. Mikrofonla konuşmanın tanınması ise tarayıcınızın kendi servisiyle yapılır (Chrome'da ses Google'a gönderilir). Gemini sesi alınamazsa cihaz sesi devreye girer.</p>
-
+            <div class="form-group"><label for="setTtsModel">TTS Modeli</label><select class="form-control" id="setTtsModel"><option value="gemini-3.8-flash-tts">Flash TTS</option></select></div>
+            <button type="button" class="btn btn-block" id="ttsTest">Sesi Dene</button>
+            <p class="diag" id="ttsStatus"></p>
             <button class="submit-btn" id="saveSettings">Kaydet</button>
-
-            <div class="form-divider">🧠 Kişisel bellek</div>
-            <label class="switch-row" for="memToggle">
-                <span>Belleği kullan<small>Asistan kaydettiğiniz tercihleri ve devam eden işleri bilir. Cihazda saklanır; sağlık, din, siyaset, kimlik, kart ve parola gibi hassas bilgiler alınmaz.</small></span>
-                <input type="checkbox" id="memToggle">
-            </label>
+            <div class="form-divider">🧠 Kişisel Bellek</div>
+            <label class="switch-row" for="memToggle"><span>Belleği Kullan</span><input type="checkbox" id="memToggle"></label>
             <div class="mem-list" id="memList"></div>
             <div class="mem-add">
-                <input type="text" class="form-control" id="memInput" placeholder="Örn: Kahveyi sade içerim" maxlength="200" autocomplete="off">
-                <button type="button" class="btn" id="memAdd" aria-label="Belleğe ekle"><i class="fa-solid fa-plus"></i></button>
+                <input type="text" class="form-control" id="memInput" placeholder="Not ekle...">
+                <button type="button" class="btn" id="memAdd"><i class="fa-solid fa-plus"></i></button>
             </div>
-            <p class="diag" id="memStatus" role="status"></p>
-
-            <div class="form-divider">💾 Yedek &amp; Veri</div>
+            <p class="diag" id="memStatus"></p>
+            <div class="form-divider">💾 Veri Yönetimi</div>
             <div class="settings-actions">
                 <button class="btn" id="exportBtn"><i class="fa-solid fa-download"></i> Dışa Aktar</button>
                 <button class="btn" id="importBtn"><i class="fa-solid fa-upload"></i> İçe Aktar</button>
             </div>
-            <input type="file" id="importFile" accept=".json,application/json" hidden>
-            <button class="btn btn-ghost-danger btn-block" id="resetBtn"><i class="fa-solid fa-trash-can"></i> Tüm Verileri Sıfırla</button>
+            <input type="file" id="importFile" accept=".json" hidden>
+            <button class="btn btn-ghost-danger btn-block" id="resetBtn">Sıfırla</button>
             <p class="settings-note" id="kbInfo"></p>
             <p class="settings-note" id="versionInfo"></p>
         </div>
     </div>
 
-    <!-- ================= HESAP MAKİNESİ ================= -->
-    <div class="hm-overlay" id="hm-overlay" role="dialog" aria-modal="true" aria-label="Hesap Makinesi">
-        <div class="hm-app" id="hm-app">
+    <!-- HESAP MAKİNESİ MODALI -->
+    <div class="hm-overlay" id="hm-overlay">
+        <div class="hm-app glass-widget" id="hm-app">
             <div class="hm-header">
-                <h3><i class="fa-solid fa-calculator" style="color:var(--accent);"></i> Hesap Makinesi</h3>
-                <button class="hm-close" id="hm-close" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+                <h3><i class="fa-solid fa-calculator"></i> Hesap Makinesi</h3>
+                <button class="hm-close" id="hm-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="hm-tabs" role="tablist">
-                <button class="hm-tab hm-active" data-tab="basic" role="tab" aria-selected="true">Temel</button>
-                <button class="hm-tab" data-tab="sci" role="tab" aria-selected="false">Bilimsel</button>
+            <div class="hm-tabs">
+                <button class="hm-tab hm-active" data-tab="basic">Temel</button>
+                <button class="hm-tab" data-tab="sci">Bilimsel</button>
             </div>
-            <output id="hm-display" class="hm-display" aria-live="polite" aria-atomic="true">0</output>
-
+            <output id="hm-display" class="hm-display">0</output>
             <div class="hm-grid" id="hm-grid-basic">
                 <button class="hm-btn hm-fn" data-action="clear">C</button>
-                <button class="hm-btn hm-fn" data-action="delete" aria-label="Sil">⌫</button>
-                <button class="hm-btn hm-op" data-value="%" aria-label="Mod (kalan)">mod</button>
-                <button class="hm-btn hm-op" data-value="/" aria-label="Böl">÷</button>
+                <button class="hm-btn hm-fn" data-action="delete">⌫</button>
+                <button class="hm-btn hm-op" data-value="%">mod</button>
+                <button class="hm-btn hm-op" data-value="/">÷</button>
                 <button class="hm-btn" data-value="7">7</button>
                 <button class="hm-btn" data-value="8">8</button>
                 <button class="hm-btn" data-value="9">9</button>
-                <button class="hm-btn hm-op" data-value="*" aria-label="Çarp">×</button>
+                <button class="hm-btn hm-op" data-value="*">×</button>
                 <button class="hm-btn" data-value="4">4</button>
                 <button class="hm-btn" data-value="5">5</button>
                 <button class="hm-btn" data-value="6">6</button>
-                <button class="hm-btn hm-op" data-value="-" aria-label="Çıkar">−</button>
+                <button class="hm-btn hm-op" data-value="-">−</button>
                 <button class="hm-btn" data-value="1">1</button>
                 <button class="hm-btn" data-value="2">2</button>
                 <button class="hm-btn" data-value="3">3</button>
-                <button class="hm-btn hm-op" data-value="+" aria-label="Topla">+</button>
+                <button class="hm-btn hm-op" data-value="+">+</button>
                 <button class="hm-btn hm-zero" data-value="0">0</button>
-                <button class="hm-btn" data-value="." aria-label="Virgül">,</button>
-                <button class="hm-btn hm-eq" data-action="equals" aria-label="Eşittir">=</button>
+                <button class="hm-btn" data-value=".">,</button>
+                <button class="hm-btn hm-eq" data-action="equals">=</button>
             </div>
-
             <div class="hm-grid hm-sci" id="hm-grid-sci" hidden>
                 <button class="hm-btn hm-sci-btn" data-action="clear">C</button>
-                <button class="hm-btn hm-sci-btn" data-action="delete" aria-label="Sil">⌫</button>
+                <button class="hm-btn hm-sci-btn" data-action="delete">⌫</button>
                 <button class="hm-btn hm-sci-btn" data-value="(">(</button>
                 <button class="hm-btn hm-sci-btn" data-value=")">)</button>
-                <button class="hm-btn hm-sci-btn" data-value="/" aria-label="Böl">÷</button>
+                <button class="hm-btn hm-sci-btn" data-value="/">÷</button>
                 <button class="hm-btn hm-sci-btn" data-fn="sin">sin</button>
                 <button class="hm-btn hm-sci-btn" data-fn="cos">cos</button>
                 <button class="hm-btn hm-sci-btn" data-fn="tan">tan</button>
-                <button class="hm-btn hm-sci-btn" data-value="^" aria-label="Üs">xʸ</button>
-                <button class="hm-btn hm-sci-btn" data-value="*" aria-label="Çarp">×</button>
-                <button class="hm-btn hm-sci-btn" data-fn="sqrt" aria-label="Karekök">√</button>
-                <button class="hm-btn hm-sci-btn" data-fn="sq" aria-label="Kare">x²</button>
+                <button class="hm-btn hm-sci-btn" data-value="^">xʸ</button>
+                <button class="hm-btn hm-sci-btn" data-value="*">×</button>
+                <button class="hm-btn hm-sci-btn" data-fn="sqrt">√</button>
+                <button class="hm-btn hm-sci-btn" data-fn="sq">x²</button>
                 <button class="hm-btn hm-sci-btn" data-fn="log">log</button>
                 <button class="hm-btn hm-sci-btn" data-fn="ln">ln</button>
-                <button class="hm-btn hm-sci-btn" data-value="-" aria-label="Çıkar">−</button>
+                <button class="hm-btn hm-sci-btn" data-value="-">−</button>
                 <button class="hm-btn hm-sci-btn" data-value="7">7</button>
                 <button class="hm-btn hm-sci-btn" data-value="8">8</button>
                 <button class="hm-btn hm-sci-btn" data-value="9">9</button>
-                <button class="hm-btn hm-sci-btn" data-const="pi" aria-label="Pi">π</button>
-                <button class="hm-btn hm-sci-btn" data-value="+" aria-label="Topla">+</button>
+                <button class="hm-btn hm-sci-btn" data-const="pi">π</button>
+                <button class="hm-btn hm-sci-btn" data-value="+">+</button>
                 <button class="hm-btn hm-sci-btn" data-value="4">4</button>
                 <button class="hm-btn hm-sci-btn" data-value="5">5</button>
                 <button class="hm-btn hm-sci-btn" data-value="6">6</button>
-                <button class="hm-btn hm-sci-btn" data-const="e" aria-label="Euler sayısı">e</button>
-                <button class="hm-btn hm-sci-btn" data-value="%" aria-label="Mod (kalan)">mod</button>
+                <button class="hm-btn hm-sci-btn" data-const="e">e</button>
+                <button class="hm-btn hm-sci-btn" data-value="%">mod</button>
                 <button class="hm-btn hm-sci-btn" data-value="1">1</button>
                 <button class="hm-btn hm-sci-btn" data-value="2">2</button>
                 <button class="hm-btn hm-sci-btn" data-value="3">3</button>
-                <button class="hm-btn hm-sci-btn" data-fn="fact" aria-label="Faktöriyel">n!</button>
-                <button class="hm-btn hm-sci-btn hm-eq hm-eq-tall" data-action="equals" aria-label="Eşittir">=</button>
+                <button class="hm-btn hm-sci-btn" data-fn="fact">n!</button>
+                <button class="hm-btn hm-sci-btn hm-eq" data-action="equals">=</button>
                 <button class="hm-btn hm-sci-btn hm-span2" data-value="0">0</button>
-                <button class="hm-btn hm-sci-btn" data-value="." aria-label="Virgül">,</button>
-                <button class="hm-btn hm-sci-btn" data-action="neg" aria-label="Eksi artı">±</button>
+                <button class="hm-btn hm-sci-btn" data-value=".">,</button>
+                <button class="hm-btn hm-sci-btn" data-action="neg">±</button>
             </div>
-
-            <p class="hm-hint">Klavye: 0-9, + − × ÷, Enter, Backspace, Esc · Açılar radyan cinsindendir</p>
         </div>
     </div>
 
-    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="calculator.js?v=3.5.1"></script>
     <script src="kb.js?v=3.5.1"></script>
