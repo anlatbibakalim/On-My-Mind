@@ -28,9 +28,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="style.css?v=3.5.1">
+    <link rel="stylesheet" href="style.css?v=3.6.0">
 </head>
-<body data-version="3.5.1">
+<body data-version="3.6.0">
 
     <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
 
@@ -218,7 +218,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.5.1</span> · Kayıtlarınız cihazınızda saklanır<br>
+            <span class="version">Aklımda v3.6.0</span> · Kayıtlarınız cihazınızda saklanır · <a href="privacy.html" target="_blank" rel="noopener">Gizlilik</a><br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -245,10 +245,11 @@
             <button class="chat-chip" data-q="Bu hafta neler var?">📆 Bu hafta neler var?</button>
             <button class="chat-chip" data-q="Bu ay ne kadar ödemem var?">💳 Bu ayki ödemeler</button>
         </div>
+        <div class="media-chip" id="mediaChip" hidden><i class="fa-solid fa-paperclip"></i> <span id="mediaChipName"></span> <button type="button" id="mediaChipClear" aria-label="Eki kaldır"><i class="fa-solid fa-xmark"></i></button></div>
         <div class="chat-input">
             <input type="text" id="chatInput" placeholder="Asistana yazın ya da mikrofona basıp konuşun" autocomplete="off" aria-label="Mesajınız">
-            <button class="chat-attach" id="chatAttach" aria-label="Dosya ekle" title="Dosya ekle (CSV, TXT, MD, JSON)"><i class="fa-solid fa-paperclip"></i></button>
-            <input type="file" id="chatFile" hidden accept=".csv,.tsv,.txt,.md,.json,text/plain,text/csv,application/json">
+            <button class="chat-attach" id="chatAttach" aria-label="Dosya ekle" title="Dosya ekle (PDF, Word, Excel, CSV, görsel…)"><i class="fa-solid fa-paperclip"></i></button>
+            <input type="file" id="chatFile" hidden accept=".csv,.tsv,.txt,.md,.json,.pdf,.docx,.xlsx,.xls,image/*,application/pdf,text/plain,text/csv,application/json">
             <button class="chat-mic" id="chatMic" aria-label="Sesle konuş" aria-pressed="false" title="Sesle konuş"><i class="fa-solid fa-microphone"></i></button>
             <button class="chat-send" id="chatSend" aria-label="Gönder"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
@@ -339,6 +340,25 @@
                     <label for="eventDate">Tarih</label>
                     <input type="date" class="form-control" id="eventDate" required>
                 </div>
+                <div class="form-row2">
+                    <div class="form-group">
+                        <label for="eventTime">Saat (isteğe bağlı)</label>
+                        <input type="time" class="form-control" id="eventTime">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventLead">Hatırlatma</label>
+                        <select class="form-control" id="eventLead">
+                            <option value="">Varsayılan</option>
+                            <option value="-1">Hatırlatma yok</option>
+                            <option value="0">Başlangıçta</option>
+                            <option value="10">10 dakika önce</option>
+                            <option value="30">30 dakika önce</option>
+                            <option value="60">1 saat önce</option>
+                            <option value="120">2 saat önce</option>
+                            <option value="1440">1 gün önce</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group" id="amountGroup" style="display:none;">
                     <label for="eventAmount">Tutar (₺)</label>
                     <input type="number" class="form-control" id="eventAmount" placeholder="Örn: 450" min="0" step="0.01" inputmode="decimal">
@@ -408,9 +428,28 @@
                 <input type="number" class="form-control" id="setGoal" min="1000" max="100000" step="500" inputmode="numeric">
             </div>
             <label class="switch-row" for="setNotify">
-                <span>Açılışta hatırlat<small>Bugün ve yarın için kaydınız varsa bildirim gösterir (uygulama açıldığında).</small></span>
+                <span>Bildirimler<small>Saatli kayıtlar için hatırlatma, uygulama açılışında bugün/yarın özeti ve görev bitişi bildirimi gönderir.</small></span>
                 <input type="checkbox" id="setNotify">
             </label>
+
+            <div class="form-group">
+                <label for="setLead">Saatli kayıtlar için varsayılan hatırlatma</label>
+                <select class="form-control" id="setLead">
+                    <option value="-1">Hatırlatma yok</option>
+                            <option value="0">Başlangıçta</option>
+                            <option value="10">10 dakika önce</option>
+                            <option value="30">30 dakika önce</option>
+                            <option value="60">1 saat önce</option>
+                            <option value="120">2 saat önce</option>
+                            <option value="1440">1 gün önce</option>
+                </select>
+            </div>
+            <label class="switch-row" for="setNotifyTasks">
+                <span>Görev bitince bildir<small>Karar Odası tamamlanınca ya da asistan arka planda yanıtlayınca bildirim gönderir.</small></span>
+                <input type="checkbox" id="setNotifyTasks">
+            </label>
+            <button type="button" class="btn btn-block" id="icsAll"><i class="fa-regular fa-calendar-plus"></i> Tüm kayıtları telefon takvimine aktar (.ics)</button>
+            <p class="settings-note">Tarayıcı uygulaması kapalıyken kendi başına bildirim gönderemez. Takvime aktarılan kayıtlar telefonun kendi takvim alarmıyla (uygulama kapalıyken bile) hatırlatır; doğum günü ve ödemeler yıllık/aylık tekrarlanır.</p>
 
             <div class="form-divider">🤖 Yapay Zekâ</div>
             <div class="form-group">
@@ -418,6 +457,30 @@
                 <input type="password" class="form-control" id="setGeminiKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
                 <p class="settings-note">Asistanın beyni ve gerçekçi insan sesi için. Anahtarı Google AI Studio'dan (aistudio.google.com/apikey) alabilirsiniz. Anahtarı yalnızca bu siteden çalışacak şekilde (HTTP yönlendiren kısıtı) sınırlamanız önerilir.</p>
             </div>
+            <div class="form-group">
+                <label for="setSpeed">Yanıt hızı</label>
+                <select class="form-control" id="setSpeed">
+                    <option value="fast">Hızlı (kısa düşünür, basit sorularda hafif model)</option>
+                    <option value="balanced">Dengeli</option>
+                    <option value="deep">Derin (daha çok düşünür, yavaştır)</option>
+                </select>
+            </div>
+            <label class="switch-row" for="setLocalFirst">
+                <span>Önce cihazdan yanıtla<small>Kayıt, hesap, bellek ve kütüphanedeki bilinen sorular yapay zekâya gitmeden anında yanıtlanır.</small></span>
+                <input type="checkbox" id="setLocalFirst">
+            </label>
+            <div class="form-group">
+                <label for="setSpeed">Yanıt hızı</label>
+                <select class="form-control" id="setSpeed">
+                    <option value="fast">Hızlı (kısa düşünür, basit sorularda hafif model)</option>
+                    <option value="balanced">Dengeli</option>
+                    <option value="deep">Derin (daha çok düşünür, yavaştır)</option>
+                </select>
+            </div>
+            <label class="switch-row" for="setLocalFirst">
+                <span>Önce cihazdan yanıtla<small>Kayıt, hesap, bellek ve kütüphanedeki bilinen sorular yapay zekâya gitmeden anında yanıtlanır.</small></span>
+                <input type="checkbox" id="setLocalFirst">
+            </label>
             <div class="form-group">
                 <label for="setAiProvider">Asistanın beyni</label>
                 <select class="form-control" id="setAiProvider">
@@ -458,6 +521,24 @@
                 <span>Yazarak sorsam da sesli oku<small>Her yanıt seslendirilir.</small></span>
                 <input type="checkbox" id="setVoiceAlways">
             </label>
+            <div class="form-group">
+                <label for="setDeviceVoice">Cihaz sesi (anahtarsız mod)</label>
+                <select class="form-control" id="setDeviceVoice"></select>
+                <p class="settings-note">Cihaz sesinin doğallığı telefondaki ses paketine bağlıdır. Daha doğal Türkçe ses için: Ayarlar > Genel yönetim > Metin okuma > Google ya da Samsung > dişli simgesi > Ses verisini yükle > Türkçe. Yüklenen yeni sesler burada görünür; "Sesi dene" ile dinleyip seçin.</p>
+            </div>
+            <div class="form-group">
+                <label for="setDeviceRate">Cihaz sesi konuşma hızı</label>
+                <input type="range" id="setDeviceRate" min="0.8" max="1.3" step="0.05">
+            </div>
+            <div class="form-group">
+                <label for="setDeviceVoice">Cihaz sesi (anahtarsız mod)</label>
+                <select class="form-control" id="setDeviceVoice"></select>
+                <p class="settings-note">Cihaz sesinin doğallığı telefondaki ses paketine bağlıdır. Daha doğal Türkçe ses için: Ayarlar > Genel yönetim > Metin okuma > Google ya da Samsung > dişli simgesi > Ses verisini yükle > Türkçe. Yüklenen yeni sesler burada görünür; "Sesi dene" ile dinleyip seçin.</p>
+            </div>
+            <div class="form-group">
+                <label for="setDeviceRate">Cihaz sesi konuşma hızı</label>
+                <input type="range" id="setDeviceRate" min="0.8" max="1.3" step="0.05">
+            </div>
             <div class="form-group">
                 <label for="setVoiceEngine">Ses motoru</label>
                 <select class="form-control" id="setVoiceEngine">
@@ -597,8 +678,8 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-    <script src="calculator.js?v=3.5.1"></script>
-    <script src="kb.js?v=3.5.1"></script>
-    <script src="app.js?v=3.5.1"></script>
+    <script src="calculator.js?v=3.6.0"></script>
+    <script src="kb.js?v=3.6.0"></script>
+    <script src="app.js?v=3.6.0"></script>
 </body>
 </html>

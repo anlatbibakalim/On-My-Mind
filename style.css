@@ -1069,3 +1069,13 @@ button.agenda-day.today { color: var(--accent); }
 .mem-add { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
 .mem-add .form-control { flex: 1; }
 .mem-add .btn { flex: 0 0 auto; width: 44px; justify-content: center; }
+
+
+/* ---------- v3.6: saatli kayıt, eylem düğmeleri ---------- */
+.form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.msg-actions { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; display: flex; flex-wrap: wrap; gap: 6px; max-width: 100%; }
+
+.media-chip{display:flex;align-items:center;gap:8px;margin:0 12px 6px;padding:6px 10px;border-radius:999px;background:var(--surface-2,rgba(127,127,127,.15));font-size:.85rem;width:fit-content;max-width:calc(100% - 24px)}
+.media-chip[hidden]{display:none}
+.media-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-chip button{background:none;border:0;color:inherit;cursor:pointer;padding:2px 4px}

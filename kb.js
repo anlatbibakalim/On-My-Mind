@@ -205,6 +205,23 @@
         const need = t.routed ? Math.ceil(t.nq * 0.6) : t.nq;
         return t.matched >= need && t.score >= 2.2;
     }
+    /* Tam eşleşme yoksa "en yakın bilgi" gösterilebilir mi? (alana yönlenen ya da başlığa uyan parça) */
+    function nearest(hits) {
+        if (!hits || !hits.length) return false;
+        const t = hits[0];
+        if (t.score < 1.8) return false;
+        if (t.routed || t.titled) return t.matched >= 1;
+        return t.matched >= Math.max(1, t.nq);
+    }
+    const GENERAL_EXAMPLES = ['Bütçe nasıl yapılır?', 'Oltalama mesajını nasıl anlarım?', 'Pomodoro tekniği nedir?', 'Kararsızken ne yapmalıyım?', 'Enflasyon ne demek?', 'Seyahat hazırlık listesi neler içermeli?'];
+    /* Bilgi bulunamazsa sorgunun alanına uygun örnek sorular önerir */
+    function suggest(query, n) {
+        n = n || 3;
+        const out = [];
+        route(query).slice(0, 3).forEach(r => { const dm = domainInfo(r.id); ((dm && dm.examples) || []).forEach(e => { if (out.indexOf(e) < 0) out.push(e); }); });
+        GENERAL_EXAMPLES.forEach(e => { if (out.length < n && out.indexOf(e) < 0) out.push(e); });
+        return out.slice(0, n);
+    }
     function sourceLabel(c) {
         const dm = domainInfo(c.d);
         return (dm ? dm.file.replace(/\.md$/, '') : c.d) + ' › ' + c.s;
@@ -325,5 +342,5 @@
     }
 
     root.KB = { init: init, load: load, ready: ready, isReady: isReady, stats: stats, fold: fold, search: search, route: route, confident: confident,
-        compose: compose, contextBlock: contextBlock, toolResult: toolResult, gate: gate, verify: verify, sourceLabel: sourceLabel, domainInfo: domainInfo };
+        nearest: nearest, suggest: suggest, compose: compose, contextBlock: contextBlock, toolResult: toolResult, gate: gate, verify: verify, sourceLabel: sourceLabel, domainInfo: domainInfo };
 })(typeof window !== 'undefined' ? window : globalThis);
