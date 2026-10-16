@@ -38,12 +38,9 @@
         const up = upcoming();
         const week = up.filter(i => i.days <= 7).length;
         const today = up.filter(i => i.days === 0).length;
-        let total = 0, done = 0;
-        events.forEach(ev => { const inf = infoFor(ev); if (inf.days <= 30 || inf.done) { total++; if (inf.done) done++; } });
-        const pct = total ? Math.round(done / total * 100) : 0;
         const steps = last7();
         const goal = (settings && settings.stepGoal) || 8000;
-        return { up: up, week: week, today: today, pct: pct, steps: steps, goal: goal, next: up[0] || null, total: events.length };
+        return { up: up, week: week, today: today, steps: steps, goal: goal, next: up[0] || null, total: events.length };
     }
 
     /* ---------- Küçük çizim yardımcıları ---------- */
@@ -58,10 +55,6 @@
         const max = Math.max.apply(null, vals.concat([1]));
         return '<div class="mini-bars" style="height:' + h + 'px" aria-hidden="true">' + vals.map(v => '<i style="height:' + Math.max(6, Math.round(v / max * 100)) + '%"></i>').join('') + '</div>';
     }
-    function ring(pct, size, label) {
-        const r = 34, c = 2 * Math.PI * r, off = c * (1 - Math.min(100, pct) / 100);
-        return '<div class="h-ring" style="width:' + size + 'px;height:' + size + 'px"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="hr-bg" cx="40" cy="40" r="' + r + '"/><circle class="hr-fg" cx="40" cy="40" r="' + r + '" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 40 40)"/></svg><b>' + esc(label) + '</b></div>';
-    }
     function wave() {
         let s = '';
         for (let i = 0; i < 28; i++) s += '<i style="--i:' + i + ';--h:' + (18 + Math.round(Math.abs(Math.sin(i * 0.55)) * 62)) + '%"></i>';
@@ -69,6 +62,57 @@
     }
 
     /* ---------- Komuta paneli ---------- */
+    const TAB_KEY = 'aklimda_hometab';
+    const TABS = [
+        { id: 'quick', label: 'Hızlı Erişim', icon: 'fa-bolt', rows: [
+            ['panel:agenda', 'fa-calendar-days', 'Takvim', 'Güne dokun, o günü sesli anlatayım'],
+            ['panel:news', 'fa-globe', 'Haberler', 'Güncel başlıklar'],
+            ['calc', 'fa-calculator', 'Hesap Makinesi', 'Formüller, yüzde, faiz'],
+            ['council', 'fa-people-group', 'Karar Odası', 'Ajanlar tartışır, Hakem karar verir'],
+            ['panel:wx', 'fa-cloud-sun', 'Hava Tahmini', '5 günlük'],
+            ['panel:health', 'fa-heart-pulse', 'Sağlık ve Adım', '<span id="hStepsSmall"></span>'],
+            ['panel:summary', 'fa-chart-column', 'Özet', 'Kayıtların genel görünümü'],
+            ['ask:Bilgi kütüphanesinde ne var?', 'fa-book-open', 'Bilgi Kütüphanesi', 'Cihazda, çevrimdışı, kaynaklı']
+        ] },
+        { id: 'msg', label: 'Mesaj ve E-posta', icon: 'fa-envelope', rows: [
+            ['ask:Bir e-posta taslağı hazırla: ', 'fa-envelope', 'E-posta taslağı', 'Siz onaylamadan gönderilmez'],
+            ['ask:WhatsApp için bir mesaj taslağı hazırla: ', 'fa-brands fa-whatsapp', 'WhatsApp taslağı', 'Düğmeyle açılır, siz gönderirsiniz'],
+            ['ask:SMS için bir mesaj taslağı hazırla: ', 'fa-comment-sms', 'SMS taslağı', 'Telefonun mesaj uygulamasında açılır'],
+            ['ask:Panoya kopyaladığım mesaja cevap taslağı hazırla: ', 'fa-reply', 'Gelen mesaja cevap', 'Mesajı yapıştırın ya da Paylaş > Aklımda deyin']
+        ] },
+        { id: 'doc', label: 'Belge ve Görsel', icon: 'fa-file-lines', rows: [
+            ['file', 'fa-file-pdf', 'PDF özetle', 'Gemini ile'],
+            ['file', 'fa-file-word', 'Word oku', '.docx'],
+            ['file', 'fa-file-excel', 'Excel / CSV analiz et', 'Cihazda hesaplanır'],
+            ['file', 'fa-image', 'Görsel anla', 'Fotoğraf, ekran görüntüsü']
+        ] }
+    ];
+    function faIcon(c) { return c.indexOf('fa-brands') === 0 ? c : 'fa-solid ' + c; }
+    function tabsHtml() {
+        let cur = 'quick';
+        try { cur = localStorage.getItem(TAB_KEY) || 'quick'; } catch (e) { /* yoksay */ }
+        if (!TABS.some(t => t.id === cur)) cur = 'quick';
+        return '<div class="home-tabs g-card">' +
+            '<div class="tab-panels">' + TABS.map(t =>
+                '<div class="tab-panel" role="tabpanel" id="tp-' + t.id + '" aria-labelledby="tb-' + t.id + '"' + (t.id === cur ? '' : ' hidden') + '>' +
+                  t.rows.map(r => '<button class="g-row" type="button" data-act="' + esc(r[0]) + '"><i class="' + faIcon(r[1]) + '"></i><span><b>' + esc(r[2]) + '</b><small>' + r[3] + '</small></span></button>').join('') +
+                '</div>').join('') + '</div>' +
+            '<div class="tab-bar" role="tablist" aria-label="Kısayollar">' + TABS.map(t =>
+                '<button type="button" role="tab" class="tab-btn' + (t.id === cur ? ' on' : '') + '" id="tb-' + t.id + '" aria-controls="tp-' + t.id + '" aria-selected="' + (t.id === cur) + '" tabindex="' + (t.id === cur ? '0' : '-1') + '" data-tab="' + t.id + '"><i class="fa-solid ' + t.icon + '"></i><span>' + esc(t.label) + '</span></button>').join('') + '</div>' +
+          '</div>';
+    }
+    function selectTab(id, focus) {
+        if (!homeEl) return;
+        homeEl.querySelectorAll('.tab-btn').forEach(b => {
+            const on = b.dataset.tab === id;
+            b.classList.toggle('on', on);
+            b.setAttribute('aria-selected', String(on));
+            b.setAttribute('tabindex', on ? '0' : '-1');
+            if (on && focus) b.focus();
+        });
+        homeEl.querySelectorAll('.tab-panel').forEach(p => { p.hidden = p.id !== 'tp-' + id; });
+        try { localStorage.setItem(TAB_KEY, id); } catch (e) { /* yoksay */ }
+    }
     function build() {
         if (homeEl) return homeEl;
         const main = $q('main.container') || document.body;
@@ -77,61 +121,42 @@
         homeEl.id = 'home';
         homeEl.setAttribute('aria-label', 'Komuta paneli');
         homeEl.innerHTML =
-            '<div class="home-left">' +
-              '<div class="g-card"><h4>Hızlı Erişim</h4>' +
-                '<button class="g-row" data-act="panel:news"><i class="fa-solid fa-globe"></i><span><b>Haberler</b><small>Güncel başlıklar</small></span></button>' +
-                '<button class="g-row" data-act="calc"><i class="fa-solid fa-calculator"></i><span><b>Gelişmiş Hesap Makinesi</b><small>Formüller, yüzde, faiz</small></span></button>' +
-                '<button class="g-row" data-act="council"><i class="fa-solid fa-people-group"></i><span><b>Karar Odası</b><small>Birkaç ajan tartışır, Hakem karar verir</small></span></button>' +
-                '<button class="g-row" data-act="panel:wx"><i class="fa-solid fa-cloud-sun"></i><span><b>Hava Tahmini</b><small id="hWx">5 günlük</small></span></button>' +
-                '<button class="g-row" data-act="panel:health"><i class="fa-solid fa-heart-pulse"></i><span><b>Sağlık ve Adım</b><small id="hStepsSmall"></small></span></button>' +
-                '<button class="g-row" data-act="ask:Bilgi kütüphanesinde ne var?"><i class="fa-solid fa-book-open"></i><span><b>Bilgi Kütüphanesi</b><small>Cihazda, çevrimdışı, kaynaklı</small></span></button>' +
-              '</div>' +
-              '<div class="g-card"><h4>Mesaj ve E-posta Taslağı</h4>' +
-                '<button class="g-row" data-act="ask:Bir e-posta taslağı hazırla: "><i class="fa-solid fa-envelope"></i><span><b>E-posta taslağı</b><small>Siz onaylamadan gönderilmez</small></span></button>' +
-                '<button class="g-row" data-act="ask:WhatsApp için bir mesaj taslağı hazırla: "><i class="fa-brands fa-whatsapp"></i><span><b>WhatsApp taslağı</b><small>Düğmeyle açılır, siz gönderirsiniz</small></span></button>' +
-              '</div>' +
-              '<div class="g-card"><h4>Belge ve Görsel</h4>' +
-                '<button class="g-row" data-act="file"><i class="fa-solid fa-file-pdf"></i><span><b>PDF özetle</b><small>Gemini ile</small></span></button>' +
-                '<button class="g-row" data-act="file"><i class="fa-solid fa-file-word"></i><span><b>Word oku</b><small>.docx</small></span></button>' +
-                '<button class="g-row" data-act="file"><i class="fa-solid fa-file-excel"></i><span><b>Excel / CSV analiz et</b><small>Cihazda hesaplanır</small></span></button>' +
-                '<button class="g-row" data-act="file"><i class="fa-solid fa-image"></i><span><b>Görsel anla</b><small>Fotoğraf, ekran görüntüsü</small></span></button>' +
-              '</div>' +
-            '</div>' +
-
-            '<div class="home-center">' +
-              '<div class="h-title"><b>Aklımda Asistan</b><button class="h-bell" data-act="panel:agenda" aria-label="Takvimi aç"><i class="fa-solid fa-bell"></i></button></div>' +
-              '<button class="core" id="homeCore" type="button" aria-label="Asistanla konuş">' +
-                '<span class="core-halo"></span><span class="core-arc a1"></span><span class="core-arc a2"></span><span class="core-arc a3"></span>' +
-                '<span class="core-orb"></span><span class="core-label">AI Core</span>' +
-              '</button>' +
-              '<div class="g-card exec"><h4>Komuta Özeti</h4>' +
-                '<div class="exec-grid">' +
-                  '<button class="tile" data-act="panel:agenda"><small>Öncelikli</small><b id="hTop">0</b><em>yaklaşan 7 gün</em></button>' +
-                  '<button class="tile" data-act="panel:agenda"><small>Program</small><span id="hRing"></span></button>' +
-                  '<button class="tile" data-act="panel:summary"><small>Analiz</small><span id="hSpark"></span></button>' +
+            '<div class="home-hero">' +
+              '<div class="home-side home-soon"><div class="g-card"><h4>Yaklaşanlar</h4><div id="hSoon"></div></div></div>' +
+              '<div class="home-center">' +
+                '<div class="h-title"><b>Aklımda Asistan</b></div>' +
+                '<button class="core" id="homeCore" type="button" aria-label="Asistanla konuş">' +
+                  '<span class="core-halo"></span><span class="core-arc a1"></span><span class="core-arc a2"></span><span class="core-arc a3"></span>' +
+                  '<span class="core-orb"></span><span class="core-label">AI Core</span>' +
+                '</button>' +
+                '<div class="g-card exec"><h4>Komuta Özeti</h4>' +
+                  '<div class="exec-grid">' +
+                    '<button class="tile" type="button" data-act="date:today"><small>Bugün</small><b id="hToday">0</b><em>kayıt</em></button>' +
+                    '<button class="tile" type="button" data-act="panel:agenda"><small>Bu hafta</small><b id="hTop">0</b><em>yaklaşan 7 gün</em></button>' +
+                    '<button class="tile" type="button" data-act="panel:health"><small>Adım</small><span id="hSpark"></span></button>' +
+                  '</div>' +
                 '</div>' +
+                '<div class="listen"><div class="listen-state" id="hState"><i class="fa-solid fa-circle"></i> <span>Hazır · cihazda çalışıyor</span></div>' + wave() +
+                  '<p class="listen-quote" id="hQuote"></p></div>' +
               '</div>' +
-              '<div class="listen"><div class="listen-state" id="hState"><i class="fa-solid fa-circle"></i> <span>Hazır · cihazda çalışıyor</span></div>' + wave() +
-                '<p class="listen-quote" id="hQuote"></p></div>' +
-            '</div>' +
-
-            '<div class="home-right">' +
-              '<div class="g-card"><h4>Genel Göstergeler</h4>' +
-                '<div class="metric-row"><div><small>Bugünkü adım</small><b id="hMStep">0</b></div><div><small>Hedef</small><b id="hMGoal">0</b></div><div><small>Kayıt</small><b id="hMTotal">0</b></div></div>' +
-              '</div>' +
-              '<div class="g-card two">' +
-                '<div><h4>Verimlilik</h4><div id="hProd"></div></div>' +
-                '<div><h4>Sıradaki</h4><div class="cal-next" id="hNext"></div></div>' +
-              '</div>' +
-              '<div class="g-card"><h4>Sağlık Özeti</h4>' +
+              '<div class="home-side home-well"><div class="g-card"><h4>Sağlık Özeti</h4>' +
                 '<div class="well"><small>Adım geçmişi (7 gün)</small><span id="hStepsChart"></span></div>' +
                 '<div class="well"><small>Kalori geçmişi (yaklaşık)</small><span id="hKcalChart"></span></div>' +
-              '</div>' +
-            '</div>';
+              '</div></div>' +
+            '</div>' + tabsHtml();
         main.insertBefore(homeEl, main.firstChild);
         homeEl.addEventListener('click', onAct);
+        homeEl.addEventListener('keydown', onTabKey);
         $q('#homeCore', homeEl).addEventListener('click', onCore);
         return homeEl;
+    }
+    function onTabKey(e) {
+        const b = e.target.closest && e.target.closest('.tab-btn');
+        if (!b || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+        e.preventDefault();
+        const i = TABS.findIndex(t => t.id === b.dataset.tab);
+        const n = (i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
+        selectTab(TABS[n].id, true);
     }
 
     function openChatWith(text) {
@@ -140,6 +165,8 @@
         if (inp && text) { inp.value = text; try { inp.focus(); inp.setSelectionRange(text.length, text.length); } catch (e) { /* yoksay */ } }
     }
     function onAct(e) {
+        const tb = e.target.closest && e.target.closest('[data-tab]');
+        if (tb) { selectTab(tb.dataset.tab, false); return; }
         const b = e.target.closest && e.target.closest('[data-act]');
         if (!b) return;
         const a = b.dataset.act;
@@ -148,6 +175,12 @@
                 const id = a.slice(6);
                 if (!panelState[id]) togglePanel(id);
                 const el = $q('#panel-' + id);
+                if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (a.indexOf('date:') === 0) {
+                const iso = a.slice(5) === 'today' ? todayISO() : a.slice(5);
+                if (!panelState.agenda) togglePanel('agenda');
+                selectAgendaDay(iso, true);
+                const el = $q('#panel-agenda');
                 if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (a === 'calc') $q('#calcBtn').click();
             else if (a === 'council') $q('#councilBtn').click();
@@ -160,24 +193,24 @@
         try { if (voice && voice.recSupported) startListening(); } catch (e) { /* yoksay */ }
     }
 
+    function when(d) { return d === 0 ? 'bugün' : d === 1 ? 'yarın' : d + ' gün sonra'; }
     function refresh() {
         if (!homeEl) return;
         const m = metrics();
         const set = (id, html) => { const el = $q('#' + id, homeEl); if (el) el.innerHTML = html; };
+        set('hToday', String(m.today));
         set('hTop', String(m.week));
-        set('hRing', ring(m.pct, 58, m.pct + '%'));
         set('hSpark', spark(m.steps.map(s => s.v), 96, 40));
-        set('hMStep', num(stepState.count));
-        set('hMGoal', num(m.goal));
-        set('hMTotal', num(m.total));
         set('hStepsSmall', num(stepState.count) + ' adım · hedef ' + num(m.goal));
-        const pctGoal = Math.round(Math.min(100, stepState.count / m.goal * 100));
-        set('hProd', ring(m.pct, 84, m.pct + '%') + '<small class="mut">tamamlanan kayıt</small>');
-        set('hNext', m.next
-            ? '<b>' + esc(m.next.ev.time || 'Gün boyu') + '</b><span>' + esc(m.next.ev.title) + '</span><small>' + (m.next.days === 0 ? 'bugün' : m.next.days === 1 ? 'yarın' : m.next.days + ' gün sonra') + '</small>'
-            : '<b>Boş</b><span>Yaklaşan kayıt yok</span><small>"yarın 10:00 toplantı" yazın</small>');
-        set('hStepsChart', spark(m.steps.map(s => s.v), 220, 64, 'gold') + '<div class="axis">' + m.steps.map(s => '<i>' + s.label + '</i>').join('') + '</div>');
-        set('hKcalChart', bars(m.steps.map(s => Math.round(s.v * 0.04)), 52));
+        set('hSoon', m.up.length
+            ? m.up.slice(0, 4).map(i => '<button type="button" class="g-row" data-act="date:' + toISOLocal(i.occ) + '"><i class="fa-solid fa-calendar-day"></i><span><b>' + esc(i.ev.title) + '</b><small>' + (i.ev.time ? esc(i.ev.time) + ' · ' : '') + when(i.days) + '</small></span></button>').join('')
+            : '<p class="mut left">Yaklaşan kayıt yok. Yazın ya da söyleyin: "yarın saat 10\'da toplantı".</p>');
+        const hasSteps = m.steps.some(s => s.v > 0);
+        homeEl.classList.toggle('no-well', !hasSteps);
+        if (hasSteps) {
+            set('hStepsChart', spark(m.steps.map(s => s.v), 220, 64, 'gold') + '<div class="axis">' + m.steps.map(s => '<i>' + s.label + '</i>').join('') + '</div>');
+            set('hKcalChart', bars(m.steps.map(s => Math.round(s.v * 0.04)), 52));
+        }
         const st = $q('#hState', homeEl);
         if (st) {
             const listening = !!(typeof voice !== 'undefined' && voice.listening);
@@ -186,7 +219,6 @@
             homeEl.classList.toggle('is-listening', listening);
             $q('span', st).textContent = listening ? 'Aklımda dinliyor… (konuşun)' : busy ? 'Düşünüyor…' : (navigator.onLine === false ? 'Çevrimdışı · cihazda çalışıyor' : 'Hazır · cihazda çalışıyor');
         }
-        void pctGoal;
     }
     function rotateQuote() {
         const q = $q('#hQuote', homeEl);

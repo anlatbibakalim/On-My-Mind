@@ -5,7 +5,7 @@
    ============================================================ */
 'use strict';
 
-const APP_VERSION = '3.7.0';
+const APP_VERSION = '3.7.1';
 const K = {
     events: 'aklimda_events_v3',
     eventsV2: 'aklimda_events_v2',
@@ -565,7 +565,7 @@ function renderAgenda() {
             dot.className = 'agenda-dot';
             cell.appendChild(dot);
         }
-        cell.addEventListener('click', () => { agenda.selected = iso; renderAgenda(); });
+        cell.addEventListener('click', () => selectAgendaDay(iso, true));
         frag.appendChild(cell);
     }
     const used = lead + total;
@@ -579,6 +579,36 @@ function renderAgenda() {
     grid.innerHTML = '';
     grid.appendChild(frag);
     renderAgendaEvents();
+}
+/* Seçilen günün kısa, sesli okunabilir özeti */
+function dayBriefText(iso) {
+    const d = daysUntil(parseDate(iso));
+    const rel = d === 0 ? 'bugün' : d === 1 ? 'yarın' : d === -1 ? 'dün' : d > 1 ? d + ' gün sonra' : Math.abs(d) + ' gün önce';
+    const head = formatLongTR(iso) + ', ' + rel + '.';
+    const list = events.filter(ev => occursOn(ev, iso)).sort((a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99')));
+    if (!list.length) return head + ' Bu günde kayıt yok.';
+    const parts = list.map(ev => {
+        const t = TYPES[ev.type];
+        let x = (ev.time ? 'saat ' + ev.time + ', ' : '') + ev.title + ' (' + t.label.toLowerCase() + ')';
+        if (ev.type === 'odeme' && ev.amount != null && ev.amount !== '') x += ', ' + ev.amount + ' lira';
+        if (isDone(ev)) x += ', tamamlandı';
+        return x;
+    });
+    return head + ' ' + (list.length === 1 ? 'Bir kayıt var: ' : list.length + ' kayıt var: ') + parts.join('; ') + '.';
+}
+function speakDayBrief(iso) {
+    const text = dayBriefText(iso || agenda.selected);
+    try { unlockAudio(); stopSpeaking(); } catch (e) { /* yoksay */ }
+    if (canSpeak()) speak(text);
+    else toast(text, 'info');
+    return text;
+}
+function selectAgendaDay(iso, say) {
+    agenda.selected = iso;
+    const d = parseDate(iso);
+    agenda.year = d.getFullYear(); agenda.month = d.getMonth();
+    renderAgenda();
+    if (say && settings.voiceReply !== false) speakDayBrief(iso);
 }
 function renderAgendaEvents() {
     const isToday = agenda.selected === todayISO();
@@ -4092,6 +4122,7 @@ function bindEvents() {
         renderAgenda();
     });
     $('#agendaAddBtn').addEventListener('click', () => openEventModal());
+    $('#agendaSpeak').addEventListener('click', () => speakDayBrief(agenda.selected));
 
     $('#addBtn').addEventListener('click', () => openEventModal());
     $('#eventType').addEventListener('change', syncFormFields);
