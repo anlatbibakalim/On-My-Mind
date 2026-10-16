@@ -28,9 +28,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="style.css?v=3.7.1">
+    <link rel="stylesheet" href="style.css?v=3.7.2">
 </head>
-<body data-version="3.7.1">
+<body data-version="3.7.2">
 
     <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
 
@@ -220,7 +220,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.7.1</span> · Kayıtlarınız cihazınızda saklanır · <a href="privacy.html" target="_blank" rel="noopener">Gizlilik</a><br>
+            <span class="version">Aklımda v3.7.2</span> · Kayıtlarınız cihazınızda saklanır · <a href="privacy.html" target="_blank" rel="noopener">Gizlilik</a><br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -471,6 +471,10 @@
                 <span>Önce cihazdan yanıtla<small>Kayıt, hesap, bellek ve kütüphanedeki bilinen sorular yapay zekâya gitmeden anında yanıtlanır.</small></span>
                 <input type="checkbox" id="setLocalFirst">
             </label>
+            <label class="switch-row" for="setStepAuto">
+                <span>Adım sayacı otomatik başlasın<small>Uygulama açılınca sayar. Parmakla kaydırma, dokunma ve sarsıntı adım sayılmaz; en az 4 düzenli adım gerekir. Tarayıcılar uygulama kapalıyken sensörü vermez.</small></span>
+                <input type="checkbox" id="setStepAuto">
+            </label>
             <label class="switch-row" for="setFxOff">
                 <span>Efektleri azalt<small>Cam teminde hareketli süsleri ve bulanıklığı kapatır; eski telefonlarda pil ve akıcılık için.</small></span>
                 <input type="checkbox" id="setFxOff">
@@ -663,9 +667,9 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-    <script src="calculator.js?v=3.7.1"></script>
-    <script src="kb.js?v=3.7.1"></script>
-    <script src="app.js?v=3.7.1"></script>
-    <script src="home.js?v=3.7.1"></script>
+    <script src="calculator.js?v=3.7.2"></script>
+    <script src="kb.js?v=3.7.2"></script>
+    <script src="app.js?v=3.7.2"></script>
+    <script src="home.js?v=3.7.2"></script>
 </body>
 </html>

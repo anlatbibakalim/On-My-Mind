@@ -5,7 +5,7 @@
    ============================================================ */
 'use strict';
 
-const APP_VERSION = '3.7.1';
+const APP_VERSION = '3.7.2';
 const K = {
     events: 'aklimda_events_v3',
     eventsV2: 'aklimda_events_v2',
@@ -227,7 +227,7 @@ let settings = Object.assign({
     voiceEngine: 'gemini', ttsModel: 'gemini-3.8-flash-tts', ttsVoice: 'Sulafat',
     councilAgents: ['analist', 'supheci', 'iyimser', 'pratik'], councilRounds: 2, councilCtx: false, councilVoice: false,
     memoryOn: true, leadMinutes: 60, notifyTasks: true, dayReminderHour: 9,
-    speedMode: 'fast', localFirst: true, fxOff: false, deviceVoice: '', deviceRate: 1
+    speedMode: 'fast', localFirst: true, fxOff: false, stepAuto: true, deviceVoice: '', deviceRate: 1
 }, savedSettings);
 (function migrateSettings() {
     settings.aiKeys = Object.assign({ gemini: '', openai: '', anthropic: '' }, settings.aiKeys || {});
@@ -350,6 +350,19 @@ function showConfirm(opts) {
 /* ==================== SAĞLIK & ADIM MODÜLÜ ==================== */
 const STEP_THRESHOLD = 1.2;     // m/s² (yerçekimi çıkarıldıktan sonra)
 const STEP_MIN_GAP = 300;       // ms
+const STEP_MAX_GAP = 1500;      // ms: bundan uzun aralık yürüyüşü kesilmiş sayar
+const STEP_CHAIN = 4;           // art arda bu kadar düzenli tepe görülmeden adım sayılmaz (kaydırma/sarsıntıyı eler)
+const STEP_MAX_DYN = 14;        // m/s²: bundan sert hareket sarsıntıdır, adım değildir
+const TOUCH_QUIET = 900;        // ms: parmak ekrana dokunduktan/kaydırdıktan sonra bu süre sayma
+const stepGuard = { until: 0, bound: false };
+function touchGuard() { stepGuard.until = Date.now() + TOUCH_QUIET; stepState.chain = 0; }
+function bindStepGuard() {
+    if (stepGuard.bound || typeof window === 'undefined' || !window.addEventListener) return;
+    stepGuard.bound = true;
+    ['touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointermove', 'wheel', 'scroll', 'click', 'keydown'].forEach(t => {
+        try { window.addEventListener(t, touchGuard, { passive: true, capture: true }); } catch (e) { /* yoksay */ }
+    });
+}
 
 const stepHistory = (function () {
     const raw = db.get(K.steps, {});
@@ -357,7 +370,7 @@ const stepHistory = (function () {
 })();
 const stepState = {
     on: false, day: todayISO(), count: 0, unsaved: 0,
-    last: 0, gravity: null, lastT: 0, above: false, samples: 0,
+    last: 0, gravity: null, lastT: 0, above: false, samples: 0, chain: 0, auto: false,
     supported: typeof window !== 'undefined' && 'DeviceMotionEvent' in window,
     wakeLock: null, probe: null
 };
@@ -467,8 +480,12 @@ function onMotion(e) {
     const dyn = m - stepState.gravity;
     if (!stepState.above && dyn > STEP_THRESHOLD && now - stepState.last > STEP_MIN_GAP) {
         stepState.above = true;
+        const gap = now - stepState.last;
         stepState.last = now;
-        registerStep();
+        if (now < stepGuard.until || dyn > STEP_MAX_DYN) { stepState.chain = 0; return; }     // dokunma/kaydırma ya da sarsıntı: adım değil
+        stepState.chain = gap <= STEP_MAX_GAP ? stepState.chain + 1 : 1;                        // düzenli yürüyüş temposu şartı
+        if (stepState.chain === STEP_CHAIN) { for (let i = 0; i < STEP_CHAIN; i++) registerStep(); }  // bekleyen adımları geriye dönük ekle
+        else if (stepState.chain > STEP_CHAIN) registerStep();
     } else if (stepState.above && dyn < STEP_THRESHOLD * 0.4) {
         stepState.above = false;
     }
@@ -484,36 +501,40 @@ async function requestWakeLock() {
 function releaseWakeLock() {
     if (stepState.wakeLock) { stepState.wakeLock.release().catch(() => { }); stepState.wakeLock = null; }
 }
-function startSteps() {
+function startSteps(auto) {
+    if (!stepState.supported && auto) return;
     if (!stepState.supported) { toast('Cihazınız hareket sensörünü desteklemiyor. Adımı elle girebilirsiniz.', 'error'); return; }
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(r => {
-            if (r === 'granted') attachMotion();
-            else toast('Hareket izni verilmedi.', 'error');
-        }).catch(() => toast('Hareket izni alınamadı.', 'error'));
+            if (r === 'granted') attachMotion(auto);
+            else if (!auto) toast('Hareket izni verilmedi.', 'error');
+        }).catch(() => { if (!auto) toast('Hareket izni alınamadı.', 'error'); });
     } else {
-        attachMotion();
+        attachMotion(auto);
     }
 }
-function attachMotion() {
+function attachMotion(auto) {
     if (stepState.on) return;
     stepState.on = true;
+    stepState.auto = !!auto;
+    stepState.chain = 0;
+    bindStepGuard();
     stepState.samples = 0;
     stepState.gravity = null;
     stepState.above = false;
     window.addEventListener('devicemotion', onMotion);
     $('#stepsToggle').innerHTML = '<i class="fa-solid fa-pause"></i> Sayacı Durdur';
     $('#stepsToggle').setAttribute('aria-pressed', 'true');
-    requestWakeLock();
-    toast('Adım sayacı çalışıyor. Ekran açık kalmalı.', 'success');
+    if (!auto) { requestWakeLock(); toast('Adım sayacı çalışıyor. Uygulama açık kalmalı.', 'success'); }   // otomatik başlayınca ekranı açık tutmayız (pil)
     clearTimeout(stepState.probe);
     stepState.probe = setTimeout(() => {
         if (stepState.on && stepState.samples === 0) {
-            toast('Sensör verisi alınamıyor. Tarayıcı iznini kontrol edin ya da adımı elle girin.', 'error');
+            if (auto) { stopSteps(true); }                    // sensör yok/izinsiz: sessizce vazgeç
+            else toast('Sensör verisi alınamıyor. Tarayıcı iznini kontrol edin ya da adımı elle girin.', 'error');
         }
     }, 3000);
 }
-function stopSteps() {
+function stopSteps(silent) {
     stepState.on = false;
     window.removeEventListener('devicemotion', onMotion);
     clearTimeout(stepState.probe);
@@ -3891,6 +3912,7 @@ function openSettings() {
     $('#setSpeed').value = settings.speedMode || 'fast';
     $('#setLocalFirst').checked = settings.localFirst !== false;
     $('#setFxOff').checked = !!settings.fxOff;
+    $('#setStepAuto').checked = settings.stepAuto !== false;
     $('#setTtsVoice').value = settings.ttsVoice;
     $('#setTtsModel').value = settings.ttsModel;
     setDiag($('#aiTestResult'), '', '');
@@ -3951,6 +3973,7 @@ async function saveSettings() {
     settings.speedMode = ['fast', 'balanced', 'deep'].indexOf($('#setSpeed').value) >= 0 ? $('#setSpeed').value : 'fast';
     settings.localFirst = $('#setLocalFirst').checked;
     settings.fxOff = $('#setFxOff').checked;
+    settings.stepAuto = $('#setStepAuto').checked;
     if (typeof AklimdaHome !== 'undefined') AklimdaHome.applyFx();
     pickVoice();
     settings.ttsVoice = $('#setTtsVoice').value || 'Sulafat';
@@ -4130,7 +4153,10 @@ function bindEvents() {
     $('#cancelForm').addEventListener('click', () => closeModalEl('#eventModal'));
     $('#sampleBtn').addEventListener('click', addSampleData);
 
-    $('#stepsToggle').addEventListener('click', () => { stepState.on ? stopSteps() : startSteps(); });
+    $('#stepsToggle').addEventListener('click', () => {
+        if (stepState.on) { stopSteps(); settings.stepAuto = false; } else { startSteps(); settings.stepAuto = true; }
+        db.set(K.settings, settings);
+    });
 
     $$('.modal').forEach(m => m.addEventListener('click', e => {
         if (e.target !== m) return;
@@ -4263,6 +4289,16 @@ function handleShareTarget() {
         botSay('Paylaştığınız metni aldım. Ne yapmamı istersiniz? Örneğin "buna cevap taslağı hazırla" ya da "özetle" yazıp gönderin.');
     } catch (e) { /* paylaşım yoksa sessiz */ }
 }
+/* Uygulama açılınca adım sayacı kendiliğinden başlar (iOS'ta ilk dokunuşta izin istenir) */
+function autoStartSteps() {
+    if (settings.stepAuto === false || !stepState.supported) return;
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        const once = () => { window.removeEventListener('pointerdown', once, true); if (!stepState.on && settings.stepAuto !== false) startSteps(true); };
+        window.addEventListener('pointerdown', once, true);
+        return;
+    }
+    startSteps(true);
+}
 function init() {
     if (checkVersionSkew()) return;
     initTheme();
@@ -4277,6 +4313,7 @@ function init() {
     applyPanels();
     PANELS.forEach(id => { if (panelState[id]) onPanelOpen(id); });
     handleShareTarget();
+    autoStartSteps();
     if (typeof AklimdaHome !== 'undefined') AklimdaHome.init();
     notifyToday();
     registerServiceWorker();

@@ -61,58 +61,46 @@
         return '<div class="h-wave" aria-hidden="true">' + s + '</div>';
     }
 
-    /* ---------- Komuta paneli ---------- */
+    /* ---------- Komuta paneli + alt çubuk ---------- */
     const TAB_KEY = 'aklimda_hometab';
-    const TABS = [
-        { id: 'quick', label: 'Hızlı Erişim', icon: 'fa-bolt', rows: [
+    const BAR = [
+        { id: 'soon', label: 'Yaklaşanlar', icon: 'fa-calendar-day' },
+        { id: 'well', label: 'Sağlık', icon: 'fa-heart-pulse' },
+        { id: 'quick', label: 'Hızlı Erişim', icon: 'fa-bolt' },
+        { id: 'msg', label: 'Mesaj', icon: 'fa-envelope' },
+        { id: 'doc', label: 'Belge', icon: 'fa-file-lines' }
+    ];
+    const SHEET_TITLES = { soon: 'Yaklaşanlar', well: 'Sağlık Özeti', quick: 'Hızlı Erişim', msg: 'Mesaj ve E-posta', doc: 'Belge ve Görsel' };
+    const ROWS = {
+        quick: [
             ['panel:agenda', 'fa-calendar-days', 'Takvim', 'Güne dokun, o günü sesli anlatayım'],
             ['panel:news', 'fa-globe', 'Haberler', 'Güncel başlıklar'],
             ['calc', 'fa-calculator', 'Hesap Makinesi', 'Formüller, yüzde, faiz'],
             ['council', 'fa-people-group', 'Karar Odası', 'Ajanlar tartışır, Hakem karar verir'],
             ['panel:wx', 'fa-cloud-sun', 'Hava Tahmini', '5 günlük'],
-            ['panel:health', 'fa-heart-pulse', 'Sağlık ve Adım', '<span id="hStepsSmall"></span>'],
+            ['panel:health', 'fa-heart-pulse', 'Sağlık ve Adım', 'Ayrıntılar ve profil'],
             ['panel:summary', 'fa-chart-column', 'Özet', 'Kayıtların genel görünümü'],
             ['ask:Bilgi kütüphanesinde ne var?', 'fa-book-open', 'Bilgi Kütüphanesi', 'Cihazda, çevrimdışı, kaynaklı']
-        ] },
-        { id: 'msg', label: 'Mesaj ve E-posta', icon: 'fa-envelope', rows: [
+        ],
+        msg: [
             ['ask:Bir e-posta taslağı hazırla: ', 'fa-envelope', 'E-posta taslağı', 'Siz onaylamadan gönderilmez'],
             ['ask:WhatsApp için bir mesaj taslağı hazırla: ', 'fa-brands fa-whatsapp', 'WhatsApp taslağı', 'Düğmeyle açılır, siz gönderirsiniz'],
             ['ask:SMS için bir mesaj taslağı hazırla: ', 'fa-comment-sms', 'SMS taslağı', 'Telefonun mesaj uygulamasında açılır'],
             ['ask:Panoya kopyaladığım mesaja cevap taslağı hazırla: ', 'fa-reply', 'Gelen mesaja cevap', 'Mesajı yapıştırın ya da Paylaş > Aklımda deyin']
-        ] },
-        { id: 'doc', label: 'Belge ve Görsel', icon: 'fa-file-lines', rows: [
+        ],
+        doc: [
             ['file', 'fa-file-pdf', 'PDF özetle', 'Gemini ile'],
             ['file', 'fa-file-word', 'Word oku', '.docx'],
             ['file', 'fa-file-excel', 'Excel / CSV analiz et', 'Cihazda hesaplanır'],
             ['file', 'fa-image', 'Görsel anla', 'Fotoğraf, ekran görüntüsü']
-        ] }
-    ];
+        ]
+    };
     function faIcon(c) { return c.indexOf('fa-brands') === 0 ? c : 'fa-solid ' + c; }
-    function tabsHtml() {
-        let cur = 'quick';
-        try { cur = localStorage.getItem(TAB_KEY) || 'quick'; } catch (e) { /* yoksay */ }
-        if (!TABS.some(t => t.id === cur)) cur = 'quick';
-        return '<div class="home-tabs g-card">' +
-            '<div class="tab-panels">' + TABS.map(t =>
-                '<div class="tab-panel" role="tabpanel" id="tp-' + t.id + '" aria-labelledby="tb-' + t.id + '"' + (t.id === cur ? '' : ' hidden') + '>' +
-                  t.rows.map(r => '<button class="g-row" type="button" data-act="' + esc(r[0]) + '"><i class="' + faIcon(r[1]) + '"></i><span><b>' + esc(r[2]) + '</b><small>' + r[3] + '</small></span></button>').join('') +
-                '</div>').join('') + '</div>' +
-            '<div class="tab-bar" role="tablist" aria-label="Kısayollar">' + TABS.map(t =>
-                '<button type="button" role="tab" class="tab-btn' + (t.id === cur ? ' on' : '') + '" id="tb-' + t.id + '" aria-controls="tp-' + t.id + '" aria-selected="' + (t.id === cur) + '" tabindex="' + (t.id === cur ? '0' : '-1') + '" data-tab="' + t.id + '"><i class="fa-solid ' + t.icon + '"></i><span>' + esc(t.label) + '</span></button>').join('') + '</div>' +
-          '</div>';
+    function rowsHtml(list) {
+        return list.map(r => '<button class="g-row" type="button" data-act="' + esc(r[0]) + '"><i class="' + faIcon(r[1]) + '"></i><span><b>' + esc(r[2]) + '</b><small>' + r[3] + '</small></span></button>').join('');
     }
-    function selectTab(id, focus) {
-        if (!homeEl) return;
-        homeEl.querySelectorAll('.tab-btn').forEach(b => {
-            const on = b.dataset.tab === id;
-            b.classList.toggle('on', on);
-            b.setAttribute('aria-selected', String(on));
-            b.setAttribute('tabindex', on ? '0' : '-1');
-            if (on && focus) b.focus();
-        });
-        homeEl.querySelectorAll('.tab-panel').forEach(p => { p.hidden = p.id !== 'tp-' + id; });
-        try { localStorage.setItem(TAB_KEY, id); } catch (e) { /* yoksay */ }
-    }
+    let sheetEl = null, barEl = null, sheetOpen = null;
+
     function build() {
         if (homeEl) return homeEl;
         const main = $q('main.container') || document.body;
@@ -121,42 +109,81 @@
         homeEl.id = 'home';
         homeEl.setAttribute('aria-label', 'Komuta paneli');
         homeEl.innerHTML =
-            '<div class="home-hero">' +
-              '<div class="home-side home-soon"><div class="g-card"><h4>Yaklaşanlar</h4><div id="hSoon"></div></div></div>' +
-              '<div class="home-center">' +
-                '<div class="h-title"><b>Aklımda Asistan</b></div>' +
-                '<button class="core" id="homeCore" type="button" aria-label="Asistanla konuş">' +
-                  '<span class="core-halo"></span><span class="core-arc a1"></span><span class="core-arc a2"></span><span class="core-arc a3"></span>' +
-                  '<span class="core-orb"></span><span class="core-label">AI Core</span>' +
-                '</button>' +
-                '<div class="g-card exec"><h4>Komuta Özeti</h4>' +
-                  '<div class="exec-grid">' +
-                    '<button class="tile" type="button" data-act="date:today"><small>Bugün</small><b id="hToday">0</b><em>kayıt</em></button>' +
-                    '<button class="tile" type="button" data-act="panel:agenda"><small>Bu hafta</small><b id="hTop">0</b><em>yaklaşan 7 gün</em></button>' +
-                    '<button class="tile" type="button" data-act="panel:health"><small>Adım</small><span id="hSpark"></span></button>' +
-                  '</div>' +
+            '<div class="home-center">' +
+              '<div class="h-title"><b>Aklımda Asistan</b></div>' +
+              '<button class="core" id="homeCore" type="button" aria-label="Asistanla konuş">' +
+                '<span class="core-halo"></span><span class="core-arc a1"></span><span class="core-arc a2"></span><span class="core-arc a3"></span>' +
+                '<span class="core-orb"></span><span class="core-label">AI Core</span>' +
+              '</button>' +
+              '<div class="g-card exec"><h4>Komuta Özeti</h4>' +
+                '<div class="exec-grid">' +
+                  '<button class="tile" type="button" data-act="date:today"><small>Bugün</small><b id="hToday">0</b><em>kayıt</em></button>' +
+                  '<button class="tile" type="button" data-act="panel:agenda"><small>Bu hafta</small><b id="hTop">0</b><em>yaklaşan 7 gün</em></button>' +
+                  '<button class="tile" type="button" data-bar="well"><small>Adım</small><b id="hStep">0</b><em id="hStepEm">hedef 8.000</em></button>' +
                 '</div>' +
-                '<div class="listen"><div class="listen-state" id="hState"><i class="fa-solid fa-circle"></i> <span>Hazır · cihazda çalışıyor</span></div>' + wave() +
-                  '<p class="listen-quote" id="hQuote"></p></div>' +
               '</div>' +
-              '<div class="home-side home-well"><div class="g-card"><h4>Sağlık Özeti</h4>' +
-                '<div class="well"><small>Adım geçmişi (7 gün)</small><span id="hStepsChart"></span></div>' +
-                '<div class="well"><small>Kalori geçmişi (yaklaşık)</small><span id="hKcalChart"></span></div>' +
-              '</div></div>' +
-            '</div>' + tabsHtml();
+              '<div class="listen"><div class="listen-state" id="hState"><i class="fa-solid fa-circle"></i> <span>Hazır · cihazda çalışıyor</span></div>' + wave() +
+                '<p class="listen-quote" id="hQuote"></p></div>' +
+            '</div>';
         main.insertBefore(homeEl, main.firstChild);
         homeEl.addEventListener('click', onAct);
-        homeEl.addEventListener('keydown', onTabKey);
         $q('#homeCore', homeEl).addEventListener('click', onCore);
+
+        // Alttaki çubuk ve açılır sayfa (üst başlık gibi cam görünümlü)
+        sheetEl = document.createElement('div');
+        sheetEl.className = 'home-sheet';
+        sheetEl.id = 'homeSheet';
+        sheetEl.hidden = true;
+        sheetEl.setAttribute('role', 'region');
+        sheetEl.innerHTML = '<div class="sheet-head"><b id="sheetTitle"></b><button type="button" class="sheet-close" data-bar-close aria-label="Kapat"><i class="fa-solid fa-chevron-down"></i></button></div>' +
+            '<div class="sheet-body">' +
+              '<div class="sheet-panel" data-sp="soon" hidden><div id="hSoon"></div></div>' +
+              '<div class="sheet-panel" data-sp="well" hidden><div id="hWell"></div></div>' +
+              '<div class="sheet-panel grid" data-sp="quick" hidden>' + rowsHtml(ROWS.quick) + '</div>' +
+              '<div class="sheet-panel grid" data-sp="msg" hidden>' + rowsHtml(ROWS.msg) + '</div>' +
+              '<div class="sheet-panel grid" data-sp="doc" hidden>' + rowsHtml(ROWS.doc) + '</div>' +
+            '</div>';
+        barEl = document.createElement('nav');
+        barEl.className = 'home-bar';
+        barEl.id = 'homeBar';
+        barEl.setAttribute('aria-label', 'Kısayollar');
+        barEl.innerHTML = BAR.map(t => '<button type="button" class="bar-btn" data-bar="' + t.id + '" aria-expanded="false" aria-controls="homeSheet"><i class="fa-solid ' + t.icon + '"></i><span>' + esc(t.label) + '</span></button>').join('');
+        document.body.appendChild(sheetEl);
+        document.body.appendChild(barEl);
+        const onClick = e => {
+            const c = e.target.closest && e.target.closest('[data-bar-close]');
+            if (c) { closeSheet(); return; }
+            const bb = e.target.closest && e.target.closest('[data-bar]');
+            if (bb) { toggleSheet(bb.dataset.bar); return; }
+            if (e.target.closest && e.target.closest('[data-act]')) { onAct(e); closeSheet(); }
+        };
+        sheetEl.addEventListener('click', onClick);
+        barEl.addEventListener('click', onClick);
+        homeEl.addEventListener('click', e => { const bb = e.target.closest && e.target.closest('[data-bar]'); if (bb) toggleSheet(bb.dataset.bar); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeSheet(); });
+        document.addEventListener('click', e => {                         // sayfanın dışına dokununca kapanır
+            if (!sheetOpen) return;
+            if (e.target.closest && (e.target.closest('#homeSheet') || e.target.closest('#homeBar') || e.target.closest('[data-bar]'))) return;
+            closeSheet();
+        });
         return homeEl;
     }
-    function onTabKey(e) {
-        const b = e.target.closest && e.target.closest('.tab-btn');
-        if (!b || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
-        e.preventDefault();
-        const i = TABS.findIndex(t => t.id === b.dataset.tab);
-        const n = (i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
-        selectTab(TABS[n].id, true);
+    function showBar(on) { if (barEl) barEl.hidden = !on; if (!on) closeSheet(); }
+    function toggleSheet(id) { if (sheetOpen === id) closeSheet(); else openSheet(id); }
+    function openSheet(id) {
+        if (!sheetEl) return;
+        sheetOpen = id;
+        sheetEl.hidden = false;
+        $q('#sheetTitle', sheetEl).textContent = SHEET_TITLES[id] || '';
+        sheetEl.querySelectorAll('.sheet-panel').forEach(p => { p.hidden = p.dataset.sp !== id; });
+        document.querySelectorAll('#homeBar .bar-btn').forEach(b => { const on = b.dataset.bar === id; b.classList.toggle('on', on); b.setAttribute('aria-expanded', String(on)); });
+        try { localStorage.setItem(TAB_KEY, id); } catch (e) { /* yoksay */ }
+        refresh();
+    }
+    function closeSheet() {
+        sheetOpen = null;
+        if (sheetEl) sheetEl.hidden = true;
+        document.querySelectorAll('#homeBar .bar-btn').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-expanded', 'false'); });
     }
 
     function openChatWith(text) {
@@ -165,8 +192,6 @@
         if (inp && text) { inp.value = text; try { inp.focus(); inp.setSelectionRange(text.length, text.length); } catch (e) { /* yoksay */ } }
     }
     function onAct(e) {
-        const tb = e.target.closest && e.target.closest('[data-tab]');
-        if (tb) { selectTab(tb.dataset.tab, false); return; }
         const b = e.target.closest && e.target.closest('[data-act]');
         if (!b) return;
         const a = b.dataset.act;
@@ -186,6 +211,7 @@
             else if (a === 'council') $q('#councilBtn').click();
             else if (a === 'file') { openChat(); $q('#chatFile').click(); }
             else if (a.indexOf('ask:') === 0) openChatWith(a.slice(4));
+            else if (a === 'steps-toggle') { stepState.on ? stopSteps() : startSteps(); }
         } catch (err) { /* sessiz */ }
     }
     function onCore() {
@@ -194,22 +220,42 @@
     }
 
     function when(d) { return d === 0 ? 'bugün' : d === 1 ? 'yarın' : d + ' gün sonra'; }
+    const lastHtml = {};
+    function setIfChanged(id, html) {                       // aynıysa DOM'a dokunma (kaydırma ve odak bozulmasın)
+        if (lastHtml[id] === html) return;
+        lastHtml[id] = html;
+        const el = $q('#' + id);
+        if (el) el.innerHTML = html;
+    }
     function refresh() {
         if (!homeEl) return;
         const m = metrics();
-        const set = (id, html) => { const el = $q('#' + id, homeEl); if (el) el.innerHTML = html; };
+        const set = (id, html) => setIfChanged(id, html);
         set('hToday', String(m.today));
         set('hTop', String(m.week));
-        set('hSpark', spark(m.steps.map(s => s.v), 96, 40));
-        set('hStepsSmall', num(stepState.count) + ' adım · hedef ' + num(m.goal));
-        set('hSoon', m.up.length
-            ? m.up.slice(0, 4).map(i => '<button type="button" class="g-row" data-act="date:' + toISOLocal(i.occ) + '"><i class="fa-solid fa-calendar-day"></i><span><b>' + esc(i.ev.title) + '</b><small>' + (i.ev.time ? esc(i.ev.time) + ' · ' : '') + when(i.days) + '</small></span></button>').join('')
-            : '<p class="mut left">Yaklaşan kayıt yok. Yazın ya da söyleyin: "yarın saat 10\'da toplantı".</p>');
-        const hasSteps = m.steps.some(s => s.v > 0);
-        homeEl.classList.toggle('no-well', !hasSteps);
-        if (hasSteps) {
-            set('hStepsChart', spark(m.steps.map(s => s.v), 220, 64, 'gold') + '<div class="axis">' + m.steps.map(s => '<i>' + s.label + '</i>').join('') + '</div>');
-            set('hKcalChart', bars(m.steps.map(s => Math.round(s.v * 0.04)), 52));
+        set('hStep', num(stepState.count));
+        set('hStepEm', 'hedef ' + num(m.goal));
+        if (!sheetOpen || sheetOpen === 'soon') {
+            set('hSoon', m.up.length
+                ? m.up.slice(0, 8).map(i => '<button type="button" class="g-row" data-act="date:' + toISOLocal(i.occ) + '"><i class="fa-solid fa-calendar-day"></i><span><b>' + esc(i.ev.title) + '</b><small>' + (i.ev.time ? esc(i.ev.time) + ' · ' : '') + when(i.days) + '</small></span></button>').join('')
+                : '<p class="mut left">Yaklaşan kayıt yok. Yazın ya da söyleyin: "yarın saat 10\'da toplantı".</p>');
+        }
+        if (!sheetOpen || sheetOpen === 'well') {
+            const r = calcHealth(stepState.count);
+            const pct = Math.round(Math.min(100, stepState.count / m.goal * 100));
+            const hasSteps = m.steps.some(s => s.v > 0);
+            set('hWell',
+                '<div class="well-top"><div><small>Bugün</small><b>' + num(stepState.count) + '</b><em>adım · %' + pct + '</em></div>' +
+                '<div><small>Mesafe</small><b>' + r.distanceKm.toFixed(2).replace('.', ',') + '</b><em>km</em></div>' +
+                '<div><small>Kalori</small><b>' + num(r.kcal) + '</b><em>kcal</em></div></div>' +
+                '<div class="well-state"><i class="fa-solid fa-circle ' + (stepState.on ? 'on' : '') + '"></i> ' +
+                  (stepState.on ? 'Adım sayacı çalışıyor (uygulama açıkken)' : 'Adım sayacı durdu') +
+                  ' <button type="button" class="mini-btn" data-act="steps-toggle">' + (stepState.on ? 'Durdur' : 'Başlat') + '</button></div>' +
+                (hasSteps
+                    ? '<div class="well"><small>Adım geçmişi (7 gün)</small>' + spark(m.steps.map(s => s.v), 220, 64, 'gold') + '<div class="axis">' + m.steps.map(s => '<i>' + s.label + '</i>').join('') + '</div></div>' +
+                      '<div class="well"><small>Kalori geçmişi (yaklaşık)</small>' + bars(m.steps.map(s => Math.round(s.v * 0.04)), 52) + '</div>'
+                    : '<p class="mut left">Henüz adım verisi yok. Telefonu yürürken yanınızda taşıyın; sayaç uygulama açıkken sayar.</p>') +
+                '<button type="button" class="g-row" data-act="panel:health"><i class="fa-solid fa-heart-pulse"></i><span><b>Ayrıntılar ve profil</b><small>Boy, kilo, hedef, elle giriş</small></span></button>');
         }
         const st = $q('#hState', homeEl);
         if (st) {
@@ -243,8 +289,8 @@
         if (THEMES.indexOf(t) < 0) t = 'dark';
         document.documentElement.dataset.theme = t;
         try { db.set(K.theme, t); } catch (e) { /* yoksay */ }
-        if (t === 'glass') { build(); homeEl.hidden = false; startLoop(); }
-        else { stopLoop(); if (homeEl) homeEl.hidden = true; }
+        if (t === 'glass') { build(); homeEl.hidden = false; showBar(true); document.body.classList.add('has-bar'); startLoop(); }
+        else { stopLoop(); if (homeEl) homeEl.hidden = true; showBar(false); document.body.classList.remove('has-bar'); }
         try { initTheme(); } catch (e) { /* yoksay */ }
     }
     function applyFx() {
