@@ -74,6 +74,7 @@
     const ROWS = {
         quick: [
             ['panel:agenda', 'fa-calendar-days', 'Takvim', 'Güne dokun, o günü sesli anlatayım'],
+            ['view:records', 'fa-list-check', 'Tüm Kayıtlar', 'Arama, filtre ve liste'],
             ['panel:news', 'fa-globe', 'Haberler', 'Güncel başlıklar'],
             ['calc', 'fa-calculator', 'Hesap Makinesi', 'Formüller, yüzde, faiz'],
             ['council', 'fa-people-group', 'Karar Odası', 'Ajanlar tartışır, Hakem karar verir'],
@@ -186,6 +187,47 @@
         document.querySelectorAll('#homeBar .bar-btn').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-expanded', 'false'); });
     }
 
+    /* Odak görünümü: bir şeye dokununca yalnızca o gelir (ana ekran ve diğerleri gizlenir) */
+    const VIEW_TITLES = { agenda: 'Takvim', wx: 'Hava Durumu', health: 'Sağlık ve Adım', summary: 'Özet', news: 'Haberler', records: 'Tüm Kayıtlar' };
+    let focusEl = null;
+    function buildFocusBar() {
+        if (focusEl) return;
+        const main = $q('main.container') || document.body;
+        focusEl = document.createElement('div');
+        focusEl.className = 'focus-bar';
+        focusEl.id = 'focusBar';
+        focusEl.hidden = true;
+        focusEl.innerHTML = '<button type="button" class="focus-back" data-focus-back aria-label="Geri"><i class="fa-solid fa-arrow-left"></i> Geri</button><b id="focusTitle"></b><span></span>';
+        main.insertBefore(focusEl, main.firstChild);
+        focusEl.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-focus-back]')) closeView(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && g.document.body.dataset.focus && !sheetOpen && !document.body.classList.contains('modal-open')) closeView(); });
+    }
+    function openPanelId() { try { return PANELS.find(id => panelState[id]) || null; } catch (e) { return null; } }
+    function openView(id) {
+        buildFocusBar();
+        closeSheet();
+        const cur = openPanelId();
+        if (id === 'records') { if (cur) togglePanel(cur); }
+        else if (!panelState[id]) togglePanel(id);
+        document.body.dataset.focus = id;
+        $q('#focusTitle').textContent = VIEW_TITLES[id] || '';
+        focusEl.hidden = false;
+        try { window.scrollTo(0, 0); } catch (e) { /* yoksay */ }
+    }
+    function closeView() {
+        const cur = openPanelId();
+        if (cur) togglePanel(cur);
+        delete document.body.dataset.focus;
+        if (focusEl) focusEl.hidden = true;
+        try { window.scrollTo(0, 0); } catch (e) { /* yoksay */ }
+    }
+    function syncFocus() {                                   // panel başka yolla açılıp kapanırsa görünüm uyumlu kalsın
+        if (document.documentElement.dataset.theme !== 'glass') return;
+        const cur = openPanelId(), f = document.body.dataset.focus;
+        if (cur && f !== cur) { buildFocusBar(); document.body.dataset.focus = cur; $q('#focusTitle').textContent = VIEW_TITLES[cur] || ''; focusEl.hidden = false; }
+        else if (!cur && f && f !== 'records') { delete document.body.dataset.focus; if (focusEl) focusEl.hidden = true; }
+    }
+
     function openChatWith(text) {
         openChat();
         const inp = $q('#chatInput');
@@ -197,16 +239,13 @@
         const a = b.dataset.act;
         try {
             if (a.indexOf('panel:') === 0) {
-                const id = a.slice(6);
-                if (!panelState[id]) togglePanel(id);
-                const el = $q('#panel-' + id);
-                if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                openView(a.slice(6));
+            } else if (a.indexOf('view:') === 0) {
+                openView(a.slice(5));
             } else if (a.indexOf('date:') === 0) {
                 const iso = a.slice(5) === 'today' ? todayISO() : a.slice(5);
-                if (!panelState.agenda) togglePanel('agenda');
+                openView('agenda');
                 selectAgendaDay(iso, true);
-                const el = $q('#panel-agenda');
-                if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (a === 'calc') $q('#calcBtn').click();
             else if (a === 'council') $q('#councilBtn').click();
             else if (a === 'file') { openChat(); $q('#chatFile').click(); }
@@ -229,6 +268,7 @@
     }
     function refresh() {
         if (!homeEl) return;
+        syncFocus();
         const m = metrics();
         const set = (id, html) => setIfChanged(id, html);
         set('hToday', String(m.today));
@@ -290,7 +330,7 @@
         document.documentElement.dataset.theme = t;
         try { db.set(K.theme, t); } catch (e) { /* yoksay */ }
         if (t === 'glass') { build(); homeEl.hidden = false; showBar(true); document.body.classList.add('has-bar'); startLoop(); }
-        else { stopLoop(); if (homeEl) homeEl.hidden = true; showBar(false); document.body.classList.remove('has-bar'); }
+        else { stopLoop(); if (homeEl) homeEl.hidden = true; showBar(false); document.body.classList.remove('has-bar'); delete document.body.dataset.focus; if (focusEl) focusEl.hidden = true; }
         try { initTheme(); } catch (e) { /* yoksay */ }
     }
     function applyFx() {

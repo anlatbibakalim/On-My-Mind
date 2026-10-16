@@ -5,7 +5,7 @@
    ============================================================ */
 'use strict';
 
-const APP_VERSION = '3.7.2';
+const APP_VERSION = '3.7.3';
 const K = {
     events: 'aklimda_events_v3',
     eventsV2: 'aklimda_events_v2',
@@ -1018,22 +1018,58 @@ function useGeolocation() {
 }
 
 /* ==================== HABERLER (Ticker) ==================== */
-async function loadNews() {
+async function loadNews(force) {
     const cache = db.get(K.news, null);
-    if (cache && cache.t > Date.now() - 15 * 60 * 1000) { renderTicker(cache.items); return; }
+    if (!force && cache && cache.t > Date.now() - 15 * 60 * 1000) { renderTicker(cache.items, cache.t); return; }
     try {
         const rss = 'https://news.google.com/rss?hl=tr&gl=TR&ceid=TR:tr';
         const j = await fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rss));
         if (j.status !== 'ok' || !Array.isArray(j.items)) throw new Error('rss');
-        const items = j.items.slice(0, 12).map(it => ({ title: String(it.title || ''), link: String(it.link || '') })).filter(it => it.title);
+        const items = j.items.slice(0, 24).map(it => ({ title: String(it.title || ''), link: String(it.link || ''), date: String(it.pubDate || '') })).filter(it => it.title);
         db.set(K.news, { t: Date.now(), items: items });
-        renderTicker(items);
+        renderTicker(items, Date.now());
     } catch (e) {
-        if (cache && cache.items) renderTicker(cache.items);
+        if (cache && cache.items) renderTicker(cache.items, cache.t, true);
         else renderTicker([]);
     }
 }
-function renderTicker(items) {
+function newsAgo(dateStr) {
+    const t = Date.parse(String(dateStr || '').replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(String(dateStr || '')) ? '' : 'Z'));
+    if (!isFinite(t)) return '';
+    const m = Math.max(0, Math.round((Date.now() - t) / 60000));
+    if (m < 1) return 'şimdi';
+    if (m < 60) return m + ' dk önce';
+    if (m < 1440) return Math.round(m / 60) + ' sa önce';
+    return Math.round(m / 1440) + ' gün önce';
+}
+function renderNewsList(items, fetchedAt, stale) {
+    const box = $('#newsList');
+    if (!box) return;
+    const meta = $('#newsMeta');
+    if (!items.length) {
+        box.innerHTML = '<p class="loading-line">Haberler şu an yüklenemedi. İnternet bağlantınızı kontrol edip "Yenile"ye dokunun.</p>';
+        if (meta) meta.textContent = navigator.onLine === false ? 'Çevrimdışı' : 'Yüklenemedi';
+        return;
+    }
+    const card = (it, i) => {
+        const cut = it.title.lastIndexOf(' - ');
+        const title = cut > 12 ? it.title.slice(0, cut) : it.title;
+        const src = cut > 12 ? it.title.slice(cut + 3) : '';
+        const ago = newsAgo(it.date);
+        const ok = /^https?:\/\//.test(it.link);
+        const tag = ok ? 'a' : 'div';
+        return '<' + tag + ' class="news-card' + (i === 0 ? ' lead' : '') + '"' + (ok ? ' href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener noreferrer"' : '') + '>' +
+            '<div class="news-meta">' + (src ? '<span class="news-src">' + escapeHtml(src) + '</span>' : '') + (ago ? '<span class="news-ago">' + escapeHtml(ago) + '</span>' : '') + '</div>' +
+            '<h4>' + escapeHtml(title) + '</h4>' + (ok ? '<span class="news-go">Haberi aç <i class="fa-solid fa-arrow-up-right-from-square"></i></span>' : '') + '</' + tag + '>';
+    };
+    box.innerHTML = items.map(card).join('');
+    if (meta) {
+        const when = fetchedAt ? new Date(fetchedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
+        meta.textContent = (stale ? 'Çevrimdışı, önbellekten · ' : 'Google Haberler · ') + (when ? 'güncelleme ' + when : '');
+    }
+}
+function renderTicker(items, fetchedAt, stale) {
+    renderNewsList(items, fetchedAt, stale);
     const track = $('#tickerTrack');
     if (!items.length) { track.style.animation = 'none'; track.innerHTML = '<span class="ticker-empty">Haberler şu an yüklenemedi</span>'; return; }
     track.style.animation = '';
@@ -4145,6 +4181,7 @@ function bindEvents() {
         renderAgenda();
     });
     $('#agendaAddBtn').addEventListener('click', () => openEventModal());
+    if ($('#newsRefresh')) $('#newsRefresh').addEventListener('click', () => { $('#newsMeta').textContent = 'Yenileniyor…'; loadNews(true); });
     $('#agendaSpeak').addEventListener('click', () => speakDayBrief(agenda.selected));
 
     $('#addBtn').addEventListener('click', () => openEventModal());
