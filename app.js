@@ -5,7 +5,7 @@
    ============================================================ */
 'use strict';
 
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.7.0';
 const K = {
     events: 'aklimda_events_v3',
     eventsV2: 'aklimda_events_v2',
@@ -227,7 +227,7 @@ let settings = Object.assign({
     voiceEngine: 'gemini', ttsModel: 'gemini-3.8-flash-tts', ttsVoice: 'Sulafat',
     councilAgents: ['analist', 'supheci', 'iyimser', 'pratik'], councilRounds: 2, councilCtx: false, councilVoice: false,
     memoryOn: true, leadMinutes: 60, notifyTasks: true, dayReminderHour: 9,
-    speedMode: 'fast', localFirst: true, deviceVoice: '', deviceRate: 1
+    speedMode: 'fast', localFirst: true, fxOff: false, deviceVoice: '', deviceRate: 1
 }, savedSettings);
 (function migrateSettings() {
     settings.aiKeys = Object.assign({ gemini: '', openai: '', anthropic: '' }, settings.aiKeys || {});
@@ -259,18 +259,25 @@ function persist() { db.set(K.events, events); render(); }
 /* ==================== TEMA ==================== */
 function applyThemeMeta(t) {
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#0b1120' : '#eef2f9');
+    if (meta) meta.setAttribute('content', t === 'light' ? '#eef2f9' : (t === 'glass' ? '#050b18' : '#0b1120'));
 }
+const THEME_ORDER = ['dark', 'light', 'glass'];
+const THEME_LABEL = { dark: 'Koyu', light: 'Açık', glass: 'Cam' };
+const THEME_ICON = { dark: 'fa-moon', light: 'fa-sun', glass: 'fa-gem' };
 function initTheme() {
     const t = document.documentElement.dataset.theme;
-    $('#themeToggle').innerHTML = '<i class="fa-solid ' + (t === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i> ' + (t === 'dark' ? 'Açık tema' : 'Koyu tema');
-    $('#themeToggle').title = t === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç';
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(t) + 1) % THEME_ORDER.length];
+    $('#themeToggle').innerHTML = '<i class="fa-solid ' + (THEME_ICON[t] || 'fa-moon') + '"></i> Tema: ' + (THEME_LABEL[t] || 'Koyu') + ' <small style="opacity:.6">(değiştir)</small>';
+    $('#themeToggle').title = THEME_LABEL[next] + ' temaya geç';
     applyThemeMeta(t);
 }
 function toggleTheme() {
-    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next;
-    db.set(K.theme, next);
+    const cur = document.documentElement.dataset.theme;
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(cur) + 1) % THEME_ORDER.length];
+    if (typeof AklimdaHome !== 'undefined') { AklimdaHome.applyTheme(next); return; }
+    const safe = next === 'glass' ? 'dark' : next;                 // home.js yüklenmediyse cam teması kullanılamaz
+    document.documentElement.dataset.theme = safe;
+    db.set(K.theme, safe);
     initTheme();
 }
 
@@ -841,6 +848,7 @@ function renderList() {
     }).join('');
 }
 function render() {
+    if (typeof AklimdaHome !== 'undefined') AklimdaHome.refresh();
     renderStats();
     renderChart();
     renderList();
@@ -3852,6 +3860,7 @@ function openSettings() {
     $('#setDeviceRate').value = String(settings.deviceRate || 1);
     $('#setSpeed').value = settings.speedMode || 'fast';
     $('#setLocalFirst').checked = settings.localFirst !== false;
+    $('#setFxOff').checked = !!settings.fxOff;
     $('#setTtsVoice').value = settings.ttsVoice;
     $('#setTtsModel').value = settings.ttsModel;
     setDiag($('#aiTestResult'), '', '');
@@ -3911,6 +3920,8 @@ async function saveSettings() {
     settings.deviceRate = clamp(Number($('#setDeviceRate').value) || 1, 0.7, 1.4);
     settings.speedMode = ['fast', 'balanced', 'deep'].indexOf($('#setSpeed').value) >= 0 ? $('#setSpeed').value : 'fast';
     settings.localFirst = $('#setLocalFirst').checked;
+    settings.fxOff = $('#setFxOff').checked;
+    if (typeof AklimdaHome !== 'undefined') AklimdaHome.applyFx();
     pickVoice();
     settings.ttsVoice = $('#setTtsVoice').value || 'Sulafat';
     settings.ttsModel = $('#setTtsModel').value || 'gemini-3.8-flash-tts';
@@ -4235,6 +4246,7 @@ function init() {
     applyPanels();
     PANELS.forEach(id => { if (panelState[id]) onPanelOpen(id); });
     handleShareTarget();
+    if (typeof AklimdaHome !== 'undefined') AklimdaHome.init();
     notifyToday();
     registerServiceWorker();
     setInterval(() => { if (panelLoaded.news && panelState.news) loadNews(); }, 20 * 60 * 1000);

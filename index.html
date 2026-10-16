@@ -19,7 +19,7 @@
                 var saved = localStorage.getItem('aklimda_theme');
                 t = saved ? JSON.parse(saved) : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
             } catch (e) { /* varsayılan koyu */ }
-            if (t !== 'light' && t !== 'dark') t = 'dark';
+            if (t !== 'light' && t !== 'dark' && t !== 'glass') t = 'dark';
             document.documentElement.dataset.theme = t;
         })();
     </script>
@@ -28,9 +28,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="style.css?v=3.6.0">
+    <link rel="stylesheet" href="style.css?v=3.7.0">
 </head>
-<body data-version="3.6.0">
+<body data-version="3.7.0">
 
     <noscript>Bu uygulamanın çalışması için JavaScript gereklidir.</noscript>
 
@@ -54,6 +54,7 @@
             <button class="menu-item" id="calcBtn" role="menuitem"><i class="fa-solid fa-calculator"></i> Hesap makinesi</button>
             <button class="menu-item" id="settingsBtn" role="menuitem"><i class="fa-solid fa-sliders"></i> Ayarlar ve yedek</button>
             <button class="menu-item" id="themeToggle" role="menuitem"></button>
+            <button class="menu-item" id="tourBtn" role="menuitem"><i class="fa-solid fa-compass"></i> Tanıtım turu</button>
         </div>
     </header>
 
@@ -218,7 +219,7 @@
         </div>
 
         <footer class="app-footer">
-            <span class="version">Aklımda v3.6.0</span> · Kayıtlarınız cihazınızda saklanır · <a href="privacy.html" target="_blank" rel="noopener">Gizlilik</a><br>
+            <span class="version">Aklımda v3.7.0</span> · Kayıtlarınız cihazınızda saklanır · <a href="privacy.html" target="_blank" rel="noopener">Gizlilik</a><br>
             Hava durumu ve haberler için internet gerekir; kayıtlar çevrimdışı da çalışır.
         </footer>
     </main>
@@ -469,17 +470,9 @@
                 <span>Önce cihazdan yanıtla<small>Kayıt, hesap, bellek ve kütüphanedeki bilinen sorular yapay zekâya gitmeden anında yanıtlanır.</small></span>
                 <input type="checkbox" id="setLocalFirst">
             </label>
-            <div class="form-group">
-                <label for="setSpeed">Yanıt hızı</label>
-                <select class="form-control" id="setSpeed">
-                    <option value="fast">Hızlı (kısa düşünür, basit sorularda hafif model)</option>
-                    <option value="balanced">Dengeli</option>
-                    <option value="deep">Derin (daha çok düşünür, yavaştır)</option>
-                </select>
-            </div>
-            <label class="switch-row" for="setLocalFirst">
-                <span>Önce cihazdan yanıtla<small>Kayıt, hesap, bellek ve kütüphanedeki bilinen sorular yapay zekâya gitmeden anında yanıtlanır.</small></span>
-                <input type="checkbox" id="setLocalFirst">
+            <label class="switch-row" for="setFxOff">
+                <span>Efektleri azalt<small>Cam teminde hareketli süsleri ve bulanıklığı kapatır; eski telefonlarda pil ve akıcılık için.</small></span>
+                <input type="checkbox" id="setFxOff">
             </label>
             <div class="form-group">
                 <label for="setAiProvider">Asistanın beyni</label>
@@ -521,15 +514,6 @@
                 <span>Yazarak sorsam da sesli oku<small>Her yanıt seslendirilir.</small></span>
                 <input type="checkbox" id="setVoiceAlways">
             </label>
-            <div class="form-group">
-                <label for="setDeviceVoice">Cihaz sesi (anahtarsız mod)</label>
-                <select class="form-control" id="setDeviceVoice"></select>
-                <p class="settings-note">Cihaz sesinin doğallığı telefondaki ses paketine bağlıdır. Daha doğal Türkçe ses için: Ayarlar > Genel yönetim > Metin okuma > Google ya da Samsung > dişli simgesi > Ses verisini yükle > Türkçe. Yüklenen yeni sesler burada görünür; "Sesi dene" ile dinleyip seçin.</p>
-            </div>
-            <div class="form-group">
-                <label for="setDeviceRate">Cihaz sesi konuşma hızı</label>
-                <input type="range" id="setDeviceRate" min="0.8" max="1.3" step="0.05">
-            </div>
             <div class="form-group">
                 <label for="setDeviceVoice">Cihaz sesi (anahtarsız mod)</label>
                 <select class="form-control" id="setDeviceVoice"></select>
@@ -678,8 +662,9 @@
 
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-    <script src="calculator.js?v=3.6.0"></script>
-    <script src="kb.js?v=3.6.0"></script>
-    <script src="app.js?v=3.6.0"></script>
+    <script src="calculator.js?v=3.7.0"></script>
+    <script src="kb.js?v=3.7.0"></script>
+    <script src="app.js?v=3.7.0"></script>
+    <script src="home.js?v=3.7.0"></script>
 </body>
 </html>
